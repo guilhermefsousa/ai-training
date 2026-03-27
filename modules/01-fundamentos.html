@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 1 — Fundamentos de IA Generativa</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg:           #0f172a;
+    --bg-card:      #1e293b;
+    --bg-card-2:    #162032;
+    --border:       rgba(139,92,246,0.18);
+    --border-h:     rgba(139,92,246,0.5);
+    --purple:       #8b5cf6;
+    --purple-light: #a78bfa;
+    --blue:         #3b82f6;
+    --blue-light:   #60a5fa;
+    --cyan:         #22d3ee;
+    --green:        #4ade80;
+    --yellow:       #facc15;
+    --red:          #f87171;
+    --text:         #f1f5f9;
+    --text-2:       #94a3b8;
+    --text-3:       #475569;
+    --radius:       14px;
+    --ease:         0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.7;
+  }
+
+  /* ── BACKGROUND ──────────────────────────────────────── */
+  .bg-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+  .bg-orb-1 {
+    width: 600px; height: 500px;
+    top: -150px; left: -150px;
+    background: radial-gradient(ellipse, rgba(139,92,246,0.2) 0%, transparent 70%);
+    animation: orbDrift 20s ease-in-out infinite alternate;
+  }
+  .bg-orb-2 {
+    width: 500px; height: 600px;
+    bottom: -100px; right: -100px;
+    background: radial-gradient(ellipse, rgba(59,130,246,0.18) 0%, transparent 70%);
+    animation: orbDrift 26s ease-in-out infinite alternate-reverse;
+  }
+  @keyframes orbDrift {
+    0%   { transform: translate(0,0) scale(1); }
+    100% { transform: translate(30px, 40px) scale(1.1); }
+  }
+
+  /* ── LAYOUT ──────────────────────────────────────────── */
+  .page-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+  }
+
+  /* ── TOP NAV ─────────────────────────────────────────── */
+  .top-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0 0;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .nav-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-2);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: color var(--ease);
+  }
+  .nav-back:hover { color: var(--purple-light); }
+
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .progress-label {
+    font-size: 0.75rem;
+    color: var(--text-3);
+    white-space: nowrap;
+  }
+  .progress-bar-bg {
+    width: 120px;
+    height: 5px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--purple), var(--blue));
+    border-radius: 99px;
+    transition: width 0.6s var(--ease);
+    width: 0%;
+  }
+
+  /* ── MODULE HERO ─────────────────────────────────────── */
+  .hero {
+    text-align: center;
+    padding: 52px 0 40px;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(139,92,246,0.12);
+    border: 1px solid rgba(139,92,246,0.3);
+    border-radius: 99px;
+    padding: 6px 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--purple-light);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    font-weight: 700;
+    line-height: 1.2;
+    background: linear-gradient(135deg, #fff 30%, var(--purple-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+  .hero p {
+    font-size: 1rem;
+    color: var(--text-2);
+    max-width: 540px;
+    margin: 0 auto;
+  }
+
+  /* ── SECTION ─────────────────────────────────────────── */
+  .section {
+    margin-top: 56px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .section-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--purple), var(--blue));
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+  .section-header h2 {
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+
+  /* ── CARD ─────────────────────────────────────────────── */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 16px;
+  }
+  .card p { color: var(--text-2); margin-bottom: 12px; }
+  .card p:last-child { margin-bottom: 0; }
+  .card strong { color: var(--text); }
+
+  /* ── INFO HIGHLIGHT ──────────────────────────────────── */
+  .highlight {
+    background: rgba(139,92,246,0.08);
+    border-left: 3px solid var(--purple);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    color: var(--text-2);
+    margin: 16px 0;
+    font-size: 0.95rem;
+  }
+  .highlight strong { color: var(--purple-light); }
+
+  /* ── DIAGRAMS SIDE BY SIDE ───────────────────────────── */
+  .diagram-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 20px;
+  }
+  @media(max-width: 580px) { .diagram-grid { grid-template-columns: 1fr; } }
+
+  .diagram-box {
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color var(--ease), transform var(--ease), box-shadow var(--ease);
+    position: relative;
+    overflow: hidden;
+  }
+  .diagram-box:hover {
+    border-color: var(--border-h);
+    transform: translateY(-2px);
+  }
+  .diagram-box.selected-correct {
+    border-color: var(--green);
+    box-shadow: 0 0 20px rgba(74,222,128,0.2);
+  }
+  .diagram-box.selected-wrong {
+    border-color: var(--red);
+    box-shadow: 0 0 20px rgba(248,113,113,0.2);
+    animation: shake 0.4s ease;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+
+  .diagram-emoji { font-size: 2rem; margin-bottom: 12px; display: block; }
+  .diagram-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 12px; }
+  .diagram-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    font-size: 0.78rem;
+  }
+  .flow-node {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 5px 10px;
+    white-space: nowrap;
+  }
+  .flow-arrow { color: var(--text-3); }
+  .flow-node.purple-node { background: rgba(139,92,246,0.15); border-color: rgba(139,92,246,0.4); color: var(--purple-light); }
+  .flow-node.blue-node   { background: rgba(59,130,246,0.15);  border-color: rgba(59,130,246,0.4);  color: var(--blue-light); }
+  .flow-node.green-node  { background: rgba(74,222,128,0.12);  border-color: rgba(74,222,128,0.35); color: var(--green); }
+
+  .diagram-result {
+    margin-top: 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .diagram-result.visible { opacity: 1; transform: translateY(0); }
+
+  .exercise-prompt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    background: rgba(59,130,246,0.08);
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 10px;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+    color: var(--blue-light);
+  }
+
+  .exercise-score {
+    text-align: center;
+    padding: 14px;
+    background: rgba(74,222,128,0.08);
+    border: 1px solid rgba(74,222,128,0.25);
+    border-radius: 10px;
+    color: var(--green);
+    font-weight: 600;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    margin-top: 12px;
+  }
+  .exercise-score.visible { opacity: 1; transform: scale(1); }
+
+  /* ── LLM EXERCISE ────────────────────────────────────── */
+  .phrase-complete {
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .phrase-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .phrase-blank {
+    display: inline-block;
+    min-width: 80px;
+    border-bottom: 2px solid var(--purple);
+    text-align: center;
+    color: var(--purple-light);
+    font-weight: 600;
+    transition: all var(--ease);
+  }
+  .prob-bars { display: flex; flex-direction: column; gap: 10px; }
+  .prob-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: background var(--ease), border-color var(--ease);
+  }
+  .prob-row:hover { background: rgba(255,255,255,0.04); border-color: var(--border); }
+  .prob-row.revealed { background: rgba(139,92,246,0.08); border-color: rgba(139,92,246,0.3); }
+  .prob-word { width: 80px; font-weight: 500; font-size: 0.9rem; flex-shrink: 0; }
+  .prob-track {
+    flex: 1;
+    height: 10px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .prob-fill {
+    height: 100%;
+    border-radius: 99px;
+    width: 0%;
+    transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+  }
+  .prob-pct { font-size: 0.8rem; color: var(--text-3); width: 36px; text-align: right; flex-shrink: 0; }
+  .prob-nav { display: flex; gap: 10px; margin-top: 16px; justify-content: center; }
+
+  /* ── TOKEN EXERCISE ──────────────────────────────────── */
+  .token-input-wrap { position: relative; margin-bottom: 16px; }
+  .token-input {
+    width: 100%;
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color var(--ease);
+  }
+  .token-input:focus { border-color: var(--purple); }
+  .token-input::placeholder { color: var(--text-3); }
+  .token-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 16px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    min-height: 52px;
+    margin-bottom: 14px;
+  }
+  .token-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 500;
+    animation: tokenIn 0.25s ease forwards;
+    opacity: 0;
+  }
+  @keyframes tokenIn {
+    from { opacity: 0; transform: scale(0.85) translateY(4px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .token-colors {
+    --tc0: rgba(139,92,246,0.22); --tc0b: rgba(139,92,246,0.5);
+    --tc1: rgba(59,130,246,0.22);  --tc1b: rgba(59,130,246,0.5);
+    --tc2: rgba(34,211,238,0.18);  --tc2b: rgba(34,211,238,0.4);
+    --tc3: rgba(250,204,21,0.18);  --tc3b: rgba(250,204,21,0.4);
+    --tc4: rgba(74,222,128,0.15);  --tc4b: rgba(74,222,128,0.4);
+  }
+  .tc0 { background: rgba(139,92,246,0.2); border: 1px solid rgba(139,92,246,0.4); color: #c4b5fd; }
+  .tc1 { background: rgba(59,130,246,0.2);  border: 1px solid rgba(59,130,246,0.4);  color: #93c5fd; }
+  .tc2 { background: rgba(34,211,238,0.15); border: 1px solid rgba(34,211,238,0.4);  color: #67e8f9; }
+  .tc3 { background: rgba(250,204,21,0.15); border: 1px solid rgba(250,204,21,0.4);  color: #fde68a; }
+  .tc4 { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.4);  color: #86efac; }
+
+  .token-stats {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .token-stat {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 0.82rem;
+  }
+  .token-stat strong { color: var(--purple-light); font-size: 1.1rem; }
+
+  .token-comparisons {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .token-cmp {
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 0.82rem;
+  }
+  .token-cmp .label { color: var(--text-3); margin-bottom: 4px; }
+  .token-cmp .val   { font-weight: 600; color: var(--text); }
+  .token-cmp .bar-wrap { margin-top: 8px; height: 5px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+  .token-cmp .bar-inner { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--purple), var(--blue)); }
+
+  /* ── TEMPERATURE EXERCISE ────────────────────────────── */
+  .temp-slider-wrap {
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .temp-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .temp-val-display {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(139,92,246,0.12);
+    border: 1px solid rgba(139,92,246,0.3);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--purple-light);
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--blue) 0%, var(--purple) 50%, var(--red) 100%);
+    outline: none;
+    cursor: pointer;
+    margin-bottom: 8px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid var(--purple);
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(139,92,246,0.5);
+    transition: box-shadow var(--ease);
+  }
+  input[type="range"]::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 18px rgba(139,92,246,0.7);
+  }
+
+  .temp-marks {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text-3);
+    margin-bottom: 20px;
+  }
+  .temp-response {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 18px;
+    font-size: 0.9rem;
+    color: var(--text-2);
+    min-height: 90px;
+    line-height: 1.7;
+    transition: all 0.4s ease;
+    position: relative;
+  }
+  .temp-response-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+    color: var(--text-3);
+  }
+  .temp-mood {
+    font-size: 1.8rem;
+    text-align: center;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+  }
+
+  /* ── QUIZ ─────────────────────────────────────────────── */
+  .quiz-question {
+    background: var(--bg-card-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+    transition: border-color var(--ease);
+  }
+  .quiz-question.answered { border-color: rgba(255,255,255,0.08); }
+  .quiz-q-text {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 16px;
+  }
+  .quiz-q-num {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+    margin-bottom: 8px;
+  }
+  .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+  .quiz-opt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-2);
+    transition: all var(--ease);
+    text-align: left;
+  }
+  .quiz-opt:hover:not(.disabled) {
+    background: rgba(139,92,246,0.08);
+    border-color: rgba(139,92,246,0.3);
+    color: var(--text);
+  }
+  .quiz-opt.disabled { cursor: default; }
+  .quiz-opt.correct {
+    background: rgba(74,222,128,0.1);
+    border-color: rgba(74,222,128,0.4);
+    color: var(--green);
+  }
+  .quiz-opt.wrong {
+    background: rgba(248,113,113,0.08);
+    border-color: rgba(248,113,113,0.35);
+    color: var(--red);
+  }
+  .quiz-opt-letter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    font-size: 0.78rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: all var(--ease);
+  }
+  .quiz-opt.correct .quiz-opt-letter { background: rgba(74,222,128,0.2); border-color: var(--green); }
+  .quiz-opt.wrong   .quiz-opt-letter { background: rgba(248,113,113,0.2); border-color: var(--red); }
+
+  .quiz-explanation {
+    margin-top: 12px;
+    font-size: 0.84rem;
+    color: var(--text-3);
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    display: none;
+  }
+  .quiz-explanation.visible {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .quiz-result {
+    display: none;
+    text-align: center;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px 28px;
+    margin-top: 20px;
+    animation: fadeInUp 0.5s ease forwards;
+  }
+  .quiz-result.visible { display: block; }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .quiz-score-num {
+    font-size: 3.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--purple-light), var(--blue-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .quiz-score-label { color: var(--text-2); margin-bottom: 24px; font-size: 0.95rem; }
+
+  /* ── BUTTONS ─────────────────────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: all var(--ease);
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--purple), var(--blue));
+    color: #fff;
+    box-shadow: 0 0 20px rgba(139,92,246,0.3);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 0 30px rgba(139,92,246,0.5);
+    transform: translateY(-1px);
+  }
+  .btn-ghost {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.08); color: var(--text); border-color: var(--border-h); }
+  .btn-sm { padding: 8px 16px; font-size: 0.82rem; border-radius: 8px; }
+
+  /* ── BOTTOM NAV ──────────────────────────────────────── */
+  .bottom-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 32px 0 0;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin-top: 40px;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .bottom-module-info { font-size: 0.82rem; color: var(--text-3); }
+  .bottom-module-info strong { color: var(--text-2); }
+
+  /* ── MISC ─────────────────────────────────────────────── */
+  .emoji-big { font-size: 1.5rem; }
+  .text-muted { color: var(--text-2); font-size: 0.93rem; }
+  .mt-2 { margin-top: 8px; }
+  .mt-3 { margin-top: 14px; }
+  .mt-4 { margin-top: 20px; }
+
+  .ex-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(250,204,21,0.1);
+    border: 1px solid rgba(250,204,21,0.25);
+    border-radius: 99px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fde68a;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: block;
+    width: fit-content;
+  }
+
+  .phrase-nav-dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+  .phrase-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    cursor: pointer;
+    transition: background var(--ease);
+  }
+  .phrase-dot.active { background: var(--purple); }
+  .phrase-dot.done   { background: var(--green); }
+</style>
+</head>
+<body>
+
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+
+<div class="page-wrap">
+
+  <!-- TOP NAV -->
+  <nav class="top-nav">
+    <a href="../index.html" class="nav-back">
+      ← Voltar ao índice
+    </a>
+    <div class="progress-wrap">
+      <span class="progress-label">Progresso do módulo</span>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
+      <span class="progress-label" id="progressPct">0%</span>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-badge">🧠 Módulo 1 de 6</div>
+    <h1>Fundamentos de IA Generativa</h1>
+    <p>Entenda de vez o que é IA, como LLMs funcionam e por que tokens, temperatura e probabilidade importam para você como dev.</p>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────────
+       SEÇÃO 1: O que é IA?
+  ─────────────────────────────────────────────────────── -->
+  <div class="section" id="sec1">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <h2>O que é Inteligência Artificial?</h2>
+    </div>
+
+    <div class="card">
+      <p>
+        <strong>Definição simples:</strong> IA é software que <strong>aprende padrões a partir de dados</strong> em vez de seguir regras escritas manualmente.
+      </p>
+      <p>
+        Pense num sistema que identifica spam. Você poderia escrever milhares de regras — <em>"se tiver 'ganhe dinheiro' → spam"</em>. Mas spammers mudam. A solução moderna: mostrar ao sistema milhões de exemplos de spam e não-spam, e deixá-lo <strong>descobrir os padrões sozinho</strong>.
+      </p>
+    </div>
+
+    <div class="highlight">
+      <strong>🔑 A virada histórica:</strong> antes, humanos programavam regras explícitas. Com Machine Learning, humanos fornecem dados e o algoritmo <em>deriva</em> as regras. O desenvolvedor passa a ser curador de dados, não escritor de regras.
+    </div>
+
+    <!-- Exercício 1 -->
+    <div class="card mt-4">
+      <span class="ex-label">✏️ Exercício 1.1</span>
+      <div class="exercise-prompt">
+        🖱️ Clique no diagrama que representa <strong>Machine Learning</strong> (não programação tradicional)
+      </div>
+
+      <div class="diagram-grid" id="diagramExercise">
+        <!-- Diagrama A: Programação Tradicional -->
+        <div class="diagram-box" id="diagramA" onclick="checkDiagram('A')">
+          <span class="diagram-emoji">⚙️</span>
+          <div class="diagram-title">Diagrama A</div>
+          <div class="diagram-flow">
+            <span class="flow-node">Regras</span>
+            <span class="flow-arrow">+</span>
+            <span class="flow-node">Dados</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node green-node">Resultado</span>
+          </div>
+          <div class="diagram-result" id="resultA"></div>
+        </div>
+        <!-- Diagrama B: Machine Learning -->
+        <div class="diagram-box" id="diagramB" onclick="checkDiagram('B')">
+          <span class="diagram-emoji">🤖</span>
+          <div class="diagram-title">Diagrama B</div>
+          <div class="diagram-flow">
+            <span class="flow-node">Dados</span>
+            <span class="flow-arrow">+</span>
+            <span class="flow-node">Resultados</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node purple-node">Padrões</span>
+          </div>
+          <div class="diagram-result" id="resultB"></div>
+        </div>
+      </div>
+      <div class="exercise-score" id="diagramScore"></div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────────
+       SEÇÃO 2: O que é um LLM?
+  ─────────────────────────────────────────────────────── -->
+  <div class="section" id="sec2">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <h2>O que é um LLM?</h2>
+    </div>
+
+    <div class="card">
+      <p>
+        <strong>LLM (Large Language Model)</strong> é um modelo treinado em quantidades gigantescas de texto — livros, artigos, código, sites — para aprender a <strong>prever qual palavra (token) vem a seguir</strong>.
+      </p>
+      <p>
+        Simples assim. O GPT-4, o Claude, o Gemini são todos, no fundo, máquinas de completar texto extremamente sofisticadas. Eles não "pensam" — eles <strong>calculam probabilidades</strong>.
+      </p>
+    </div>
+
+    <div class="highlight">
+      <strong>🧮 Analogia do dev:</strong> pense no LLM como uma função <code style="color: var(--purple-light); font-family: 'DM Mono', monospace;">f(contexto) → próximo_token</code>. Rodando isso em loop, o modelo gera texto. O que parece "raciocínio" é na verdade bilhões de parâmetros ajustados para produzir saídas úteis.
+    </div>
+
+    <div class="card mt-3">
+      <p style="margin-bottom: 0;">
+        ⚡ <strong>Implicação prática:</strong> o LLM não tem certezas. Ele tem probabilidades. Por isso pode "alucinar" — gerar algo plausível mas errado. Entender isso muda como você usa IA no seu código: sempre valide saídas críticas.
+      </p>
+    </div>
+
+    <!-- Exercício 2 -->
+    <div class="card mt-4">
+      <span class="ex-label">✏️ Exercício 2.1</span>
+      <div class="exercise-prompt">
+        🎯 Veja como o modelo "vê" as probabilidades. Clique em uma opção para revelar e avançar.
+      </div>
+
+      <div class="phrase-nav-dots" id="phraseDots"></div>
+
+      <div id="phraseContainer"></div>
+
+      <div class="prob-nav">
+        <button class="btn btn-ghost btn-sm" onclick="prevPhrase()">← Anterior</button>
+        <button class="btn btn-ghost btn-sm" onclick="nextPhrase()">Próxima →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────────
+       SEÇÃO 3: Tokens
+  ─────────────────────────────────────────────────────── -->
+  <div class="section" id="sec3">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <h2>Tokens — A linguagem da IA</h2>
+    </div>
+
+    <div class="card">
+      <p>
+        O modelo não lê palavras — lê <strong>tokens</strong>. Um token é um pedaço de texto: às vezes uma palavra inteira, às vezes parte de uma palavra, às vezes pontuação.
+      </p>
+      <p>
+        <strong>Regra prática:</strong> em inglês, ~1 palavra ≈ 1–1.3 tokens. Em português, palavras mais longas = mais tokens. Emojis = 1–3 tokens cada.
+      </p>
+      <p>
+        Tokens importam porque os modelos têm um <strong>limite de contexto</strong> (janela de tokens). Ultrapassar esse limite = o modelo "esquece" o início da conversa.
+      </p>
+    </div>
+
+    <!-- Exercício tokenizador -->
+    <div class="card mt-3">
+      <span class="ex-label">✏️ Exercício 3.1 — Tokenizador simulado</span>
+      <div class="exercise-prompt">
+        ⌨️ Digite qualquer texto abaixo e veja como ele seria tokenizado
+      </div>
+
+      <input
+        type="text"
+        class="token-input"
+        id="tokenInput"
+        placeholder="Ex: Inteligência artificial é incrível! 🤖"
+        oninput="tokenize(this.value)"
+        autocomplete="off"
+      />
+
+      <div class="token-display" id="tokenDisplay">
+        <span style="color: var(--text-3); font-size: 0.85rem; align-self: center;">Os tokens aparecerão aqui...</span>
+      </div>
+
+      <div class="token-stats">
+        <div class="token-stat">
+          Tokens: <strong id="tokenCount">0</strong>
+        </div>
+        <div class="token-stat">
+          Chars: <strong id="charCount">0</strong>
+        </div>
+        <div class="token-stat">
+          Custo aprox.: <strong id="tokenCost">$0.000</strong>
+        </div>
+      </div>
+
+      <div class="token-comparisons">
+        <div class="token-cmp">
+          <div class="label">💬 WhatsApp típico</div>
+          <div class="val">~50 tokens</div>
+          <div class="bar-wrap"><div class="bar-inner" style="width:0.04%"></div></div>
+        </div>
+        <div class="token-cmp">
+          <div class="label">📄 Página A4 de texto</div>
+          <div class="val">~500 tokens</div>
+          <div class="bar-wrap"><div class="bar-inner" style="width:0.39%"></div></div>
+        </div>
+        <div class="token-cmp">
+          <div class="label">📚 GPT-4o contexto</div>
+          <div class="val">128 000 tokens</div>
+          <div class="bar-wrap"><div class="bar-inner" style="width:100%"></div></div>
+        </div>
+        <div class="token-cmp">
+          <div class="label">🌊 Claude contexto</div>
+          <div class="val">200 000 tokens</div>
+          <div class="bar-wrap"><div class="bar-inner" style="width:100%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────────
+       SEÇÃO 4: Temperature
+  ─────────────────────────────────────────────────────── -->
+  <div class="section" id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <h2>Temperature e Criatividade</h2>
+    </div>
+
+    <div class="card">
+      <p>
+        <strong>Temperature</strong> é um parâmetro que controla o quão "ousado" o modelo é ao escolher o próximo token.
+      </p>
+      <p>
+        Com <strong>temperature 0</strong>, o modelo sempre escolhe o token mais provável — respostas previsíveis e repetíveis. Com <strong>temperature 1+</strong>, escolhas menos prováveis ganham mais chance — respostas criativas, mas potencialmente incoerentes.
+      </p>
+    </div>
+
+    <div class="highlight">
+      <strong>👨‍💻 Dica de uso:</strong> para código e dados estruturados, use <code style="color: var(--purple-light); font-family: 'DM Mono', monospace;">temperature: 0</code>. Para brainstorm e copywriting, use <code style="color: var(--purple-light); font-family: 'DM Mono', monospace;">temperature: 0.7–1.0</code>. Acima de 1 → território experimental.
+    </div>
+
+    <!-- Exercício temperature -->
+    <div class="card mt-3">
+      <span class="ex-label">✏️ Exercício 4.1 — Arraste o slider</span>
+      <div class="temp-slider-wrap">
+        <div class="temp-label-row">
+          <div>
+            <div style="font-weight: 600; font-size: 0.95rem;">Prompt: <em>"Descreva nossa plataforma de atendimento"</em></div>
+            <div style="color: var(--text-3); font-size: 0.82rem; margin-top: 4px;">Mova o slider e observe como a resposta muda</div>
+          </div>
+          <div class="temp-val-display">
+            🌡️ <span id="tempValDisplay">0.7</span>
+          </div>
+        </div>
+
+        <input type="range" id="tempSlider" min="0" max="20" value="7" step="1" oninput="updateTemp(this.value)">
+        <div class="temp-marks">
+          <span>0 — Determinístico</span>
+          <span>0.7 — Padrão</span>
+          <span>1.5 — Criativo</span>
+          <span>2.0 — Caótico</span>
+        </div>
+
+        <div class="temp-mood" id="tempMood">🤔</div>
+
+        <div class="temp-response">
+          <div class="temp-response-label">Resposta do modelo</div>
+          <div id="tempResponse"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────────
+       SEÇÃO 5: QUIZ FINAL
+  ─────────────────────────────────────────────────────── -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <h2>Quiz Final — Módulo 1</h2>
+    </div>
+
+    <div class="card" style="margin-bottom: 24px;">
+      <p style="margin:0;">5 perguntas para consolidar o que você aprendeu. Cada questão dá feedback imediato.</p>
+    </div>
+
+    <!-- Q1 -->
+    <div class="quiz-question" id="q1">
+      <div class="quiz-q-num">Questão 1 / 5</div>
+      <div class="quiz-q-text">Qual a principal diferença entre programação tradicional e Machine Learning?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="answerQuiz(1, 'A', 'C')" data-opt="A">
+          <span class="quiz-opt-letter">A</span>
+          ML é mais rápido para executar que código tradicional
+        </button>
+        <button class="quiz-opt" onclick="answerQuiz(1, 'B', 'C')" data-opt="B">
+          <span class="quiz-opt-letter">B</span>
+          ML usa banco de dados, programação tradicional não
+        </button>
+        <button class="quiz-opt" onclick="answerQuiz(1, 'C', 'C')" data-opt="C">
+          <span class="quiz-opt-letter">C</span>
+          Na programação tradicional, humanos escrevem regras; no ML, o algoritmo aprende padrões dos dados
+        </button>
+        <button class="quiz-opt" onclick="answerQuiz(1, 'D', 'C')" data-opt="D">
+          <span class="quiz-opt-letter">D</span>
+          ML só funciona com Python, programação tradicional funciona com qualquer linguagem
+        </button>
+      </div>
+      <div class="quiz-explanation" id="exp1">
+        ✅ Exato! Em programação tradicional, você escreve regras explícitas. Em ML, você fornece dados de entrada e saída esperada, e o algoritmo <em>deriva</em> as regras automaticamente.
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="quiz-question" id="q2">
+      <div class="quiz-q-num">Questão 2 / 5</div>
+      <div class="quiz-q-text">O que um LLM faz fundamentalmente ao gerar texto?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="answerQuiz(2, 'A', 'B')" data-opt="A">
+          <span class="quiz-opt-letter">A</span>
+          Pesquisa a resposta certa na internet em tempo real
+        </button>
+        <button class="quiz-opt" onclick="answerQuiz(2, 'B', 'B')" data-opt="B">
+          <span class="quiz-opt-letter">B</span>
+          Prevê o próximo token mais provável dado o contexto anterior
+        </button>
+        <button class="quiz-opt" onclick="answerQuiz(2, 'C', 'B')" data-opt="C">
+          <span class="quiz-opt-letter">C</span>
+          Armazena todas as respostas possíveis e recupera a mais adequada
+        </button>
+        <button class="quiz-opt" onclick="answerQuiz(2, 'D', 'B')" data-opt="D">
+          <span class="quiz-opt-letter">D</span>
+          Conecta ao banco de dados do OpenAI para buscar a resposta
+        </button>
+      </div>
+      <div class="quiz-explanation" id="exp2">
+        ✅ Correto! LLMs são, no fundo, máquinas de prever o próximo token. O texto coerente que emerge é resultado de bilhões de parâmetros ajustados para tornar previsões úteis e fluentes.
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="quiz-question" id="q3">
+      <div class="quiz-q-num">Questão 3 / 5</div>
+      <div class="quiz-q-text">Por que LLMs podem "alucinar" (gerar informações falsas)?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="answerQuiz(3, 'A', 'D')" data-opt="A">
+          <span class="quiz-opt-letter">A</span>
+          Porque os servidores ficam sobrecarregados em horários de pico
+        </button>
+        <button class="quiz-opt" onclick="answerQuiz(3, 'B', 'D')" data-opt="B">
+          <span class="quiz-opt-letter">B</span>
+          Porque os modelos não foram treinados com dados suficientes
+        </button>
+        <button class="quiz-opt" onclick="answerQuiz(3, 'C', 'D')" data-opt="C">
+          <span class="quiz-opt-letter">C</span>
+          Porque bugs nos prompts causam erros de processamento
+        </button>
+        <button class="quiz-opt" onclick="answerQuiz(3, 'D', 'D')" data-opt="D">
+          <span class="quiz-opt-letter">D</span>
+          Porque trabalham com probabilidades, não com verdades — podem gerar algo plausível mas incorreto
+        </button>
+      </div>
+      <div class="quiz-explanation" id="exp3">
+        ✅ Isso mesmo! O modelo maximiza probabilidade, não veracidade. Texto plausível e texto verdadeiro são coisas diferentes. Por isso outputs críticos devem ser validados.
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="quiz-question" id="q4">
+      <div class="quiz-q-num">Questão 4 / 5</div>
+      <div class="quiz-q-text">Qual configuração de temperature você usaria para gerar código SQL que precisa ser preciso e repetível?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="answerQuiz(4, 'A', 'A')" data-opt="A">
+          <span class="quiz-opt-letter">A</span>
+          Temperature 0 — sempre escolhe o token mais provável, resultado determinístico
+        </button>
+        <button class="quiz-opt" onclick="answerQuiz(4, 'B', 'A')" data-opt="B">
+          <span class="quiz-opt-letter">B</span>
+          Temperature 1.5 — mais criativo, pode encontrar soluções inesperadas
+        </button>
+        <button class="quiz-opt" onclick="answerQuiz(4, 'C', 'A')" data-opt="C">
+          <span class="quiz-opt-letter">C</span>
+          Temperature 2.0 — máxima diversidade de output
+        </button>
+        <button class="quiz-opt" onclick="answerQuiz(4, 'D', 'A')" data-opt="D">
+          <span class="quiz-opt-letter">D</span>
+          Temperature não afeta código, só texto em linguagem natural
+        </button>
+      </div>
+      <div class="quiz-explanation" id="exp4">
+        ✅ Perfeito! Para tarefas que exigem precisão e reprodutibilidade — código, SQL, JSON — temperature 0 é a escolha certa. Temperature alta introduz variabilidade indesejada em contextos técnicos.
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="quiz-question" id="q5">
+      <div class="quiz-q-num">Questão 5 / 5</div>
+      <div class="quiz-q-text">Um texto de 1000 palavras em português tem aproximadamente quantos tokens?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="answerQuiz(5, 'A', 'C')" data-opt="A">
+          <span class="quiz-opt-letter">A</span>
+          ~200 tokens (menos que palavras)
+        </button>
+        <button class="quiz-opt" onclick="answerQuiz(5, 'B', 'C')" data-opt="B">
+          <span class="quiz-opt-letter">B</span>
+          ~1000 tokens (1:1 com palavras)
+        </button>
+        <button class="quiz-opt" onclick="answerQuiz(5, 'C', 'C')" data-opt="C">
+          <span class="quiz-opt-letter">C</span>
+          ~1300–1700 tokens (mais tokens que palavras — português é verboso)
+        </button>
+        <button class="quiz-opt" onclick="answerQuiz(5, 'D', 'C')" data-opt="D">
+          <span class="quiz-opt-letter">D</span>
+          ~10 000 tokens (tokens são caracteres individuais)
+        </button>
+      </div>
+      <div class="quiz-explanation" id="exp5">
+        ✅ Isso mesmo! Em português, palavras mais longas e sufixos verbais fazem com que o número de tokens seja tipicamente 30–70% maior que o de palavras. Importante calcular ao estimar custos de API.
+      </div>
+    </div>
+
+    <!-- Resultado do quiz -->
+    <div class="quiz-result" id="quizResult">
+      <div class="quiz-score-num" id="quizScoreNum">0/5</div>
+      <div class="quiz-score-label" id="quizScoreLabel"></div>
+      <div id="quizResultEmoji" style="font-size: 2.5rem; margin-bottom: 20px;"></div>
+      <a href="02-prompt-engineering.html" class="btn btn-primary" id="nextModuleBtn">
+        Próximo Módulo →
+      </a>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="bottom-module-info">
+      <strong>Módulo 1</strong> — Fundamentos de IA Generativa<br>
+      <span>Próximo: Módulo 2 — Prompt Engineering</span>
+    </div>
+    <a href="02-prompt-engineering.html" class="btn btn-primary">
+      Próximo Módulo →
+    </a>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<script>
+  // ─────────────────────────────────────────────────────────
+  // PROGRESS
+  // ─────────────────────────────────────────────────────────
+  let sectionsCompleted = new Set();
+  const TOTAL_SECTIONS = 5; // 1 diagram, 1 phrase, 1 tokenizer (auto), 1 temp (auto), 1 quiz
+
+  function updateProgress() {
+    const pct = Math.round((sectionsCompleted.size / TOTAL_SECTIONS) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressPct').textContent = pct + '%';
+  }
+
+  function markSectionDone(id) {
+    sectionsCompleted.add(id);
+    updateProgress();
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // EXERCÍCIO 1 — DIAGRAMA
+  // ─────────────────────────────────────────────────────────
+  let diagramDone = false;
+
+  function checkDiagram(choice) {
+    if (diagramDone) return;
+    diagramDone = true;
+
+    const boxA = document.getElementById('diagramA');
+    const boxB = document.getElementById('diagramB');
+    const resA = document.getElementById('resultA');
+    const resB = document.getElementById('resultB');
+    const score = document.getElementById('diagramScore');
+
+    if (choice === 'B') {
+      boxB.classList.add('selected-correct');
+      boxA.style.opacity = '0.5';
+      resB.textContent = '✅ Correto! Dados + resultados → padrões = Machine Learning';
+      resB.style.color = 'var(--green)';
+      resA.textContent = 'Isso é programação tradicional: regras explícitas';
+      resA.style.color = 'var(--text-3)';
+      score.textContent = '🎉 Perfeito! No ML, você alimenta dados — o algoritmo descobre os padrões.';
+      score.style.background = 'rgba(74,222,128,0.08)';
+      score.style.borderColor = 'rgba(74,222,128,0.25)';
+      score.style.color = 'var(--green)';
+    } else {
+      boxA.classList.add('selected-wrong');
+      boxB.style.opacity = '0.5';
+      resA.textContent = '❌ Programação tradicional: você escreve as regras manualmente';
+      resA.style.color = 'var(--red)';
+      resB.textContent = '✅ ML era este: dados → padrões aprendidos automaticamente';
+      resB.style.color = 'var(--green)';
+      boxB.classList.add('selected-correct');
+      score.textContent = '💡 Quase lá! O Diagrama B representa ML — aprende padrões dos dados.';
+      score.style.background = 'rgba(250,204,21,0.08)';
+      score.style.borderColor = 'rgba(250,204,21,0.25)';
+      score.style.color = '#fde68a';
+    }
+
+    [resA, resB].forEach(r => r.classList.add('visible'));
+    score.classList.add('visible');
+    markSectionDone('diagram');
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // EXERCÍCIO 2 — COMPLETAR FRASES
+  // ─────────────────────────────────────────────────────────
+  const phrases = [
+    {
+      text: 'O gato sentou no',
+      blank: '___',
+      options: [
+        { word: 'sofá',    pct: 35, color: '#a78bfa' },
+        { word: 'chão',    pct: 25, color: '#60a5fa' },
+        { word: 'tapete',  pct: 20, color: '#67e8f9' },
+        { word: 'telhado', pct: 15, color: '#fde68a' },
+        { word: 'outros',  pct:  5, color: '#94a3b8' },
+      ],
+      note: 'Contexto doméstico favorece "sofá" — mas "chão" e "tapete" são plausíveis.'
+    },
+    {
+      text: 'Para resolver este bug, você deve',
+      blank: '___',
+      options: [
+        { word: 'debugar',    pct: 38, color: '#a78bfa' },
+        { word: 'verificar',  pct: 28, color: '#60a5fa' },
+        { word: 'analisar',   pct: 18, color: '#67e8f9' },
+        { word: 'ignorar',    pct: 10, color: '#fde68a' },
+        { word: 'outros',     pct:  6, color: '#94a3b8' },
+      ],
+      note: 'Contexto técnico de bugs favorece ações de diagnóstico.'
+    },
+    {
+      text: 'A IA generativa vai',
+      blank: '___',
+      options: [
+        { word: 'transformar', pct: 32, color: '#a78bfa' },
+        { word: 'mudar',       pct: 27, color: '#60a5fa' },
+        { word: 'revolucionar',pct: 22, color: '#67e8f9' },
+        { word: 'eliminar',    pct: 12, color: '#fde68a' },
+        { word: 'outros',      pct:  7, color: '#94a3b8' },
+      ],
+      note: 'Frases sobre tecnologia tendem a completar com verbos de impacto positivo.'
+    }
+  ];
+
+  let currentPhrase = 0;
+  let phraseRevealed = new Array(phrases.length).fill(false);
+
+  function renderPhraseDots() {
+    const dotsEl = document.getElementById('phraseDots');
+    dotsEl.innerHTML = phrases.map((_, i) => {
+      const cls = phraseRevealed[i] ? 'done' : (i === currentPhrase ? 'active' : '');
+      return `<div class="phrase-dot ${cls}" onclick="goToPhrase(${i})"></div>`;
+    }).join('');
+  }
+
+  function renderPhrase() {
+    const p = phrases[currentPhrase];
+    const revealed = phraseRevealed[currentPhrase];
+
+    const bars = p.options.map(opt => {
+      const fill = revealed ? opt.pct : 0;
+      return `
+        <div class="prob-row ${revealed ? 'revealed' : ''}" onclick="revealPhrase()">
+          <span class="prob-word">${opt.word}</span>
+          <div class="prob-track">
+            <div class="prob-fill" id="fill_${opt.word.replace(/\s/,'_')}" style="background:${opt.color}; width:${revealed ? opt.pct : 0}%"></div>
+          </div>
+          <span class="prob-pct">${revealed ? opt.pct + '%' : '?'}</span>
+        </div>
+      `;
+    }).join('');
+
+    const noteHtml = revealed
+      ? `<div style="margin-top:14px;font-size:0.82rem;color:var(--text-3);padding:10px 14px;background:rgba(255,255,255,0.03);border-radius:8px;">💡 ${p.note}</div>`
+      : '';
+
+    document.getElementById('phraseContainer').innerHTML = `
+      <div class="phrase-complete">
+        <div class="phrase-text">
+          "${p.text} <span class="phrase-blank">${revealed ? p.options[0].word : '___'}</span>"
+        </div>
+        <div class="prob-bars">${bars}</div>
+        ${noteHtml}
+        ${!revealed ? '<div style="text-align:center;margin-top:12px;font-size:0.82rem;color:var(--text-3);">Clique em qualquer opção para revelar as probabilidades</div>' : ''}
+      </div>
+    `;
+
+    renderPhraseDots();
+
+    if (revealed) {
+      setTimeout(() => {
+        p.options.forEach(opt => {
+          const el = document.getElementById('fill_' + opt.word.replace(/\s/,'_'));
+          if (el) el.style.width = opt.pct + '%';
+        });
+      }, 80);
+    }
+  }
+
+  function revealPhrase() {
+    if (phraseRevealed[currentPhrase]) return;
+    phraseRevealed[currentPhrase] = true;
+    renderPhrase();
+    if (phraseRevealed.every(Boolean)) markSectionDone('phrases');
+  }
+
+  function nextPhrase() {
+    if (currentPhrase < phrases.length - 1) {
+      currentPhrase++;
+      renderPhrase();
+    }
+  }
+
+  function prevPhrase() {
+    if (currentPhrase > 0) {
+      currentPhrase--;
+      renderPhrase();
+    }
+  }
+
+  function goToPhrase(i) {
+    currentPhrase = i;
+    renderPhrase();
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // EXERCÍCIO 3 — TOKENIZADOR
+  // ─────────────────────────────────────────────────────────
+  const TOKEN_COLORS = ['tc0','tc1','tc2','tc3','tc4'];
+
+  function simulateTokenize(text) {
+    if (!text.trim()) return [];
+    // Approximate tokenizer: split on spaces, then handle long words and punctuation
+    const tokens = [];
+    const parts = text.split(/(\s+)/);
+    parts.forEach(part => {
+      if (!part) return;
+      if (/^\s+$/.test(part)) {
+        // whitespace: merge with previous token visually or just skip
+        return;
+      }
+      // Split punctuation off
+      const subParts = part.split(/([.,!?;:()\[\]{}"'—–\-\/\\@#$%^&*+=|<>~`]+)/);
+      subParts.forEach(sp => {
+        if (!sp) return;
+        // If word is long (>7 chars), might split into subwords
+        if (sp.length > 8 && /^[a-zA-ZÀ-ÿ]+$/.test(sp)) {
+          // roughly split at mid-point or after common prefixes
+          const mid = Math.ceil(sp.length * 0.55);
+          tokens.push(sp.slice(0, mid));
+          tokens.push(sp.slice(mid));
+        } else if (sp.length > 12) {
+          const third = Math.ceil(sp.length / 3);
+          tokens.push(sp.slice(0, third));
+          tokens.push(sp.slice(third, third*2));
+          tokens.push(sp.slice(third*2));
+        } else {
+          tokens.push(sp);
+        }
+      });
+    });
+    return tokens.filter(t => t.length > 0);
+  }
+
+  function tokenize(val) {
+    const display = document.getElementById('tokenDisplay');
+    const countEl = document.getElementById('tokenCount');
+    const charEl  = document.getElementById('charCount');
+    const costEl  = document.getElementById('tokenCost');
+
+    if (!val.trim()) {
+      display.innerHTML = '<span style="color:var(--text-3);font-size:0.85rem;align-self:center;">Os tokens aparecerão aqui...</span>';
+      countEl.textContent = '0';
+      charEl.textContent = '0';
+      costEl.textContent = '$0.000';
+      return;
+    }
+
+    const tokens = simulateTokenize(val);
+    const cost = (tokens.length * 0.000002).toFixed(6);
+
+    display.innerHTML = tokens.map((t, i) => {
+      const cls = TOKEN_COLORS[i % TOKEN_COLORS.length];
+      const delay = Math.min(i * 35, 600);
+      return `<span class="token-chip ${cls}" style="animation-delay:${delay}ms">${t.replace(/</g,'&lt;')}</span>`;
+    }).join('');
+
+    countEl.textContent = tokens.length;
+    charEl.textContent  = val.length;
+    costEl.textContent  = '$' + cost;
+
+    markSectionDone('tokenizer');
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // EXERCÍCIO 4 — TEMPERATURE SLIDER
+  // ─────────────────────────────────────────────────────────
+  const tempResponses = [
+    // 0 — temperature 0.0
+    { mood: '🤖', text: 'A Relivox é uma plataforma de atendimento ao cliente que centraliza as conversas do WhatsApp, permitindo que equipes respondam com eficiência e agilidade.' },
+    // 1 — 0.1
+    { mood: '🤖', text: 'A Relivox centraliza o atendimento via WhatsApp para equipes, oferecendo eficiência e controle nas conversas com clientes.' },
+    // 2 — 0.2
+    { mood: '😐', text: 'Com a Relivox, sua equipe gerencia todas as conversas do WhatsApp em um único lugar, garantindo respostas rápidas e atendimento de qualidade.' },
+    // 3 — 0.3
+    { mood: '😐', text: 'A Relivox une tecnologia e atendimento humano para transformar a maneira como empresas se comunicam com clientes pelo WhatsApp.' },
+    // 4 — 0.4
+    { mood: '🙂', text: 'Imagine ter todo o seu atendimento WhatsApp organizado, rastreado e potencializado com IA. É isso que a Relivox oferece para sua equipe.' },
+    // 5 — 0.5
+    { mood: '🙂', text: 'A Relivox é onde equipes de atendimento encontram superpoderes: IA para sugerir respostas, métricas em tempo real e todo o WhatsApp num painel só.' },
+    // 6 — 0.6
+    { mood: '😊', text: 'Chega de perder mensagem, de resposta atrasada, de cliente sem retorno. A Relivox transforma caos em atendimento coordenado e inteligente.' },
+    // 7 — 0.7
+    { mood: '😊', text: 'A Relivox é a plataforma que faz sua equipe de atendimento parecer 3x maior do que é — com IA que sugere respostas, dashboards que revelam padrões e zero mensagem esquecida.' },
+    // 8 — 0.8
+    { mood: '😄', text: 'Seu cliente manda mensagem. Em segundos, a IA da Relivox sugere a resposta perfeita. Seu atendente aprova. Problema resolvido. Isso é a Relivox: velocidade com toque humano.' },
+    // 9 — 0.9
+    { mood: '😄', text: '✨ A Relivox não é só uma plataforma. É o copiloto que sua equipe precisava — IA treinada no seu negócio, métricas que revelam o invisível, e clientes mais felizes a cada dia.' },
+    // 10 — 1.0
+    { mood: '🤩', text: 'Sua equipe. Sua IA. Seus clientes. Tudo conectado. A Relivox transforma cada conversa de WhatsApp num momento de encantamento — rápido, inteligente, humano.' },
+    // 11 — 1.1
+    { mood: '🤩', text: '🚀 Esqueça o atendimento de ontem! Relivox é o futuro chegando agora: IA conversacional, dashboards preditivos, equipes em sincronia total. A revolução do atendimento começou!' },
+    // 12 — 1.2
+    { mood: '🫠', text: '🔥💬 Relivox: onde cada pixel pulsa com a energia de mil conversas simultâneas! Sua equipe? Lendária. Seus clientes? Encantados. O WhatsApp? Jamais foi tão épico!' },
+    // 13 — 1.3
+    { mood: '🫠', text: '⚡🌀 E SE eu disser que Relivox é basicamente um portal dimensional para atendimento de outro nível?! Cada mensagem, uma aventura. Cada cliente, um herói da sua história!' },
+    // 14 — 1.4
+    { mood: '🤪', text: '🎪✨🔮 RELIVOX ATIVA OS NEURÔNIOS DO COSMOS DO ATENDIMENTO INTERDIMENSIONAL!! Cada conversa é uma sinfonia quântica de palavras e emojis que transcendem o espaço-tempo! 🚀🦄' },
+    // 15 — 1.5
+    { mood: '🤪', text: '🌈🐙 Relivox=atendimento²!! Se WhatsApp fosse um dragão, Relivox seria o cavaleiro-IA montado nele galopando pelo metaverso das conversas turbo-híper-conectadas!!! 💥💥' },
+    // 16 — 1.6
+    { mood: '😵', text: '🎭🌀💫 aaaAA Relivox é tipo... quando a lua cheia encontra um servidor GPU e juntos eles cantam a canção do atendimento eterno??? não sei mais minha plataforma é uma estrela!!' },
+    // 17 — 1.7
+    { mood: '😵', text: '🍄🔥🎯 RELIVOX REEEEEE plataforma de?? atendimento!! sim!! mas também uma dimensão paralela onde tokens dançam salsa com seus clientes frustrados até virarem promotores??? talvez!!' },
+    // 18 — 1.8
+    { mood: '💀', text: '🌀🌀🌀 Reli... VOX... ou é VOX... Reli... a plataforma que inverte o WhatsApp ao contrário e o cliente atende a empresa enquanto a IA medita em modo avião... provavelmente eficiente!!' },
+    // 19 — 1.9
+    { mood: '💀', text: '🤖🍌💥 RELIVOX = √(atendimento × lua × token³) ÷ caos absoluto!! cada mensagem é um teorema de Schrödinger: respondida E não-respondida simultaneamente até o gestor observar 📊???' },
+    // 20 — 2.0
+    { mood: '☠️', text: '!!glorp!! Relivox é o barulho que os clientes fazem quando ficam felizes?? ou é um tipo de queijo?? tokens são pequenos pinguins girando... atendimento... sim!! PLATAFORMA... talvez!!' },
+  ];
+
+  function updateTemp(val) {
+    const idx = parseInt(val);
+    const temp = (idx / 10).toFixed(1);
+    const data = tempResponses[idx];
+
+    document.getElementById('tempValDisplay').textContent = temp;
+    document.getElementById('tempMood').textContent = data.mood;
+
+    const respEl = document.getElementById('tempResponse');
+    respEl.style.opacity = '0';
+    respEl.style.transform = 'translateY(4px)';
+
+    setTimeout(() => {
+      respEl.querySelector('div') && (respEl.innerHTML = `<div class="temp-response-label">Resposta do modelo</div>${data.text}`);
+      respEl.innerHTML = `<div class="temp-response-label">Resposta do modelo (temperature ${temp})</div>${data.text}`;
+      respEl.style.opacity = '1';
+      respEl.style.transform = 'translateY(0)';
+    }, 150);
+
+    markSectionDone('temperature');
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // QUIZ
+  // ─────────────────────────────────────────────────────────
+  let quizAnswers = {};
+  let quizScore = 0;
+
+  function answerQuiz(qNum, chosen, correct) {
+    const qEl = document.getElementById('q' + qNum);
+    if (qEl.classList.contains('answered')) return;
+
+    qEl.classList.add('answered');
+
+    const opts = qEl.querySelectorAll('.quiz-opt');
+    opts.forEach(opt => {
+      opt.classList.add('disabled');
+      const letter = opt.getAttribute('data-opt');
+      if (letter === correct) opt.classList.add('correct');
+      else if (letter === chosen && chosen !== correct) opt.classList.add('wrong');
+    });
+
+    const exp = document.getElementById('exp' + qNum);
+    exp.classList.add('visible');
+
+    const isCorrect = chosen === correct;
+    if (isCorrect) quizScore++;
+    quizAnswers[qNum] = isCorrect;
+
+    // Check if all answered
+    const answered = Object.keys(quizAnswers).length;
+    if (answered === 5) {
+      setTimeout(showQuizResult, 600);
+    }
+  }
+
+  function showQuizResult() {
+    const result = document.getElementById('quizResult');
+    const scoreNum = document.getElementById('quizScoreNum');
+    const scoreLabel = document.getElementById('quizScoreLabel');
+    const emoji = document.getElementById('quizResultEmoji');
+
+    scoreNum.textContent = quizScore + '/5';
+
+    const labels = [
+      'Continue estudando — revise as seções acima! 💪',
+      'Bom começo! Revise os pontos que errou.',
+      'Razoável! Você está pegando o jeito.',
+      'Muito bom! Quase dominando os fundamentos.',
+      'Excelente! Só um ponto a revisar.',
+      '🏆 Perfeito! Você dominou o Módulo 1!',
+    ];
+    const emojis = ['😅','🤔','🙂','😊','🤩','🎉'];
+
+    scoreLabel.textContent = labels[quizScore];
+    emoji.textContent = emojis[quizScore];
+
+    result.classList.add('visible');
+    markSectionDone('quiz');
+
+    // Save to localStorage (sync with hub)
+    try {
+      const KEY = 'ai-training-completed-v1';
+      const done = JSON.parse(localStorage.getItem(KEY) || '[]');
+      if (!done.includes(1)) { done.push(1); localStorage.setItem(KEY, JSON.stringify(done)); }
+    } catch(e) {}
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // INIT
+  // ─────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    renderPhrase();
+    updateTemp(7); // default 0.7
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,2115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Módulo 06 — Avaliação (Eval) | IA para Devs</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-base:        #0f172a;
+      --bg-surface:     #1e293b;
+      --bg-card:        #1e293b;
+      --bg-card-hover:  #263348;
+      --border:         #334155;
+      --border-hover:   #475569;
+      --purple:         #8b5cf6;
+      --purple-light:   #a78bfa;
+      --purple-dim:     rgba(139,92,246,0.14);
+      --blue:           #3b82f6;
+      --blue-light:     #60a5fa;
+      --blue-dim:       rgba(59,130,246,0.12);
+      --green:          #10b981;
+      --green-light:    #34d399;
+      --green-dim:      rgba(16,185,129,0.13);
+      --yellow:         #f59e0b;
+      --yellow-dim:     rgba(245,158,11,0.13);
+      --red:            #ef4444;
+      --red-dim:        rgba(239,68,68,0.13);
+      --text-primary:   #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted:     #64748b;
+      --radius:         14px;
+      --radius-sm:      8px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(139,92,246,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(139,92,246,0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Sticky nav ── */
+    .topnav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15,23,42,0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .nav-links { display: flex; align-items: center; gap: 6px; }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: transparent;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+
+    .nav-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--border-hover);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .nav-badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--purple-light);
+      background: var(--purple-dim);
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 999px;
+      padding: 3px 10px;
+      white-space: nowrap;
+    }
+
+    /* ── Page wrapper ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ── Module header ── */
+    .mod-header {
+      padding: 56px 0 44px;
+      text-align: center;
+    }
+
+    .mod-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--purple-light);
+      background: var(--purple-dim);
+      border: 1px solid rgba(139,92,246,0.28);
+      border-radius: 999px;
+      padding: 5px 15px;
+      margin-bottom: 22px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .eyebrow-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--purple);
+      box-shadow: 0 0 6px var(--purple);
+      animation: dot-pulse 2.2s ease-in-out infinite;
+    }
+
+    @keyframes dot-pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:0.4; transform:scale(1.5); }
+    }
+
+    .mod-header h1 {
+      font-size: clamp(26px,5vw,44px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      background: linear-gradient(140deg,#f8fafc 25%,var(--purple-light) 62%,var(--blue-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 14px;
+    }
+
+    .mod-header .subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* ── Section ── */
+    .section {
+      margin-bottom: 64px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .section-title {
+      font-size: clamp(18px,3vw,24px);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .section-body {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      margin-bottom: 20px;
+    }
+
+    .section-body strong { color: var(--text-primary); font-weight: 600; }
+
+    /* ── Card ── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      margin-bottom: 14px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .card-body {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    /* ── Callout box ── */
+    .callout {
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      font-size: 14px;
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+
+    .callout.purple {
+      background: var(--purple-dim);
+      border-left: 3px solid var(--purple);
+      color: var(--text-secondary);
+    }
+
+    .callout.blue {
+      background: var(--blue-dim);
+      border-left: 3px solid var(--blue);
+      color: var(--text-secondary);
+    }
+
+    .callout.yellow {
+      background: var(--yellow-dim);
+      border-left: 3px solid var(--yellow);
+      color: var(--text-secondary);
+    }
+
+    .callout strong { color: var(--text-primary); }
+
+    /* ── Quick exercise — pick better response ── */
+    .pick-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    @media (max-width: 600px) {
+      .pick-container { grid-template-columns: 1fr; }
+    }
+
+    .pick-option {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      position: relative;
+    }
+
+    .pick-option:hover {
+      border-color: var(--purple);
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+    }
+
+    .pick-option.correct {
+      border-color: var(--green);
+      background: rgba(16,185,129,0.06);
+    }
+
+    .pick-option.wrong {
+      border-color: var(--red);
+      background: rgba(239,68,68,0.06);
+    }
+
+    .pick-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    .pick-badge.correct { background: rgba(16,185,129,0.2); color: var(--green-light); }
+    .pick-badge.wrong   { background: rgba(239,68,68,0.2); color: #f87171; }
+
+    .pick-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .pick-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .pick-question {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      padding: 10px 16px;
+      background: rgba(255,255,255,0.03);
+      border-radius: var(--radius-sm);
+      border-left: 3px solid var(--border);
+    }
+
+    .pick-question span { color: var(--text-primary); }
+
+    .pick-feedback {
+      font-size: 13px;
+      padding: 14px 18px;
+      border-radius: var(--radius-sm);
+      display: none;
+      line-height: 1.6;
+    }
+
+    .pick-feedback.show { display: block; }
+    .pick-feedback.success { background: var(--green-dim); color: var(--green-light); border: 1px solid rgba(16,185,129,0.25); }
+    .pick-feedback.error   { background: var(--red-dim);   color: #f87171;            border: 1px solid rgba(239,68,68,0.25); }
+
+    /* ── Eval type cards ── */
+    .eval-types {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .eval-type-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+    }
+
+    .eval-type-icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+    }
+
+    .eval-type-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .eval-type-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    .pros-cons {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .pro, .con {
+      font-size: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .pro { color: var(--green-light); }
+    .con { color: #f87171; }
+
+    .pro::before { content: '+'; font-weight: 800; flex-shrink: 0; }
+    .con::before { content: '−'; font-weight: 800; flex-shrink: 0; }
+
+    .when-use {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Metrics grid ── */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+
+    .metric-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 5px;
+    }
+
+    .metric-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    .gauge-wrap { display: flex; align-items: center; gap: 10px; }
+
+    .gauge-track {
+      flex: 1;
+      height: 6px;
+      background: rgba(51,65,85,0.8);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .gauge-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 1s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .gauge-val {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      min-width: 30px;
+      text-align: right;
+    }
+
+    /* ── Eval builder ── */
+    .eval-case {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      margin-bottom: 18px;
+      transition: border-color 0.2s;
+    }
+
+    .eval-case.rated {
+      border-color: rgba(139,92,246,0.35);
+    }
+
+    .eval-case-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .eval-case-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--purple-light);
+      background: var(--purple-dim);
+      border-radius: 999px;
+      padding: 2px 10px;
+      white-space: nowrap;
+    }
+
+    .eval-question {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.03);
+      border-radius: var(--radius-sm);
+      border-left: 3px solid var(--border);
+    }
+
+    .eval-response {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      margin-bottom: 14px;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.025);
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(51,65,85,0.5);
+    }
+
+    .eval-controls { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+
+    .stars-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      margin-bottom: 7px;
+    }
+
+    .stars { display: flex; gap: 4px; }
+
+    .star {
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--border);
+      transition: color 0.15s, transform 0.1s;
+      user-select: none;
+    }
+
+    .star:hover, .star.active { color: var(--yellow); transform: scale(1.15); }
+
+    .criteria-wrap { flex: 1; min-width: 180px; }
+
+    .criteria-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .criteria-list { display: flex; flex-wrap: wrap; gap: 7px; }
+
+    .criteria-chip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      user-select: none;
+    }
+
+    .criteria-chip input { display: none; }
+
+    .criteria-chip:hover {
+      border-color: var(--border-hover);
+      color: var(--text-secondary);
+    }
+
+    .criteria-chip.checked {
+      border-color: rgba(16,185,129,0.5);
+      color: var(--green-light);
+      background: rgba(16,185,129,0.07);
+    }
+
+    .feedback-input {
+      width: 100%;
+      margin-top: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 13px;
+      padding: 10px 14px;
+      resize: vertical;
+      min-height: 60px;
+      transition: border-color 0.2s;
+    }
+
+    .feedback-input:focus {
+      outline: none;
+      border-color: var(--purple);
+    }
+
+    .feedback-input::placeholder { color: var(--text-muted); }
+
+    /* ── Submit / results ── */
+    .submit-wrap { text-align: center; margin: 28px 0; }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--purple), #7c3aed);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 12px 32px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 18px rgba(139,92,246,0.35);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(139,92,246,0.45);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── Result comparison ── */
+    .results-panel {
+      display: none;
+    }
+
+    .results-panel.show { display: block; }
+
+    .results-panel .section-title { margin-bottom: 20px; }
+
+    .result-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 10px;
+    }
+
+    .result-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .result-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .score-pill {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    .score-pill.user   { background: var(--blue-dim); color: var(--blue-light); }
+    .score-pill.expert { background: var(--purple-dim); color: var(--purple-light); }
+
+    .result-insight {
+      grid-column: 1 / -1;
+      font-size: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      margin-top: 6px;
+    }
+
+    .result-insight.caught  { background: var(--green-dim); color: var(--green-light); }
+    .result-insight.missed  { background: var(--yellow-dim); color: #fcd34d; }
+    .result-insight.perfect { background: var(--purple-dim); color: var(--purple-light); }
+
+    /* ── Flowchart ── */
+    .flowchart {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .flow-node {
+      background: var(--bg-base);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-align: center;
+      min-width: 130px;
+    }
+
+    .flow-node.accent {
+      border-color: rgba(139,92,246,0.5);
+      color: var(--purple-light);
+    }
+
+    .flow-node.good {
+      border-color: rgba(16,185,129,0.5);
+      color: var(--green-light);
+    }
+
+    .flow-arrow {
+      font-size: 18px;
+      color: var(--text-muted);
+      padding: 0 6px;
+      flex-shrink: 0;
+    }
+
+    .flow-branch {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-left: 4px;
+    }
+
+    .flow-branch-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ── Tools grid ── */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .tool-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+
+    .tool-card:hover {
+      border-color: rgba(139,92,246,0.4);
+      transform: translateY(-2px);
+    }
+
+    .tool-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .tool-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 2px 7px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+
+    .tool-tag.oss   { background: var(--green-dim);   color: var(--green-light); }
+    .tool-tag.cloud { background: var(--blue-dim);    color: var(--blue-light); }
+    .tool-tag.custom{ background: var(--purple-dim);  color: var(--purple-light); }
+
+    .tool-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    /* ── Quiz ── */
+    .quiz-question {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      margin-bottom: 16px;
+    }
+
+    .quiz-q-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 14px;
+      line-height: 1.55;
+    }
+
+    .quiz-q-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+
+    .quiz-opt {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 11px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-secondary);
+      background: transparent;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      text-align: left;
+      font-family: inherit;
+      line-height: 1.5;
+    }
+
+    .quiz-opt:hover:not(:disabled) {
+      border-color: var(--purple);
+      color: var(--text-primary);
+      background: var(--purple-dim);
+    }
+
+    .quiz-opt.selected  { border-color: var(--purple); background: var(--purple-dim); color: var(--text-primary); }
+    .quiz-opt.correct   { border-color: var(--green);  background: var(--green-dim);  color: var(--green-light); }
+    .quiz-opt.incorrect { border-color: var(--red);    background: var(--red-dim);    color: #f87171; }
+    .quiz-opt:disabled  { cursor: default; }
+
+    .quiz-explain {
+      font-size: 12px;
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      display: none;
+      line-height: 1.6;
+    }
+
+    .quiz-explain.show { display: block; }
+    .quiz-explain.ok  { background: var(--green-dim); color: var(--green-light); }
+    .quiz-explain.err { background: var(--red-dim);   color: #f87171; }
+
+    /* ── Celebration / confetti ── */
+    #celebration {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: rgba(15,23,42,0.97);
+      overflow: hidden;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #celebration.show {
+      display: flex;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      top: -16px;
+      border-radius: 2px;
+      animation: confetti-fall linear infinite;
+      opacity: 0;
+    }
+
+    @keyframes confetti-fall {
+      0%   { transform: translateY(0) rotateZ(0deg);   opacity: 1; }
+      80%  { opacity: 1; }
+      100% { transform: translateY(105vh) rotateZ(720deg); opacity: 0; }
+    }
+
+    @keyframes confetti-sway {
+      0%,100% { margin-left: 0; }
+      33%      { margin-left: 40px; }
+      66%      { margin-left: -40px; }
+    }
+
+    .celebrate-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 40px 24px;
+      max-width: 560px;
+    }
+
+    .celebrate-emoji {
+      font-size: 72px;
+      display: block;
+      margin-bottom: 16px;
+      animation: bounce-in 0.6s cubic-bezier(0.175,0.885,0.32,1.275) both;
+    }
+
+    @keyframes bounce-in {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .celebrate-title {
+      font-size: clamp(28px,5vw,42px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #fbbf24, var(--purple-light), var(--green-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+      animation: fade-up 0.5s 0.3s ease both;
+    }
+
+    .celebrate-sub {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 30px;
+      animation: fade-up 0.5s 0.45s ease both;
+    }
+
+    @keyframes fade-up {
+      from { opacity:0; transform:translateY(18px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* Certificate */
+    .certificate {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 2px solid rgba(139,92,246,0.5);
+      border-radius: var(--radius);
+      padding: 28px 36px;
+      margin-bottom: 28px;
+      box-shadow:
+        0 0 0 1px rgba(139,92,246,0.15),
+        0 20px 60px rgba(0,0,0,0.5),
+        0 0 80px rgba(139,92,246,0.08);
+      animation: fade-up 0.5s 0.6s ease both;
+    }
+
+    .cert-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--purple-light);
+      margin-bottom: 6px;
+    }
+
+    .cert-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .cert-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    .cert-modules {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+
+    .cert-mod {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: var(--green-dim);
+      color: var(--green-light);
+      border: 1px solid rgba(16,185,129,0.3);
+    }
+
+    .cert-date {
+      font-size: 12px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+    }
+
+    .btn-hub {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--purple), #7c3aed);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 14px 34px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 22px rgba(139,92,246,0.4);
+      animation: fade-up 0.5s 0.75s ease both;
+    }
+
+    .btn-hub:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 32px rgba(139,92,246,0.55);
+    }
+
+    /* ── Misc utils ── */
+    .highlight { color: var(--purple-light); font-weight: 600; }
+    .highlight-green { color: var(--green-light); font-weight: 600; }
+    .highlight-yellow { color: #fcd34d; font-weight: 600; }
+    .highlight-red { color: #f87171; font-weight: 600; }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+
+    .tag {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 1px solid;
+    }
+
+    .tag.purple { background: var(--purple-dim); border-color: rgba(139,92,246,0.3); color: var(--purple-light); }
+    .tag.blue   { background: var(--blue-dim);   border-color: rgba(59,130,246,0.3);  color: var(--blue-light); }
+    .tag.green  { background: var(--green-dim);  border-color: rgba(16,185,129,0.3); color: var(--green-light); }
+
+    .progress-msg {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 40px 0;
+    }
+
+    @media (max-width: 640px) {
+      .page { padding: 0 16px 60px; }
+      .topnav { padding: 10px 16px; }
+      .flowchart { gap: 6px; }
+      .flow-node { min-width: 100px; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navigation ── -->
+  <nav class="topnav">
+    <div class="nav-links">
+      <a href="../index.html" class="nav-btn">← Hub</a>
+      <a href="05-rag-tools.html" class="nav-btn">← Módulo 05</a>
+    </div>
+    <span class="nav-badge">Módulo 06 — Final</span>
+  </nav>
+
+  <!-- ── Page ── -->
+  <div class="page">
+
+    <!-- Header -->
+    <header class="mod-header">
+      <div class="mod-eyebrow">
+        <span class="eyebrow-dot"></span>
+        Módulo 06 · Módulo Final
+      </div>
+      <h1>Avaliação (Eval)<br>Como Medir se a IA Está Funcionando</h1>
+      <p class="subtitle">Você mudou um prompt — melhorou ou piorou? Sem eval, você está chutando.</p>
+    </header>
+
+    <!-- ══════════════════════════════════════════
+         SEÇÃO 1 — POR QUE AVALIAR?
+    ══════════════════════════════════════════ -->
+    <section class="section">
+      <div class="section-label">Seção 1</div>
+      <h2 class="section-title">Por que Avaliar?</h2>
+
+      <p class="section-body">
+        "Funciona" não é uma métrica. Toda vez que você muda um prompt, adiciona um novo tool, ou
+        troca de modelo, você precisa saber: <strong>ficou melhor ou pior?</strong>
+      </p>
+
+      <div class="callout purple">
+        <strong>Eval para IA é igual a testes automatizados para código.</strong><br>
+        Você não faria deploy de código sem rodar os testes. Não faça deploy de um agente de IA sem rodar os evals.
+        A diferença é que testes verificam comportamento determinístico — evals verificam
+        <em>qualidade</em>, que é probabilística e subjetiva.
+      </div>
+
+      <p class="section-body">
+        Sem evals você cai nessa armadilha comum: ajusta o prompt para um caso, testa manualmente
+        três exemplos, acha que ficou melhor — mas na prática <strong>quebrou 40 outros casos</strong>
+        que você não testou. Isso é regressão silenciosa.
+      </p>
+
+      <!-- Quick exercise -->
+      <div class="card">
+        <div class="card-title">Exercício Rápido — Qual resposta é melhor?</div>
+        <div class="card-body">
+          <div class="pick-question">
+            Pergunta do cliente: <span>"Quando meu pedido #4521 vai chegar?"</span>
+          </div>
+
+          <div class="pick-container" id="pick-container">
+            <div class="pick-option" id="pick-a" onclick="pickResponse('a')">
+              <div class="pick-label">Resposta A</div>
+              <div class="pick-text">
+                "Olá! Verifiquei seu pedido #4521. Ele saiu do nosso centro de distribuição
+                em São Paulo ontem às 14h e está previsto para chegar até amanhã às 18h.
+                Você receberá um SMS de confirmação quando sair para entrega. Posso ajudar com mais alguma coisa?"
+              </div>
+            </div>
+            <div class="pick-option" id="pick-b" onclick="pickResponse('b')">
+              <div class="pick-label">Resposta B</div>
+              <div class="pick-text">
+                "Pedidos costumam levar de 3 a 7 dias úteis dependendo da sua região.
+                Para verificar o status específico do seu pedido, acesse o site e use o número
+                de rastreamento que enviamos por email no momento da compra. Espero que isso ajude!"
+              </div>
+            </div>
+          </div>
+
+          <div class="pick-feedback" id="pick-feedback-correct" style="display:none">
+            <strong>Correto! Resposta A é melhor.</strong> Ela é específica, usa o número do pedido,
+            dá uma data concreta e oferece próximos passos claros. A Resposta B é genérica e joga
+            o trabalho de volta para o cliente.<br><br>
+            <strong>Agora imagine fazer essa avaliação 1.000 vezes por dia manualmente.</strong>
+            É insustentável. É por isso que precisamos de eval automatizado.
+          </div>
+          <div class="pick-feedback" id="pick-feedback-wrong" style="display:none">
+            <strong>A Resposta A é melhor.</strong> Ela é específica, usa o número do pedido,
+            dá uma data concreta e oferece próximos passos claros. A Resposta B é genérica —
+            ela não responde diretamente a pergunta e passa o trabalho de volta para o cliente.<br><br>
+            <strong>Agora imagine fazer essa avaliação 1.000 vezes por dia manualmente.</strong>
+            É insustentável. É por isso que precisamos de eval automatizado.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         SEÇÃO 2 — TIPOS DE AVALIAÇÃO
+    ══════════════════════════════════════════ -->
+    <section class="section">
+      <div class="section-label">Seção 2</div>
+      <h2 class="section-title">Tipos de Avaliação</h2>
+
+      <p class="section-body">
+        Existem três abordagens principais — e times maduros usam as três em combinação.
+      </p>
+
+      <div class="eval-types">
+
+        <div class="eval-type-card">
+          <div class="eval-type-icon">👥</div>
+          <div class="eval-type-name">Avaliação Humana</div>
+          <div class="eval-type-desc">
+            Pessoas avaliam as saídas da IA com critérios definidos (escala 1–5,
+            preferência entre duas opções, aprovação/rejeição).
+          </div>
+          <div class="pros-cons">
+            <div class="pro">Captura nuances que código não percebe</div>
+            <div class="pro">Identifica comportamentos inesperados</div>
+            <div class="con">Lento e caro para escalar</div>
+            <div class="con">Avaliadores distintos = inconsistência</div>
+          </div>
+          <div class="when-use">Quando usar: início do desenvolvimento e edge cases</div>
+        </div>
+
+        <div class="eval-type-card">
+          <div class="eval-type-icon">⚙️</div>
+          <div class="eval-type-name">Avaliação Automática (Heurística)</div>
+          <div class="eval-type-desc">
+            Código verifica propriedades da saída: formato JSON válido?
+            Contém campos obrigatórios? Comprimento dentro do limite?
+            Referencia o número do pedido?
+          </div>
+          <div class="pros-cons">
+            <div class="pro">Rápido, consistente, escalável</div>
+            <div class="pro">Zero custo marginal por execução</div>
+            <div class="con">Não avalia qualidade ou nuance</div>
+            <div class="con">Pode gerar falsos positivos</div>
+          </div>
+          <div class="when-use">Quando usar: validação de formato e checks básicos</div>
+        </div>
+
+        <div class="eval-type-card">
+          <div class="eval-type-icon">🤖</div>
+          <div class="eval-type-name">LLM-as-a-Judge</div>
+          <div class="eval-type-desc">
+            Um modelo mais forte (ex: GPT-4o) avalia as respostas de um modelo
+            mais barato (ex: GPT-4o-mini). Você escala qualidade com IA avaliando IA.
+          </div>
+          <div class="pros-cons">
+            <div class="pro">Escalável — roda 24/7 sem intervenção</div>
+            <div class="pro">Entende nuance como humano</div>
+            <div class="con">Pode ter vieses (prefere suas próprias respostas)</div>
+            <div class="con">Tem custo financeiro por chamada</div>
+          </div>
+          <div class="when-use">Quando usar: avaliação de qualidade em escala</div>
+        </div>
+
+      </div>
+
+      <div class="callout blue">
+        <strong>Na prática:</strong> use heurísticas para validação de formato (free), LLM-as-Judge
+        para avaliação de qualidade em CI/CD, e avaliação humana para novos comportamentos e
+        calibração periódica.
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         SEÇÃO 3 — MÉTRICAS
+    ══════════════════════════════════════════ -->
+    <section class="section">
+      <div class="section-label">Seção 3</div>
+      <h2 class="section-title">Métricas Comuns</h2>
+
+      <p class="section-body">
+        Cada métrica mede uma dimensão diferente da qualidade. Um sistema de prod geralmente
+        monitora várias em paralelo.
+      </p>
+
+      <div class="metrics-grid" id="metrics-grid">
+        <!-- Preenchido pelo JS -->
+      </div>
+
+      <div class="callout yellow">
+        <strong>Dica prática:</strong> não tente medir tudo ao mesmo tempo. Comece com as 2–3 métricas
+        mais críticas para o seu caso de uso. Para um chatbot de suporte: relevância + completude + tom.
+        Para um gerador de código: acurácia + execução sem erros.
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         SEÇÃO 4 — EXERCÍCIO PRINCIPAL
+    ══════════════════════════════════════════ -->
+    <section class="section">
+      <div class="section-label">Seção 4 · Exercício Principal</div>
+      <h2 class="section-title">Monte um Eval</h2>
+
+      <p class="section-body">
+        Você gerencia um assistente de suporte ao cliente. Avalie as 5 respostas abaixo.
+        Para cada uma: dê uma nota de 1 a 5, marque os critérios e escreva um feedback opcional.
+      </p>
+
+      <div class="callout purple">
+        <strong>Objetivo:</strong> Ao final você verá sua avaliação comparada com a de um especialista —
+        e entenderá como isso seria automatizado em produção.
+      </div>
+
+      <div id="eval-cases">
+        <!-- Preenchido pelo JS -->
+      </div>
+
+      <div class="submit-wrap">
+        <button class="btn-primary" id="btn-submit-eval" onclick="submitEval()" disabled>
+          Ver Resultado da Avaliação →
+        </button>
+        <div class="progress-msg" id="eval-progress-msg">0 de 5 respostas avaliadas</div>
+      </div>
+
+      <div class="results-panel" id="eval-results">
+        <h3 class="section-title">Comparação com o Especialista</h3>
+        <div id="results-rows"></div>
+
+        <div class="callout blue" style="margin-top:20px">
+          <strong>Em produção, um LLM-as-Judge faria isso automaticamente 24/7.</strong><br>
+          Você definiria os critérios uma vez (como fez acima), e o modelo avaliador processaria
+          cada nova resposta — gerando dashboards, alertas e comparações de prompt em segundos.
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         SEÇÃO 5 — O CICLO EVAL → MELHORIA
+    ══════════════════════════════════════════ -->
+    <section class="section">
+      <div class="section-label">Seção 5</div>
+      <h2 class="section-title">O Ciclo Eval → Melhoria</h2>
+
+      <p class="section-body">
+        Eval não é um evento único — é um ciclo contínuo idêntico ao TDD (Test-Driven Development).
+      </p>
+
+      <div class="flowchart">
+        <div class="flow-node accent">Criar prompts<br>/ agentes</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Testar com<br>eval dataset</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Medir<br>métricas</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-branch">
+          <div class="flow-branch-item">
+            <div class="flow-node good" style="font-size:11px;padding:8px 12px">✓ Bom o suficiente?<br>Deploy + monitorar</div>
+          </div>
+          <div class="flow-branch-item">
+            <div class="flow-node" style="font-size:11px;padding:8px 12px">✗ Não? Ajustar<br>→ reiniciar ciclo</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">TDD vs. Eval — são a mesma ideia</div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:6px">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--blue-light);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em">TDD (código)</div>
+              <div style="font-size:12px;color:var(--text-secondary);line-height:1.8">
+                1. Escreve o teste<br>
+                2. Escreve o código<br>
+                3. Roda os testes<br>
+                4. Corrige falhas<br>
+                5. Repete
+              </div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--purple-light);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em">Eval (IA)</div>
+              <div style="font-size:12px;color:var(--text-secondary);line-height:1.8">
+                1. Escreve os casos de eval<br>
+                2. Escreve o prompt<br>
+                3. Roda os evals<br>
+                4. Corrige regressões<br>
+                5. Repete
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="section-body" style="margin-top:16px">
+        A grande diferença: em TDD o teste <strong>passa ou falha</strong> (binário). Em eval,
+        o resultado é uma <strong>pontuação ou distribuição</strong> — e você define o limiar
+        aceitável para o seu contexto.
+      </p>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         SEÇÃO 6 — FERRAMENTAS
+    ══════════════════════════════════════════ -->
+    <section class="section">
+      <div class="section-label">Seção 6</div>
+      <h2 class="section-title">Ferramentas de Eval</h2>
+
+      <p class="section-body">
+        Você não precisa construir tudo do zero. Escolha a ferramenta certa para o seu estágio.
+      </p>
+
+      <div class="tools-grid">
+        <div class="tool-card">
+          <div class="tool-name">Promptfoo</div>
+          <span class="tool-tag oss">Open Source</span>
+          <div class="tool-desc">
+            Focado em devs. CLI-based, fácil de integrar ao CI/CD.
+            Ideal para testar prompts contra datasets locais com múltiplos modelos.
+          </div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">Braintrust</div>
+          <span class="tool-tag cloud">Cloud</span>
+          <div class="tool-desc">
+            Plataforma completa: logging, experimentação, comparação de versões de prompt.
+            Boa para times que precisam de visibilidade compartilhada.
+          </div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">LangSmith</div>
+          <span class="tool-tag cloud">Cloud</span>
+          <div class="tool-desc">
+            Do ecossistema LangChain. Excelente para tracing de agentes complexos —
+            você vê cada passo, tool call e decisão do agente.
+          </div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">Scripts customizados</div>
+          <span class="tool-tag custom">Custom</span>
+          <div class="tool-desc">
+            Às vezes um script Python com assertions e um CSV de casos de teste
+            é tudo que você precisa. Não superengenheire antes de ter a necessidade.
+          </div>
+        </div>
+      </div>
+
+      <div class="callout yellow">
+        <strong>Regra prática:</strong> comece com scripts simples. Quando você tiver mais de
+        50 casos de teste e múltiplos membros do time avaliando, considere uma plataforma dedicada.
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ══════════════════════════════════════════
+         SEÇÃO 7 — QUIZ FINAL
+    ══════════════════════════════════════════ -->
+    <section class="section">
+      <div class="section-label">Seção 7 · Quiz Final</div>
+      <h2 class="section-title">Teste seus Conhecimentos</h2>
+
+      <p class="section-body">
+        5 perguntas para consolidar o que você aprendeu neste módulo.
+      </p>
+
+      <div id="quiz-container">
+        <!-- Preenchido pelo JS -->
+      </div>
+
+      <div class="submit-wrap" id="quiz-submit-wrap" style="display:none">
+        <button class="btn-primary" id="btn-submit-quiz" onclick="submitQuiz()">
+          Ver Resultado Final →
+        </button>
+      </div>
+
+      <div id="quiz-score-panel" style="display:none">
+        <!-- Resultado do quiz -->
+      </div>
+    </section>
+
+  </div><!-- /.page -->
+
+  <!-- ══════════════════════════════════════════
+       TELA DE CELEBRAÇÃO
+  ══════════════════════════════════════════ -->
+  <div id="celebration">
+    <div id="confetti-container"></div>
+    <div class="celebrate-content">
+      <span class="celebrate-emoji">🎉</span>
+      <div class="celebrate-title">Treinamento Completo!</div>
+      <div class="celebrate-sub">Você completou todos os 6 módulos de IA para Devs</div>
+
+      <div class="certificate">
+        <div class="cert-label">Certificado de Conclusão</div>
+        <div class="cert-title">IA para Devs</div>
+        <div class="cert-subtitle">Treinamento Interativo — Fundamentos ao Deploy</div>
+        <div class="cert-modules" id="cert-modules"></div>
+        <div class="cert-date" id="cert-date"></div>
+      </div>
+
+      <a href="../index.html" class="btn-hub">
+        🏠 Voltar ao Hub
+      </a>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+
+    /* ════════════════════════════════════
+       SEÇÃO 1 — Pick exercise
+    ════════════════════════════════════ */
+    function pickResponse(choice) {
+      const container = document.getElementById('pick-container');
+      const optA = document.getElementById('pick-a');
+      const optB = document.getElementById('pick-b');
+
+      optA.onclick = null;
+      optB.onclick = null;
+
+      if (choice === 'a') {
+        optA.classList.add('correct');
+        optB.classList.add('wrong');
+        optA.innerHTML += '<span class="pick-badge correct">Melhor ✓</span>';
+        optB.innerHTML += '<span class="pick-badge wrong">Genérica ✗</span>';
+        document.getElementById('pick-feedback-correct').classList.add('show');
+        document.getElementById('pick-feedback-correct').classList.add('success');
+        document.getElementById('pick-feedback-correct').style.display = 'block';
+      } else {
+        optA.classList.add('correct');
+        optB.classList.add('wrong');
+        optA.innerHTML += '<span class="pick-badge correct">Melhor ✓</span>';
+        optB.innerHTML += '<span class="pick-badge wrong">Genérica ✗</span>';
+        document.getElementById('pick-feedback-wrong').classList.add('show');
+        document.getElementById('pick-feedback-wrong').classList.add('error');
+        document.getElementById('pick-feedback-wrong').style.display = 'block';
+      }
+    }
+
+    /* ════════════════════════════════════
+       SEÇÃO 3 — Metrics grid
+    ════════════════════════════════════ */
+    const METRICS = [
+      {
+        name: 'Acurácia',
+        desc: 'A resposta está factualmente correta? Ideal para perguntas com resposta definida.',
+        pct: 92,
+        color: '#10b981'
+      },
+      {
+        name: 'Relevância',
+        desc: 'A resposta responde o que foi perguntado? Ou é off-topic?',
+        pct: 88,
+        color: '#3b82f6'
+      },
+      {
+        name: 'Completude',
+        desc: 'Cobriu todos os aspectos necessários da pergunta?',
+        pct: 74,
+        color: '#8b5cf6'
+      },
+      {
+        name: 'Concisão',
+        desc: 'Foi apropriadamente breve? Três parágrafos quando dois parágrafos resolveriam.',
+        pct: 65,
+        color: '#f59e0b'
+      },
+      {
+        name: 'Toxicidade',
+        desc: 'A resposta é segura e apropriada? Crucial para produtos expostos ao público.',
+        pct: 98,
+        color: '#10b981'
+      },
+      {
+        name: 'Groundedness',
+        desc: 'A resposta se baseia nas fontes fornecidas? Ou está alucinando informações?',
+        pct: 81,
+        color: '#60a5fa'
+      }
+    ];
+
+    const metricsGrid = document.getElementById('metrics-grid');
+    METRICS.forEach(m => {
+      const card = document.createElement('div');
+      card.className = 'metric-card';
+      card.innerHTML = `
+        <div class="metric-name">${m.name}</div>
+        <div class="metric-desc">${m.desc}</div>
+        <div class="gauge-wrap">
+          <div class="gauge-track">
+            <div class="gauge-fill" style="width:0%;background:${m.color}" data-target="${m.pct}"></div>
+          </div>
+          <span class="gauge-val">${m.pct}%</span>
+        </div>
+      `;
+      metricsGrid.appendChild(card);
+    });
+
+    /* Animate gauges on scroll */
+    const gaugeObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.querySelectorAll('.gauge-fill').forEach(fill => {
+            const target = fill.getAttribute('data-target');
+            setTimeout(() => { fill.style.width = target + '%'; }, 100);
+          });
+          gaugeObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    gaugeObserver.observe(metricsGrid);
+
+    /* ════════════════════════════════════
+       SEÇÃO 4 — Eval builder
+    ════════════════════════════════════ */
+    const EVAL_CASES = [
+      {
+        id: 1,
+        question: 'Qual é o prazo de devolução dos produtos?',
+        response: 'Olá! Nosso prazo de devolução é de 30 dias corridos a partir da data de recebimento. Para iniciar a devolução, acesse "Meus Pedidos" no site, selecione o item e clique em "Solicitar Devolução". Você receberá uma etiqueta de postagem por email em até 2 horas. O reembolso é processado em até 5 dias úteis após recebermos o produto. Posso ajudar com mais alguma coisa?',
+        type: 'perfect',
+        expertScore: 5,
+        expertCriteria: ['accurate','relevant','complete','polite','concise'],
+        insight: {
+          type: 'perfect',
+          text: '✨ Resposta perfeita — específica, completa, polida e com próximos passos claros. Exatamente o padrão que queremos automatizar.'
+        }
+      },
+      {
+        id: 2,
+        question: 'Como troco a senha da minha conta?',
+        response: 'Claro! Primeiro, vou explicar um pouco sobre a importância de ter uma senha forte. Senhas devem ter pelo menos 8 caracteres, incluindo letras maiúsculas, minúsculas, números e símbolos. Evite usar datas de aniversário ou sequências óbvias como "12345". Dito isso, para trocar sua senha siga este processo: Acesse o site da nossa loja. No canto superior direito, clique no ícone da sua conta. Selecione a opção "Configurações da Conta". Vá até a seção "Segurança". Clique em "Alterar Senha". Digite sua senha atual e depois sua nova senha duas vezes. Clique em "Salvar". Pronto! Sua senha foi alterada com sucesso. Se tiver dificuldades, entre em contato conosco.',
+        type: 'verbose',
+        expertScore: 3,
+        expertCriteria: ['accurate','relevant','complete','polite'],
+        insight: {
+          type: 'missed',
+          text: '📝 Correta mas verbosa. O parágrafo inteiro sobre "como criar senhas fortes" não foi pedido. Em suporte, brevidade é respeito pelo tempo do cliente. Score ideal: 3/5.'
+        }
+      },
+      {
+        id: 3,
+        question: 'Vocês vendem na Amazon?',
+        response: 'Sim! Nossos produtos estão disponíveis na Amazon com entrega Prime em 1 dia para a maioria das regiões. Inclusive, temos uma promoção ativa lá com 20% de desconto para compras acima de R$150, válida até o final do mês.',
+        type: 'hallucination',
+        expertScore: 1,
+        expertCriteria: ['polite'],
+        insight: {
+          type: 'caught',
+          text: '⚠️ ALUCINAÇÃO — Esta resposta inventa informações que não existem na base de conhecimento (desconto de 20%, prazo Prime). Isso é o problema mais grave em IA de suporte. Score: 1/5.'
+        }
+      },
+      {
+        id: 4,
+        question: 'Meu pedido está com status "Em separação" há 3 dias. É normal?',
+        response: 'O status "Em separação" indica que nosso time está preparando os itens do seu pedido no estoque. Nosso armazém opera de segunda a sexta das 8h às 18h. Em períodos de alta demanda como Black Friday e Natal, os prazos podem ser maiores.',
+        type: 'offtopic',
+        expertScore: 2,
+        expertCriteria: ['accurate','polite'],
+        insight: {
+          type: 'missed',
+          text: '🎯 Tecnicamente correta, mas não responde a pergunta. O cliente quer saber SE 3 dias é normal para o caso dele, não como funciona o processo. Falta relevância direta. Score: 2/5.'
+        }
+      },
+      {
+        id: 5,
+        question: 'Recebi um produto diferente do que pedi.',
+        response: 'Erro de separação. Abra um ticket em suporte.empresa.com/ticket com a foto do produto errado e o número do pedido. Processamos em D+1.',
+        type: 'rude',
+        expertScore: 2,
+        expertCriteria: ['accurate','relevant','complete','concise'],
+        insight: {
+          type: 'missed',
+          text: '😬 As informações estão corretas, mas o tom é inadequado para suporte ao cliente. Sem empatia, sem desculpas pelo erro da empresa. A informação certa no tom errado ainda é uma experiência ruim. Score: 2/5.'
+        }
+      }
+    ];
+
+    const CRITERIA_LABELS = {
+      accurate: 'Correto',
+      relevant: 'Relevante',
+      complete: 'Completo',
+      polite:   'Educado',
+      concise:  'Conciso'
+    };
+
+    const evalScores    = {};
+    const evalCriteria  = {};
+    let evalRatedCount  = 0;
+
+    function buildEvalCases() {
+      const container = document.getElementById('eval-cases');
+
+      EVAL_CASES.forEach(ec => {
+        evalScores[ec.id]   = 0;
+        evalCriteria[ec.id] = [];
+
+        const el = document.createElement('div');
+        el.className = 'eval-case';
+        el.id = 'eval-case-' + ec.id;
+
+        el.innerHTML = `
+          <div class="eval-case-header">
+            <div>
+              <div class="eval-case-num">Caso ${ec.id} de ${EVAL_CASES.length}</div>
+            </div>
+          </div>
+          <div class="eval-question">Pergunta do cliente: "${ec.question}"</div>
+          <div class="eval-response">${ec.response}</div>
+          <div class="eval-controls">
+            <div>
+              <div class="stars-label">Nota (1–5)</div>
+              <div class="stars" id="stars-${ec.id}">
+                ${[1,2,3,4,5].map(i =>
+                  `<span class="star" data-case="${ec.id}" data-val="${i}" onclick="setStar(${ec.id},${i})">★</span>`
+                ).join('')}
+              </div>
+            </div>
+            <div class="criteria-wrap">
+              <div class="criteria-label">Critérios que passa</div>
+              <div class="criteria-list" id="criteria-${ec.id}">
+                ${Object.entries(CRITERIA_LABELS).map(([key, label]) => `
+                  <label class="criteria-chip" id="chip-${ec.id}-${key}" onclick="toggleCriteria(${ec.id},'${key}',this)">
+                    <input type="checkbox" />
+                    ${label}
+                  </label>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+          <textarea class="feedback-input" id="feedback-${ec.id}"
+            placeholder="Feedback opcional (ex: 'Alucinação detectada na linha 2')"></textarea>
+        `;
+
+        container.appendChild(el);
+      });
+    }
+
+    function setStar(caseId, val) {
+      const wasRated = evalScores[caseId] > 0;
+      evalScores[caseId] = val;
+
+      const stars = document.querySelectorAll(`#stars-${caseId} .star`);
+      stars.forEach(s => {
+        const sv = parseInt(s.getAttribute('data-val'));
+        s.classList.toggle('active', sv <= val);
+      });
+
+      document.getElementById('eval-case-' + caseId).classList.add('rated');
+
+      if (!wasRated) {
+        evalRatedCount++;
+        updateEvalProgress();
+      }
+    }
+
+    function toggleCriteria(caseId, key, el) {
+      const idx = evalCriteria[caseId].indexOf(key);
+      if (idx === -1) {
+        evalCriteria[caseId].push(key);
+        el.classList.add('checked');
+      } else {
+        evalCriteria[caseId].splice(idx, 1);
+        el.classList.remove('checked');
+      }
+    }
+
+    function updateEvalProgress() {
+      const msg = document.getElementById('eval-progress-msg');
+      msg.textContent = `${evalRatedCount} de ${EVAL_CASES.length} respostas avaliadas`;
+      document.getElementById('btn-submit-eval').disabled = evalRatedCount < EVAL_CASES.length;
+    }
+
+    function submitEval() {
+      const resultsPanel = document.getElementById('eval-results');
+      const resultsRows  = document.getElementById('results-rows');
+      resultsRows.innerHTML = '';
+
+      EVAL_CASES.forEach(ec => {
+        const userScore    = evalScores[ec.id] || 0;
+        const userCriteria = evalCriteria[ec.id] || [];
+        const expertScore  = ec.expertScore;
+
+        const row = document.createElement('div');
+        row.innerHTML = `
+          <div class="result-row">
+            <div>
+              <div class="result-label">Caso ${ec.id}: "${ec.question.substring(0,45)}..."</div>
+              <div class="result-sub">Tipo: ${getTypeName(ec.type)}</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:3px;text-align:center">Sua nota</div>
+              <span class="score-pill user">${'★'.repeat(userScore)}${'☆'.repeat(5-userScore)}</span>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:3px;text-align:center">Expert</div>
+              <span class="score-pill expert">${'★'.repeat(expertScore)}${'☆'.repeat(5-expertScore)}</span>
+            </div>
+            <div class="result-insight ${ec.insight.type}">
+              ${ec.insight.text}
+            </div>
+          </div>
+        `;
+        resultsRows.appendChild(row);
+      });
+
+      resultsPanel.classList.add('show');
+      resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function getTypeName(type) {
+      const names = {
+        perfect:      '✓ Resposta perfeita',
+        verbose:      '📄 Correta porém verbosa',
+        hallucination:'⚠️ Alucinação',
+        offtopic:     '🎯 Off-topic',
+        rude:         '😬 Tom inadequado'
+      };
+      return names[type] || type;
+    }
+
+    /* ════════════════════════════════════
+       SEÇÃO 7 — Quiz
+    ════════════════════════════════════ */
+    const QUIZ = [
+      {
+        id: 1,
+        q: 'Você mudou um prompt e quer saber se melhorou. Qual é a abordagem mais escalável para avaliar 10.000 respostas por dia?',
+        opts: [
+          'Avaliação manual por membros do time',
+          'LLM-as-a-Judge com um modelo forte avaliando as respostas',
+          'Não avaliar — se não receber reclamações, está bom',
+          'Olhar amostras aleatórias uma vez por semana'
+        ],
+        correct: 1,
+        explain: 'LLM-as-Judge é a única abordagem que escala para 10k/dia com qualidade. Avaliação manual não escala, e monitoramento passivo (esperar reclamações) é reativo demais.'
+      },
+      {
+        id: 2,
+        q: 'Uma resposta de IA afirma que "nossos produtos têm garantia de 5 anos" — informação que não existe na base de conhecimento. Qual métrica isso viola principalmente?',
+        opts: [
+          'Concisão',
+          'Toxicidade',
+          'Groundedness (fundamentação nas fontes)',
+          'Relevância'
+        ],
+        correct: 2,
+        explain: 'Groundedness mede se a resposta se baseia nas fontes fornecidas. Quando a IA inventa informação não presente no contexto, está alucinando — violação direta dessa métrica.'
+      },
+      {
+        id: 3,
+        q: 'Qual a maior diferença entre eval de IA e testes unitários tradicionais (TDD)?',
+        opts: [
+          'Testes unitários são mais lentos de executar',
+          'Evals não precisam de casos de teste definidos antecipadamente',
+          'Em TDD o resultado é binário (passa/falha); em eval é uma pontuação ou distribuição',
+          'Evals só funcionam com modelos pagos'
+        ],
+        correct: 2,
+        explain: 'A diferença fundamental: testes de código são determinísticos (passa ou falha). Evals de IA são probabilísticos — medem uma pontuação em um espectro, e você define um limiar aceitável para o seu contexto.'
+      },
+      {
+        id: 4,
+        q: 'Você está no início do desenvolvimento de um novo agente de suporte. Qual tipo de avaliação faz mais sentido como primeiro passo?',
+        opts: [
+          'LLM-as-Judge em produção com tráfego real',
+          'Avaliação humana em um dataset pequeno de edge cases',
+          'Scripts de heurística para validar o JSON de saída',
+          'Deploy imediato e monitorar reclamações'
+        ],
+        correct: 1,
+        explain: 'No início do desenvolvimento, avaliação humana em um dataset pequeno é a escolha certa. Ela captura nuances, identifica comportamentos inesperados e calibra o que "bom" significa — base para automatizar depois.'
+      },
+      {
+        id: 5,
+        q: 'Uma resposta de suporte está 100% correta, mas usa 5 parágrafos quando 2 sentenças resolveriam. Qual é o score mais correto para a métrica de Concisão?',
+        opts: [
+          '5/5 — a informação está correta',
+          '1/5 — está completamente errada',
+          'Baixo (ex: 2/5) — é muito verbosa para o contexto',
+          'Concisão não se aplica a suporte ao cliente'
+        ],
+        correct: 2,
+        explain: 'Concisão mede se a resposta foi apropriadamente breve para o contexto. Uma resposta verbosa tem alto custo de tempo para o cliente e pode até reduzir a confiança — mesmo sendo factualmente correta.'
+      }
+    ];
+
+    const quizAnswers  = {};
+    let quizSubmitted  = false;
+
+    function buildQuiz() {
+      const container = document.getElementById('quiz-container');
+      QUIZ.forEach(q => {
+        const el = document.createElement('div');
+        el.className = 'quiz-question';
+        el.id = 'quiz-q-' + q.id;
+
+        el.innerHTML = `
+          <div class="quiz-q-num">Questão ${q.id} de ${QUIZ.length}</div>
+          <div class="quiz-q-text">${q.q}</div>
+          <div class="quiz-options">
+            ${q.opts.map((opt, i) => `
+              <button class="quiz-opt" data-qid="${q.id}" data-idx="${i}" onclick="selectOpt(${q.id},${i})">
+                <span style="flex-shrink:0;font-weight:700;color:var(--text-muted)">${String.fromCharCode(65+i)}.</span>
+                ${opt}
+              </button>
+            `).join('')}
+          </div>
+          <div class="quiz-explain" id="quiz-explain-${q.id}"></div>
+        `;
+        container.appendChild(el);
+      });
+
+      document.getElementById('quiz-submit-wrap').style.display = 'block';
+    }
+
+    function selectOpt(qid, idx) {
+      if (quizSubmitted) return;
+
+      quizAnswers[qid] = idx;
+
+      document.querySelectorAll(`[data-qid="${qid}"]`).forEach(btn => {
+        btn.classList.remove('selected');
+      });
+
+      const btn = document.querySelector(`[data-qid="${qid}"][data-idx="${idx}"]`);
+      if (btn) btn.classList.add('selected');
+
+      const answered = Object.keys(quizAnswers).length;
+      const submitBtn = document.getElementById('btn-submit-quiz');
+      if (answered === QUIZ.length) {
+        submitBtn.textContent = 'Ver Resultado Final →';
+      }
+    }
+
+    function submitQuiz() {
+      if (quizSubmitted) return;
+
+      const unanswered = QUIZ.filter(q => quizAnswers[q.id] === undefined);
+      if (unanswered.length > 0) {
+        alert(`Responda todas as ${QUIZ.length} questões antes de continuar.`);
+        return;
+      }
+
+      quizSubmitted = true;
+      document.getElementById('quiz-submit-wrap').style.display = 'none';
+
+      let correct = 0;
+
+      QUIZ.forEach(q => {
+        const userIdx = quizAnswers[q.id];
+        const isCorrect = userIdx === q.correct;
+        if (isCorrect) correct++;
+
+        document.querySelectorAll(`[data-qid="${q.id}"]`).forEach(btn => {
+          btn.disabled = true;
+          const idx = parseInt(btn.getAttribute('data-idx'));
+          if (idx === q.correct) {
+            btn.classList.remove('selected');
+            btn.classList.add('correct');
+          } else if (idx === userIdx && !isCorrect) {
+            btn.classList.remove('selected');
+            btn.classList.add('incorrect');
+          }
+        });
+
+        const explainEl = document.getElementById('quiz-explain-' + q.id);
+        explainEl.textContent = (isCorrect ? '✓ Correto! ' : '✗ Incorreto. ') + q.explain;
+        explainEl.className = 'quiz-explain show ' + (isCorrect ? 'ok' : 'err');
+      });
+
+      const scorePanel = document.getElementById('quiz-score-panel');
+      const passed = correct >= 4;
+
+      scorePanel.style.display = 'block';
+      scorePanel.innerHTML = `
+        <div class="card" style="text-align:center;padding:28px">
+          <div style="font-size:44px;margin-bottom:12px">${passed ? '🎯' : '📚'}</div>
+          <div style="font-size:22px;font-weight:800;color:${passed ? 'var(--green-light)' : 'var(--yellow)'};margin-bottom:8px">
+            ${correct} / ${QUIZ.length} corretas
+          </div>
+          <div style="font-size:14px;color:var(--text-secondary);margin-bottom:20px">
+            ${passed
+              ? 'Excelente! Você demonstrou domínio sólido sobre avaliação de IA.'
+              : 'Quase lá! Revise as questões erradas e tente novamente.'}
+          </div>
+          ${passed
+            ? `<button class="btn-primary" onclick="showCelebration()" style="margin:0 auto">
+                 🎉 Ver Certificado →
+               </button>`
+            : `<button class="btn-primary" onclick="retryQuiz()" style="margin:0 auto;background:linear-gradient(135deg,var(--yellow),#d97706)">
+                 Tentar Novamente
+               </button>`
+          }
+        </div>
+      `;
+
+      scorePanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      if (passed) markModuleComplete();
+    }
+
+    function retryQuiz() {
+      quizSubmitted = false;
+      Object.keys(quizAnswers).forEach(k => delete quizAnswers[k]);
+
+      document.querySelectorAll('.quiz-opt').forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('selected','correct','incorrect');
+      });
+
+      document.querySelectorAll('.quiz-explain').forEach(el => {
+        el.classList.remove('show','ok','err');
+      });
+
+      document.getElementById('quiz-score-panel').style.display = 'none';
+      document.getElementById('quiz-submit-wrap').style.display = 'block';
+      document.getElementById('btn-submit-quiz').textContent = 'Ver Resultado Final →';
+
+      document.getElementById('quiz-container').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    /* ════════════════════════════════════
+       PROGRESSO + CERTIFICADO
+    ════════════════════════════════════ */
+    const STORAGE_KEY = 'ai-training-completed-v1';
+    const ALL_MODULES = [
+      { id:1, name:'Fundamentos de IA Generativa' },
+      { id:2, name:'Prompt Engineering' },
+      { id:3, name:'Context Engineering' },
+      { id:4, name:'Agentes de IA' },
+      { id:5, name:'RAG & Tools' },
+      { id:6, name:'Avaliação (Eval)' }
+    ];
+
+    function getCompleted() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+      catch { return []; }
+    }
+
+    function markModuleComplete() {
+      const completed = getCompleted();
+      if (!completed.includes(6)) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify([...completed, 6]));
+      }
+    }
+
+    function showCelebration() {
+      markModuleComplete();
+      const completed = getCompleted();
+
+      /* Build cert modules */
+      const certModules = document.getElementById('cert-modules');
+      certModules.innerHTML = '';
+      ALL_MODULES.forEach(m => {
+        const chip = document.createElement('div');
+        chip.className = 'cert-mod';
+        const isDone = completed.includes(m.id);
+        chip.textContent = (isDone ? '✓ ' : '○ ') + 'M0' + m.id + ' ' + m.name;
+        if (!isDone) {
+          chip.style.background = 'rgba(51,65,85,0.5)';
+          chip.style.color = 'var(--text-muted)';
+          chip.style.borderColor = 'var(--border)';
+        }
+        certModules.appendChild(chip);
+      });
+
+      /* Date */
+      const now = new Date();
+      document.getElementById('cert-date').textContent =
+        'Emitido em ' + now.toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
+
+      /* Show screen */
+      const cel = document.getElementById('celebration');
+      cel.classList.add('show');
+
+      /* Confetti */
+      spawnConfetti();
+    }
+
+    /* ════════════════════════════════════
+       CONFETTI
+    ════════════════════════════════════ */
+    const CONFETTI_COLORS = [
+      '#8b5cf6','#a78bfa','#3b82f6','#60a5fa',
+      '#10b981','#34d399','#f59e0b','#fbbf24',
+      '#ef4444','#f87171','#ec4899','#f9a8d4'
+    ];
+
+    function spawnConfetti() {
+      const container = document.getElementById('confetti-container');
+      container.innerHTML = '';
+
+      const count = 120;
+      for (let i = 0; i < count; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+
+        const size   = 6 + Math.random() * 8;
+        const color  = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+        const left   = Math.random() * 100;
+        const delay  = Math.random() * 4;
+        const dur    = 3 + Math.random() * 4;
+        const shape  = Math.random() > 0.5 ? '50%' : '2px';
+
+        piece.style.cssText = `
+          width: ${size}px;
+          height: ${size}px;
+          background: ${color};
+          left: ${left}%;
+          animation-delay: ${delay}s;
+          animation-duration: ${dur}s;
+          border-radius: ${shape};
+          animation-name: confetti-fall, confetti-sway;
+          animation-timing-function: linear, ease-in-out;
+          animation-iteration-count: infinite;
+        `;
+
+        container.appendChild(piece);
+      }
+    }
+
+    /* ════════════════════════════════════
+       INIT
+    ════════════════════════════════════ */
+    buildEvalCases();
+    buildQuiz();
+
+  </script>
+</body>
+</html>

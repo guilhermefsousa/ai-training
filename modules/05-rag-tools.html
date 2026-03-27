@@ -1,0 +1,1770 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Módulo 5 — RAG & Tools | AI Training</title>
+<style>
+  /* ─── Reset & Base ─── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:          #0b0d1a;
+    --bg2:         #10142a;
+    --bg3:         #161c3a;
+    --surface:     #1c2245;
+    --surface2:    #222b55;
+    --border:      rgba(100, 120, 255, 0.18);
+    --border2:     rgba(100, 120, 255, 0.35);
+    --primary:     #7c6dff;
+    --primary-lt:  #a89dff;
+    --accent:      #3ecfff;
+    --accent2:     #00e5b0;
+    --warn:        #ffb347;
+    --text:        #e8eaf6;
+    --text-muted:  #7b83b8;
+    --text-dim:    #4a527a;
+    --success:     #4ade80;
+    --radius:      12px;
+    --radius-sm:   8px;
+    --shadow:      0 4px 32px rgba(0,0,0,.45);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    min-height: 100vh;
+  }
+
+  /* ─── Progress Bar ─── */
+  #progress-bar {
+    position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 1000;
+    background: rgba(255,255,255,.06);
+  }
+  #progress-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    transition: width .3s ease;
+  }
+
+  /* ─── Nav ─── */
+  nav {
+    position: sticky; top: 0; z-index: 900;
+    background: rgba(11,13,26,.88);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 56px;
+  }
+  .nav-brand { display: flex; align-items: center; gap: 10px; }
+  .nav-badge {
+    font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .nav-title { font-size: 14px; color: var(--text-muted); }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .nav-back {
+    font-size: 13px; color: var(--text-muted); text-decoration: none;
+    display: flex; align-items: center; gap: 6px;
+    transition: color .2s;
+  }
+  .nav-back:hover { color: var(--primary-lt); }
+
+  /* Section dots */
+  .section-dots { display: flex; gap: 6px; align-items: center; }
+  .s-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--surface2); cursor: pointer;
+    transition: all .25s; border: 1px solid var(--border);
+  }
+  .s-dot.active { background: var(--primary); border-color: var(--primary); transform: scale(1.3); }
+  .s-dot.done   { background: var(--accent2); border-color: var(--accent2); }
+
+  /* ─── Hero ─── */
+  .hero {
+    text-align: center; padding: 80px 24px 64px;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124,109,255,.18) 0%, transparent 70%);
+    border-bottom: 1px solid var(--border);
+  }
+  .module-tag {
+    display: inline-block; font-size: 12px; font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--primary-lt); background: rgba(124,109,255,.14);
+    border: 1px solid rgba(124,109,255,.35); border-radius: 20px;
+    padding: 4px 14px; margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 52px); font-weight: 800;
+    line-height: 1.15; margin-bottom: 16px;
+    background: linear-gradient(135deg, #fff 20%, var(--primary-lt) 55%, var(--accent) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero p { font-size: 17px; color: var(--text-muted); max-width: 560px; margin: 0 auto 32px; }
+  .hero-meta { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
+  .hero-chip {
+    font-size: 13px; color: var(--text-muted);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .hero-chip span { color: var(--text); font-weight: 600; }
+
+  /* ─── Layout ─── */
+  .container { max-width: 920px; margin: 0 auto; padding: 0 24px; }
+
+  /* ─── Section ─── */
+  .section {
+    padding: 72px 0 48px;
+    border-bottom: 1px solid var(--border);
+    opacity: 0; transform: translateY(28px);
+    transition: opacity .5s ease, transform .5s ease;
+  }
+  .section.visible { opacity: 1; transform: none; }
+
+  .section-header { margin-bottom: 36px; }
+  .section-number {
+    font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--primary); margin-bottom: 8px;
+  }
+  .section-header h2 {
+    font-size: clamp(22px, 3.5vw, 34px); font-weight: 700; line-height: 1.25;
+  }
+  .section-header p { color: var(--text-muted); font-size: 16px; margin-top: 10px; max-width: 640px; }
+
+  /* ─── Cards ─── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+  }
+  .card-grid { display: grid; gap: 16px; }
+  .card-grid-2 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .card-grid-3 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+  /* ─── Approach Cards ─── */
+  .approach-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 22px;
+    position: relative; overflow: hidden;
+    transition: border-color .2s, transform .2s;
+  }
+  .approach-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .approach-card.recommended {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary), 0 8px 32px rgba(124,109,255,.2);
+  }
+  .approach-label {
+    font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .approach-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+  .approach-card p  { font-size: 14px; color: var(--text-muted); }
+  .rec-badge {
+    position: absolute; top: 16px; right: 16px;
+    font-size: 11px; font-weight: 700;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #fff; border-radius: 20px; padding: 3px 10px;
+  }
+  .tag-warning  { color: var(--warn); }
+  .tag-muted    { color: var(--text-muted); }
+  .tag-success  { color: var(--success); }
+
+  /* ─── Timeline ─── */
+  .timeline-wrap { display: flex; align-items: center; gap: 0; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 8px; }
+  .tl-item {
+    flex-shrink: 0; display: flex; flex-direction: column; align-items: center;
+    gap: 8px; min-width: 120px;
+  }
+  .tl-node {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .tl-label { font-size: 12px; color: var(--text-muted); text-align: center; max-width: 110px; }
+  .tl-connector {
+    flex: 1; height: 2px; background: var(--border2);
+    min-width: 24px; flex-shrink: 0; position: relative;
+  }
+  .tl-connector::after {
+    content: ''; position: absolute; right: -1px; top: -4px;
+    border: 5px solid transparent; border-left-color: var(--border2);
+  }
+
+  /* ─── RAG Steps ─── */
+  .rag-steps { display: flex; flex-direction: column; gap: 20px; }
+  .rag-step {
+    display: flex; align-items: flex-start; gap: 20px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 24px;
+    transition: border-color .3s;
+  }
+  .rag-step.active-step { border-color: var(--primary); }
+  .step-num {
+    width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800; color: #fff;
+  }
+  .step-content h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .step-content p  { font-size: 14px; color: var(--text-muted); }
+
+  /* ─── Embedding viz ─── */
+  #embed-canvas-wrap {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); position: relative; overflow: hidden;
+    height: 380px;
+  }
+  #embed-canvas { width: 100%; height: 100%; display: block; }
+  .embed-legend {
+    display: flex; gap: 20px; flex-wrap: wrap; margin-top: 12px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--text-muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ─── RAG Exercise ─── */
+  .rag-exercise {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px; margin-top: 24px;
+  }
+  .rag-exercise h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .rag-exercise > p { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+  .rag-search-row { display: flex; gap: 10px; margin-bottom: 20px; }
+  .rag-input {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px 14px;
+    font-size: 14px; color: var(--text); outline: none;
+    transition: border-color .2s;
+  }
+  .rag-input:focus { border-color: var(--primary); }
+  .rag-input::placeholder { color: var(--text-dim); }
+  .btn {
+    padding: 10px 20px; border-radius: var(--radius-sm); border: none; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: all .2s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), #5c4fdd);
+    color: #fff; box-shadow: 0 2px 12px rgba(124,109,255,.3);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(124,109,255,.45); }
+  .btn-secondary {
+    background: var(--surface2); color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--primary); }
+
+  .rag-output { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .rag-output { grid-template-columns: 1fr; } }
+  .rag-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; }
+  .rag-panel h4 { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
+  .doc-chip {
+    font-size: 13px; padding: 6px 10px; border-radius: 6px;
+    background: rgba(124,109,255,.12); border: 1px solid rgba(124,109,255,.25);
+    margin-bottom: 6px; color: var(--primary-lt);
+    opacity: 0; transform: translateX(-8px);
+    transition: opacity .3s, transform .3s;
+  }
+  .doc-chip.show { opacity: 1; transform: none; }
+  .ai-response {
+    font-size: 13px; color: var(--text); line-height: 1.6;
+    opacity: 0; transition: opacity .5s;
+  }
+  .ai-response.show { opacity: 1; }
+
+  /* ─── Embedding Section 3 ─── */
+  .word-math {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px; text-align: center;
+    font-size: 22px; font-weight: 700; letter-spacing: .02em;
+  }
+  .word-math .wm-row { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+  .wm-token {
+    padding: 8px 18px; border-radius: var(--radius-sm);
+    font-size: 18px; font-weight: 700;
+  }
+  .wm-token.k  { background: rgba(124,109,255,.18); color: var(--primary-lt); border: 1px solid rgba(124,109,255,.35); }
+  .wm-token.op { color: var(--text-muted); font-size: 22px; }
+  .wm-token.r  { background: rgba(62,207,255,.12); color: var(--accent); border: 1px solid rgba(62,207,255,.3); }
+  .wm-token.eq { color: var(--text-muted); font-size: 22px; }
+  .wm-token.q  { background: rgba(0,229,176,.12); color: var(--accent2); border: 1px solid rgba(0,229,176,.3); }
+  .wm-arrow { color: var(--text-dim); font-size: 18px; }
+
+  .sim-tool {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; margin-top: 24px;
+  }
+  .sim-tool h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+  .sim-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 540px) { .sim-row { grid-template-columns: 1fr; } }
+  .sim-score {
+    text-align: center; padding: 16px;
+    background: var(--surface); border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+  .sim-score-num {
+    font-size: 36px; font-weight: 800;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .sim-score-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .sim-bar { height: 6px; background: var(--surface2); border-radius: 3px; margin-top: 10px; overflow: hidden; }
+  .sim-bar-fill { height: 100%; border-radius: 3px; transition: width .6s ease; background: linear-gradient(90deg, var(--primary), var(--accent)); }
+
+  /* ─── Tools Section ─── */
+  .tools-hub {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    min-height: 340px; margin: 16px 0;
+  }
+  .hub-center {
+    position: relative; z-index: 2;
+    width: 100px; height: 100px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), #4a3cc9);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 12px rgba(124,109,255,.12), 0 0 0 24px rgba(124,109,255,.06);
+    font-size: 32px;
+  }
+  .hub-tools {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tool-node {
+    position: absolute; display: flex; flex-direction: column; align-items: center; gap: 6px;
+    cursor: default;
+  }
+  .tool-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: var(--surface2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; font-size: 22px;
+    transition: all .25s; box-shadow: var(--shadow);
+  }
+  .tool-icon:hover { transform: scale(1.1); border-color: var(--primary); }
+  .tool-label { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+  /* Position tools in a circle */
+  .tool-node:nth-child(1) { top: 10px;  left: 50%; transform: translateX(-50%); }
+  .tool-node:nth-child(2) { top: 24%;   right: 5%; }
+  .tool-node:nth-child(3) { bottom: 24%; right: 5%; }
+  .tool-node:nth-child(4) { bottom: 10px; left: 50%; transform: translateX(-50%); }
+  .tool-node:nth-child(5) { bottom: 24%; left: 5%; }
+  .tool-node:nth-child(6) { top: 24%;   left: 5%; }
+  .hub-ring {
+    position: absolute; border-radius: 50%; border: 1px dashed var(--border);
+    pointer-events: none;
+  }
+
+  /* Tools animation steps */
+  .tool-anim {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; margin-top: 24px;
+  }
+  .tool-anim h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+  .anim-steps { display: flex; flex-direction: column; gap: 0; }
+  .anim-step {
+    display: flex; align-items: flex-start; gap: 16px; padding: 14px 16px;
+    border-radius: var(--radius-sm); transition: all .3s;
+    border-left: 2px solid transparent;
+  }
+  .anim-step.highlight {
+    background: rgba(124,109,255,.1); border-left-color: var(--primary);
+  }
+  .anim-step-icon { font-size: 20px; width: 28px; flex-shrink: 0; text-align: center; padding-top: 2px; }
+  .anim-step-label { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+  .anim-step-label strong { color: var(--text); }
+  .anim-step-label code {
+    background: rgba(124,109,255,.15); color: var(--primary-lt);
+    padding: 1px 6px; border-radius: 4px; font-family: 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 12px;
+  }
+  .anim-controls { display: flex; gap: 10px; margin-top: 16px; align-items: center; }
+  .step-counter { font-size: 13px; color: var(--text-muted); }
+
+  /* ─── Key Insight Box ─── */
+  .insight-box {
+    border-radius: var(--radius); padding: 20px 24px;
+    display: flex; gap: 16px; align-items: flex-start; margin-top: 20px;
+  }
+  .insight-box.primary {
+    background: rgba(124,109,255,.1); border: 1px solid rgba(124,109,255,.3);
+  }
+  .insight-box.accent {
+    background: rgba(62,207,255,.08); border: 1px solid rgba(62,207,255,.25);
+  }
+  .insight-box.success {
+    background: rgba(74,222,128,.07); border: 1px solid rgba(74,222,128,.22);
+  }
+  .insight-icon { font-size: 22px; flex-shrink: 0; }
+  .insight-body h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .insight-body p  { font-size: 14px; color: var(--text-muted); }
+
+  /* ─── MCP ─── */
+  .mcp-analogy {
+    display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: center;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 560px) { .mcp-analogy { grid-template-columns: 1fr; } .mcp-vs { text-align: center; } }
+  .mcp-side {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; text-align: center;
+  }
+  .mcp-side .icon { font-size: 36px; margin-bottom: 10px; }
+  .mcp-side h4 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .mcp-side p  { font-size: 13px; color: var(--text-muted); }
+  .mcp-vs { font-size: 22px; color: var(--text-dim); font-weight: 700; text-align: center; }
+
+  .mcp-port {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; position: relative;
+  }
+  .mcp-label { text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+  .mcp-flows { display: flex; flex-direction: column; gap: 10px; }
+  .mcp-flow {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface); border-radius: var(--radius-sm);
+    padding: 12px 16px; border: 1px solid var(--border);
+  }
+  .mcp-flow-icon { font-size: 20px; flex-shrink: 0; }
+  .mcp-flow-name { font-size: 14px; font-weight: 600; }
+  .mcp-flow-arrow { flex: 1; text-align: right; color: var(--primary); font-weight: 700; font-size: 16px; }
+  .mcp-center-port {
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-radius: 50%; width: 64px; height: 64px; font-size: 26px;
+    margin: 16px auto; box-shadow: 0 0 0 8px rgba(124,109,255,.15);
+  }
+  .mcp-benefits { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 20px; }
+  .mcp-benefit {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 16px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .mcp-benefit-icon { font-size: 20px; flex-shrink: 0; }
+  .mcp-benefit h5 { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+  .mcp-benefit p  { font-size: 12px; color: var(--text-muted); }
+
+  /* ─── Decision Tree ─── */
+  .dtree {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px;
+    display: flex; flex-direction: column; align-items: center; gap: 0;
+  }
+  .dt-q {
+    background: var(--surface); border: 1px solid var(--primary);
+    border-radius: 28px; padding: 10px 22px; font-size: 14px;
+    font-weight: 600; text-align: center; max-width: 320px;
+    position: relative;
+  }
+  .dt-arrow { color: var(--text-dim); font-size: 18px; margin: 4px 0; text-align: center; }
+  .dt-row { display: flex; gap: 24px; align-items: flex-start; justify-content: center; width: 100%; }
+  .dt-branch { display: flex; flex-direction: column; align-items: center; gap: 4px; max-width: 160px; }
+  .dt-ans {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--text-muted);
+  }
+  .dt-result {
+    padding: 10px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700;
+    text-align: center;
+  }
+  .dt-result.context { background: rgba(62,207,255,.12); color: var(--accent); border: 1px solid rgba(62,207,255,.3); }
+  .dt-result.rag     { background: rgba(124,109,255,.14); color: var(--primary-lt); border: 1px solid rgba(124,109,255,.3); }
+  .dt-result.tools   { background: rgba(0,229,176,.1); color: var(--accent2); border: 1px solid rgba(0,229,176,.28); }
+  .dt-result.ft      { background: rgba(255,179,71,.1); color: var(--warn); border: 1px solid rgba(255,179,71,.28); }
+  @media (max-width: 600px) { .dt-row { flex-direction: column; align-items: center; gap: 12px; } }
+
+  /* ─── Exercise 2 ─── */
+  .scenario-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 24px; }
+  .scenario-card {
+    background: var(--surface); border: 2px solid var(--border);
+    border-radius: var(--radius); padding: 20px; cursor: pointer;
+    transition: all .25s; user-select: none;
+  }
+  .scenario-card.selected-rag    { border-color: var(--primary); background: rgba(124,109,255,.1); }
+  .scenario-card.selected-tools  { border-color: var(--accent2); background: rgba(0,229,176,.08); }
+  .scenario-card.selected-context{ border-color: var(--accent); background: rgba(62,207,255,.07); }
+  .scenario-card.selected-ft     { border-color: var(--warn); background: rgba(255,179,71,.07); }
+  .scenario-card.correct   { border-color: var(--success) !important; }
+  .scenario-card.incorrect { border-color: #f87171 !important; background: rgba(248,113,113,.07) !important; }
+  .scenario-icon { font-size: 28px; margin-bottom: 10px; }
+  .scenario-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .scenario-card p  { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+  .scenario-options { display: flex; gap: 6px; flex-wrap: wrap; }
+  .opt-btn {
+    font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px;
+    border: 1px solid var(--border2); cursor: pointer; transition: all .2s;
+    background: transparent; color: var(--text-muted);
+  }
+  .opt-btn:hover { color: var(--text); }
+  .opt-btn.opt-rag    { border-color: rgba(124,109,255,.5); }
+  .opt-btn.opt-tools  { border-color: rgba(0,229,176,.5); }
+  .opt-btn.opt-context{ border-color: rgba(62,207,255,.5); }
+  .opt-btn.opt-ft     { border-color: rgba(255,179,71,.5); }
+  .opt-btn.opt-rag.sel    { background: rgba(124,109,255,.2); color: var(--primary-lt); }
+  .opt-btn.opt-tools.sel  { background: rgba(0,229,176,.15); color: var(--accent2); }
+  .opt-btn.opt-context.sel{ background: rgba(62,207,255,.12); color: var(--accent); }
+  .opt-btn.opt-ft.sel     { background: rgba(255,179,71,.12); color: var(--warn); }
+  .scenario-feedback { font-size: 12px; margin-top: 10px; font-weight: 600; min-height: 18px; }
+  .scenario-feedback.ok  { color: var(--success); }
+  .scenario-feedback.err { color: #f87171; }
+
+  /* ─── Quiz ─── */
+  .quiz-wrap { margin-top: 8px; }
+  .quiz-q {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; margin-bottom: 16px;
+    transition: border-color .3s;
+  }
+  .quiz-q.answered-correct { border-color: var(--success); }
+  .quiz-q.answered-wrong   { border-color: #f87171; }
+  .quiz-q-num { font-size: 12px; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+  .quiz-q-text { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt {
+    padding: 11px 16px; border-radius: var(--radius-sm); cursor: pointer;
+    border: 1px solid var(--border2); font-size: 14px;
+    background: transparent; color: var(--text);
+    text-align: left; transition: all .2s;
+  }
+  .quiz-opt:hover:not([disabled]) { border-color: var(--primary); background: rgba(124,109,255,.08); }
+  .quiz-opt.correct  { border-color: var(--success); background: rgba(74,222,128,.1); color: var(--success); }
+  .quiz-opt.wrong    { border-color: #f87171; background: rgba(248,113,113,.1); color: #f87171; }
+  .quiz-opt[disabled]{ cursor: default; }
+  .quiz-feedback { font-size: 13px; margin-top: 12px; padding: 10px 14px; border-radius: var(--radius-sm); }
+  .quiz-feedback.correct { background: rgba(74,222,128,.1); color: var(--success); border: 1px solid rgba(74,222,128,.2); }
+  .quiz-feedback.wrong   { background: rgba(248,113,113,.1); color: #f87171; border: 1px solid rgba(248,113,113,.2); }
+  .quiz-score {
+    text-align: center; padding: 32px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    display: none; margin-top: 20px;
+  }
+  .quiz-score-num {
+    font-size: 56px; font-weight: 800;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .quiz-score p { font-size: 16px; color: var(--text-muted); margin-top: 8px; }
+  .complete-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 20px; padding: 12px 28px; border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--primary), #5a4fd8);
+    color: #fff; font-size: 15px; font-weight: 700; border: none; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(124,109,255,.35);
+    transition: all .25s;
+  }
+  .complete-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(124,109,255,.5); }
+  .complete-btn:disabled { opacity: .5; cursor: default; transform: none; }
+
+  /* ─── Footer Nav ─── */
+  .footer-nav {
+    padding: 40px 24px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    max-width: 920px; margin: 0 auto; flex-wrap: wrap; gap: 16px;
+  }
+  .fn-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border2); text-decoration: none;
+    font-size: 14px; font-weight: 600; color: var(--text-muted);
+    transition: all .2s; background: transparent;
+  }
+  .fn-btn:hover { border-color: var(--primary); color: var(--primary-lt); }
+  .fn-btn.next  {
+    background: linear-gradient(135deg, var(--primary), #5a4fd8);
+    color: #fff; border: none; box-shadow: 0 2px 16px rgba(124,109,255,.3);
+  }
+  .fn-btn.next:hover { transform: translateY(-1px); box-shadow: 0 4px 24px rgba(124,109,255,.45); }
+
+  /* ─── Utilities ─── */
+  .spacer { height: 16px; }
+  .text-muted { color: var(--text-muted); }
+  .text-accent { color: var(--accent); }
+  .text-primary { color: var(--primary-lt); }
+  .text-success { color: var(--success); }
+  .mt-4  { margin-top: 16px; }
+  .mt-6  { margin-top: 24px; }
+  .mt-8  { margin-top: 32px; }
+  .mb-4  { margin-bottom: 16px; }
+
+  /* Tooltip for canvas dots */
+  #tooltip {
+    position: fixed; z-index: 999; pointer-events: none;
+    background: var(--surface2); border: 1px solid var(--border2);
+    padding: 6px 12px; border-radius: 8px; font-size: 13px;
+    color: var(--text); opacity: 0; transition: opacity .15s;
+    max-width: 200px;
+  }
+
+  /* ─── Scrollbar ─── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"><div id="progress-fill"></div></div>
+<div id="tooltip"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <span class="nav-badge">Módulo 5</span>
+    <span class="nav-title">RAG &amp; Tools</span>
+  </div>
+  <div class="nav-right">
+    <div class="section-dots" id="section-dots"></div>
+    <a href="../index.html" class="nav-back">← Hub</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="module-tag">Módulo 5 · Avançado</div>
+  <h1>RAG &amp; Tools<br>Conectando IA ao Mundo Real</h1>
+  <p>Aprenda como dar memória, contexto e capacidade de ação para modelos de linguagem — sem re-treiná-los.</p>
+  <div class="hero-meta">
+    <div class="hero-chip">⏱ <span>~35 min</span></div>
+    <div class="hero-chip">🎯 <span>2 exercícios interativos</span></div>
+    <div class="hero-chip">📋 <span>Quiz de 5 questões</span></div>
+    <div class="hero-chip">⚙️ <span>Pré-req: Módulos 1–4</span></div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 1 — O Problema
+══════════════════════════════════════════════════════ -->
+<div class="section" id="sec-1" data-sec="1">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-number">Seção 1 / 7</div>
+      <h2>O Problema — IA Não Sabe Tudo</h2>
+      <p>LLMs são treinados em dados históricos. Eles não conhecem seus dados privados nem eventos recentes.</p>
+    </div>
+
+    <!-- Timeline visual -->
+    <div class="card mb-4">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;font-weight:600;text-transform:uppercase;letter-spacing:.08em">Linha do Tempo do Conhecimento</p>
+      <div class="timeline-wrap">
+        <div class="tl-item">
+          <div class="tl-node" style="background:rgba(124,109,255,.15);border:2px solid rgba(124,109,255,.4);">📚</div>
+          <div class="tl-label" style="color:var(--primary-lt);font-weight:600;">Dados de treino<br><span style="color:var(--text-dim);font-size:11px;">toda internet até X</span></div>
+        </div>
+        <div class="tl-connector"></div>
+        <div class="tl-item">
+          <div class="tl-node" style="background:rgba(62,207,255,.1);border:2px solid rgba(62,207,255,.4);">🤖</div>
+          <div class="tl-label" style="color:var(--accent);font-weight:600;">Modelo treinado<br><span style="color:var(--text-dim);font-size:11px;">conhecimento "congelado"</span></div>
+        </div>
+        <div class="tl-connector" style="background:var(--border);"></div>
+        <div class="tl-connector" style="background:var(--border);border-top:2px dashed var(--border2);height:0;"></div>
+        <div class="tl-item" style="opacity:.55;">
+          <div class="tl-node" style="background:rgba(255,179,71,.1);border:2px dashed rgba(255,179,71,.5);">❓</div>
+          <div class="tl-label" style="color:var(--warn);">Dados novos<br><span style="color:var(--text-dim);font-size:11px;">o modelo não sabe</span></div>
+        </div>
+        <div class="tl-connector" style="background:var(--border);border-top:2px dashed var(--border2);height:0;"></div>
+        <div class="tl-item" style="opacity:.55;">
+          <div class="tl-node" style="background:rgba(248,113,113,.1);border:2px dashed rgba(248,113,113,.5);">🔒</div>
+          <div class="tl-label" style="color:#f87171;">Seus dados privados<br><span style="color:var(--text-dim);font-size:11px;">nunca vistos</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 approaches -->
+    <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px;font-weight:600;">Três formas de resolver:</p>
+    <div class="card-grid card-grid-3">
+      <div class="approach-card">
+        <div class="approach-label tag-warning">Opção 1</div>
+        <h3>Fine-tuning</h3>
+        <p>Re-treinar o modelo com seus dados. Permanente, mas <strong style="color:var(--warn);">caro e lento</strong>. Não é ideal para dados que mudam.</p>
+      </div>
+      <div class="approach-card">
+        <div class="approach-label tag-muted">Opção 2</div>
+        <h3>Context Stuffing</h3>
+        <p>Colocar todos os dados no prompt. Simples, mas <strong style="color:var(--text-muted);">limitado pela janela de contexto</strong> e caro em tokens.</p>
+      </div>
+      <div class="approach-card recommended">
+        <div class="rec-badge">✅ Melhor</div>
+        <div class="approach-label tag-success">Opção 3</div>
+        <h3>RAG</h3>
+        <p>Buscar <em>somente o relevante</em> sob demanda. Escalável, atualizado, e custo-eficiente.</p>
+      </div>
+    </div>
+
+    <div class="insight-box primary mt-6">
+      <div class="insight-icon">💡</div>
+      <div class="insight-body">
+        <h4>Por que RAG é o melhor dos dois mundos?</h4>
+        <p>Combina o poder do LLM (raciocínio, linguagem) com seus dados reais (atuais, privados). Você não treina de novo — você dá o contexto certo na hora certa.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 2 — RAG
+══════════════════════════════════════════════════════ -->
+<div class="section" id="sec-2" data-sec="2">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-number">Seção 2 / 7</div>
+      <h2>RAG — Retrieval-Augmented Generation</h2>
+      <p>Como o modelo "consulta" seus documentos antes de responder.</p>
+    </div>
+
+    <div class="rag-steps">
+      <div class="rag-step" id="rag-step-1">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>Indexação — transformar documentos em vetores</h4>
+          <p>Cada documento é convertido em um "embedding" — um vetor numérico que captura seu significado. Esses vetores ficam armazenados num vector store (banco de vetores).</p>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap;">
+            <div style="background:rgba(124,109,255,.12);border:1px solid rgba(124,109,255,.25);border-radius:8px;padding:8px 14px;font-size:13px;">📄 Doc 1</div>
+            <div style="color:var(--text-dim);">→</div>
+            <div style="background:rgba(62,207,255,.1);border:1px solid rgba(62,207,255,.25);border-radius:8px;padding:8px 14px;font-size:13px;font-family:monospace;">✨ Embedding</div>
+            <div style="color:var(--text-dim);">→</div>
+            <div style="background:rgba(0,229,176,.08);border:1px solid rgba(0,229,176,.22);border-radius:8px;padding:8px 14px;font-size:13px;">[0.23, 0.87, −0.41, …]</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rag-step" id="rag-step-2">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>Busca — encontrar os documentos mais próximos</h4>
+          <p>Quando o usuário faz uma pergunta, ela também vira um vetor. O sistema encontra os documentos cujos vetores são mais <em>próximos</em> no espaço semântico (busca por similaridade de cosseno).</p>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap;">
+            <div style="background:rgba(255,179,71,.1);border:1px solid rgba(255,179,71,.3);border-radius:8px;padding:8px 14px;font-size:13px;">❓ Pergunta</div>
+            <div style="color:var(--text-dim);">→</div>
+            <div style="background:rgba(62,207,255,.1);border:1px solid rgba(62,207,255,.25);border-radius:8px;padding:8px 14px;font-size:13px;font-family:monospace;">Vetor da query</div>
+            <div style="color:var(--text-dim);">→</div>
+            <div style="background:rgba(124,109,255,.12);border:1px solid rgba(124,109,255,.3);border-radius:8px;padding:8px 14px;font-size:13px;">🔍 Top 3 docs similares</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rag-step" id="rag-step-3">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>Geração — resposta baseada nos documentos relevantes</h4>
+          <p>Os documentos encontrados são injetados no contexto do LLM junto com a pergunta. O modelo responde <em>baseado nesses documentos</em> — não em memória genérica.</p>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap;">
+            <div style="background:rgba(0,229,176,.08);border:1px solid rgba(0,229,176,.22);border-radius:8px;padding:8px 14px;font-size:13px;">📋 Docs relevantes</div>
+            <div style="color:var(--text-dim);">+</div>
+            <div style="background:rgba(255,179,71,.1);border:1px solid rgba(255,179,71,.3);border-radius:8px;padding:8px 14px;font-size:13px;">❓ Pergunta</div>
+            <div style="color:var(--text-dim);">→</div>
+            <div style="background:linear-gradient(135deg,rgba(124,109,255,.2),rgba(62,207,255,.1));border:1px solid var(--primary);border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;">🤖 Resposta precisa</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── EXERCISE: Embedding Visualization ── -->
+    <div class="rag-exercise mt-8" id="rag-exercise">
+      <h3>🎮 Exercício — Simulador de Busca RAG</h3>
+      <p>Digite uma consulta e veja quais "documentos" (representados como pontos 2D) são retornados pelo RAG. Passe o mouse nos pontos para ver o título do documento.</p>
+
+      <div class="rag-search-row">
+        <input class="rag-input" id="rag-query" type="text" placeholder="Ex: problema com login, política de reembolso, férias…" />
+        <button class="btn btn-primary" onclick="runRAGSearch()">Buscar</button>
+        <button class="btn btn-secondary" onclick="resetRAG()">Limpar</button>
+      </div>
+
+      <div id="embed-canvas-wrap">
+        <canvas id="embed-canvas"></canvas>
+      </div>
+      <div class="embed-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#7c6dff;"></div>Suporte</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#3ecfff;"></div>Vendas</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#00e5b0;"></div>RH</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ffb347;"></div>Financeiro</div>
+      </div>
+
+      <div class="rag-output mt-4" id="rag-output" style="display:none;">
+        <div class="rag-panel">
+          <h4>📋 Contexto injetado no LLM</h4>
+          <div id="rag-docs"></div>
+        </div>
+        <div class="rag-panel">
+          <h4>🤖 Resposta gerada</h4>
+          <div class="ai-response" id="rag-response"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 3 — Embeddings
+══════════════════════════════════════════════════════ -->
+<div class="section" id="sec-3" data-sec="3">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-number">Seção 3 / 7</div>
+      <h2>Embeddings — A Magia por Trás</h2>
+      <p>Como texto vira números — e por que isso captura <em>significado</em>.</p>
+    </div>
+
+    <div class="insight-box accent mb-4">
+      <div class="insight-icon">🧠</div>
+      <div class="insight-body">
+        <h4>Embeddings transformam texto em números que capturam SIGNIFICADO</h4>
+        <p>Palavras ou frases semanticamente próximas ficam matematicamente próximas no espaço vetorial. Isso permite busca por <em>sentido</em>, não apenas por palavras-chave.</p>
+      </div>
+    </div>
+
+    <div class="word-math">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;">Aritmética de Palavras</p>
+      <div class="wm-row">
+        <div class="wm-token k">rei</div>
+        <div class="wm-token op">−</div>
+        <div class="wm-token k">homem</div>
+        <div class="wm-token op">+</div>
+        <div class="wm-token r">mulher</div>
+        <div class="wm-token eq">≈</div>
+        <div class="wm-token q">rainha</div>
+      </div>
+      <div class="wm-arrow">↓</div>
+      <p style="font-size:14px;color:var(--text-muted);margin-top:12px;">Os vetores capturam <em>relações semânticas</em>. Não é coincidência — é geometria do significado.</p>
+    </div>
+
+    <div class="sim-tool mt-6">
+      <h3>🔬 Calculadora de Similaridade Semântica</h3>
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px;">Digite duas frases e veja o quão semanticamente similares elas são (baseado em sobreposição de palavras-chave como heurística simplificada).</p>
+      <div class="sim-row">
+        <div>
+          <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:6px;">Frase A</label>
+          <input class="rag-input" style="width:100%;" id="sim-a" type="text" placeholder="Ex: Quero cancelar minha assinatura" oninput="calcSimilarity()" />
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:6px;">Frase B</label>
+          <input class="rag-input" style="width:100%;" id="sim-b" type="text" placeholder="Ex: Como faço para encerrar meu plano?" oninput="calcSimilarity()" />
+        </div>
+      </div>
+      <div class="sim-score">
+        <div class="sim-score-num" id="sim-num">—</div>
+        <div class="sim-score-label">Similaridade semântica</div>
+        <div class="sim-bar"><div class="sim-bar-fill" id="sim-bar" style="width:0%"></div></div>
+      </div>
+      <p style="font-size:12px;color:var(--text-dim);margin-top:10px;">* Heurística simplificada usando sobreposição de termos. Embeddings reais usam redes neurais para captar nuances muito mais sutis.</p>
+    </div>
+
+    <div class="card-grid card-grid-2 mt-6">
+      <div class="card">
+        <h4 style="margin-bottom:10px;">📐 Alta Similaridade</h4>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:10px 14px;font-size:13px;">"Cancelar assinatura"</div>
+          <div style="background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:10px 14px;font-size:13px;">"Encerrar meu plano"</div>
+          <div style="background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:10px 14px;font-size:13px;">"Quero parar de pagar"</div>
+        </div>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:10px;">Intenções parecidas → vetores próximos → RAG encontra o documento certo</p>
+      </div>
+      <div class="card">
+        <h4 style="margin-bottom:10px;">📏 Baixa Similaridade</h4>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.18);border-radius:8px;padding:10px 14px;font-size:13px;">"Cancelar assinatura"</div>
+          <div style="background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.18);border-radius:8px;padding:10px 14px;font-size:13px;">"Receita de bolo de cenoura"</div>
+        </div>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:10px;">Intenções opostas → vetores distantes → RAG <em>não</em> confunde os documentos</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 4 — Tools & Function Calling
+══════════════════════════════════════════════════════ -->
+<div class="section" id="sec-4" data-sec="4">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-number">Seção 4 / 7</div>
+      <h2>Tools &amp; Function Calling</h2>
+      <p>Além de recuperar texto, a IA pode solicitar a execução de funções reais.</p>
+    </div>
+
+    <!-- Tools hub visual -->
+    <div class="card mb-4" style="padding:0;overflow:hidden;">
+      <div style="padding:20px 24px 0;">
+        <p style="font-size:13px;color:var(--text-muted);font-weight:600;">Ferramentas disponíveis para a IA</p>
+      </div>
+      <div class="tools-hub">
+        <div class="hub-ring" style="width:240px;height:240px;"></div>
+        <div class="hub-ring" style="width:320px;height:320px;opacity:.5;"></div>
+        <div class="hub-center">🤖</div>
+        <div class="hub-tools">
+          <div class="tool-node">
+            <div class="tool-icon">🗄️</div>
+            <div class="tool-label">Banco de Dados</div>
+          </div>
+          <div class="tool-node">
+            <div class="tool-icon">🌐</div>
+            <div class="tool-label">API Externa</div>
+          </div>
+          <div class="tool-node">
+            <div class="tool-icon">🧮</div>
+            <div class="tool-label">Calculadora</div>
+          </div>
+          <div class="tool-node">
+            <div class="tool-icon">📁</div>
+            <div class="tool-label">Sistema de Arquivos</div>
+          </div>
+          <div class="tool-node">
+            <div class="tool-icon">🔍</div>
+            <div class="tool-label">Busca Web</div>
+          </div>
+          <div class="tool-node">
+            <div class="tool-icon">📧</div>
+            <div class="tool-label">Email / Notif.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step-by-step animation -->
+    <div class="tool-anim">
+      <h3>Como funciona — passo a passo</h3>
+      <div class="anim-steps" id="anim-steps">
+        <div class="anim-step" data-step="0">
+          <div class="anim-step-icon">👤</div>
+          <div class="anim-step-label"><strong>Usuário pergunta:</strong> "Qual o faturamento de março?"</div>
+        </div>
+        <div class="anim-step" data-step="1">
+          <div class="anim-step-icon">🤖</div>
+          <div class="anim-step-label"><strong>IA decide:</strong> "Preciso consultar o banco de dados para responder isso."</div>
+        </div>
+        <div class="anim-step" data-step="2">
+          <div class="anim-step-icon">📝</div>
+          <div class="anim-step-label"><strong>IA gera:</strong> <code>query_database("SELECT SUM(revenue) FROM sales WHERE month = 3")</code></div>
+        </div>
+        <div class="anim-step" data-step="3">
+          <div class="anim-step-icon">⚙️</div>
+          <div class="anim-step-label"><strong>Sistema executa</strong> a query e retorna: <code>{"result": 150000}</code></div>
+        </div>
+        <div class="anim-step" data-step="4">
+          <div class="anim-step-icon">💬</div>
+          <div class="anim-step-label"><strong>IA formata:</strong> "O faturamento de março foi <strong>R$ 150.000</strong>."</div>
+        </div>
+      </div>
+      <div class="anim-controls">
+        <button class="btn btn-secondary" id="anim-prev" onclick="animPrev()">← Anterior</button>
+        <button class="btn btn-primary" id="anim-next" onclick="animNext()">Próximo →</button>
+        <span class="step-counter" id="step-counter">Passo 1 / 5</span>
+      </div>
+    </div>
+
+    <div class="insight-box primary mt-6">
+      <div class="insight-icon">⚠️</div>
+      <div class="insight-body">
+        <h4>A IA não EXECUTA a tool — ela PEDE para o sistema executar</h4>
+        <p>O modelo gera uma chamada estruturada (JSON). Seu sistema valida, executa, e devolve o resultado. Isso mantém segurança e controle — a IA nunca tem acesso direto ao banco.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 5 — MCP
+══════════════════════════════════════════════════════ -->
+<div class="section" id="sec-5" data-sec="5">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-number">Seção 5 / 7</div>
+      <h2>MCP — Model Context Protocol</h2>
+      <p>O padrão universal para conectar tools à IA. Pense nele como um "USB para modelos de linguagem".</p>
+    </div>
+
+    <div class="mcp-analogy">
+      <div class="mcp-side">
+        <div class="icon">🔌</div>
+        <h4>USB</h4>
+        <p>Padrão universal para conectar periféricos (teclado, mouse, HD) ao computador. Um conector, infinitos dispositivos.</p>
+      </div>
+      <div class="mcp-vs">≈</div>
+      <div class="mcp-side" style="border-color:rgba(124,109,255,.4);box-shadow:0 0 0 1px rgba(124,109,255,.2);">
+        <div class="icon">🤖</div>
+        <h4>MCP</h4>
+        <p>Padrão universal para conectar tools (banco, Slack, GitHub) à IA. Um protocolo, qualquer modelo compatível.</p>
+      </div>
+    </div>
+
+    <!-- MCP flows visual -->
+    <div class="mcp-port">
+      <div class="mcp-label">Ferramentas conectadas via MCP</div>
+      <div class="mcp-flows">
+        <div class="mcp-flow">
+          <div class="mcp-flow-icon">💬</div>
+          <div class="mcp-flow-name">Slack</div>
+          <div class="mcp-flow-arrow">→ MCP</div>
+        </div>
+        <div class="mcp-flow">
+          <div class="mcp-flow-icon">🐙</div>
+          <div class="mcp-flow-name">GitHub</div>
+          <div class="mcp-flow-arrow">→ MCP</div>
+        </div>
+        <div class="mcp-flow">
+          <div class="mcp-flow-icon">🗄️</div>
+          <div class="mcp-flow-name">Banco de Dados</div>
+          <div class="mcp-flow-arrow">→ MCP</div>
+        </div>
+        <div class="mcp-flow">
+          <div class="mcp-flow-icon">📝</div>
+          <div class="mcp-flow-name">Notion</div>
+          <div class="mcp-flow-arrow">→ MCP</div>
+        </div>
+      </div>
+      <div class="mcp-center-port">🔌</div>
+      <div style="text-align:center;font-size:13px;color:var(--text-muted);">↓</div>
+      <div style="text-align:center;margin-top:10px;">
+        <div style="display:inline-block;background:linear-gradient(135deg,rgba(124,109,255,.2),rgba(62,207,255,.1));border:1px solid var(--primary);border-radius:var(--radius-sm);padding:12px 24px;font-size:14px;font-weight:700;">🤖 Qualquer LLM compatível com MCP</div>
+      </div>
+    </div>
+
+    <div class="mcp-benefits mt-6">
+      <div class="mcp-benefit">
+        <div class="mcp-benefit-icon">⚡</div>
+        <div>
+          <h5>Uma vez implementado</h5>
+          <p>Funciona com qualquer modelo compatível. Não precisa reimplementar por modelo.</p>
+        </div>
+      </div>
+      <div class="mcp-benefit">
+        <div class="mcp-benefit-icon">📐</div>
+        <div>
+          <h5>Padronização</h5>
+          <p>Não precisa reinventar a roda. A comunidade já criou tools para os serviços mais comuns.</p>
+        </div>
+      </div>
+      <div class="mcp-benefit">
+        <div class="mcp-benefit-icon">🔒</div>
+        <div>
+          <h5>Segurança centralizada</h5>
+          <p>Controle de permissões em um único ponto. Cada tool declara o que pode e o que não pode fazer.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 6 — Quando usar o quê
+══════════════════════════════════════════════════════ -->
+<div class="section" id="sec-6" data-sec="6">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-number">Seção 6 / 7</div>
+      <h2>Na Prática — Quando Usar RAG vs Tools vs Context</h2>
+      <p>Diagrama de decisão e exercício de classificação.</p>
+    </div>
+
+    <!-- Decision tree -->
+    <div class="dtree">
+      <div class="dt-q">Seus dados cabem no contexto?<br><small style="color:var(--text-dim);font-weight:400;">(poucos tokens, sempre relevante)</small></div>
+      <div class="dt-arrow">↓</div>
+      <div class="dt-row">
+        <div class="dt-branch">
+          <div class="dt-ans">✅ Sim</div>
+          <div class="dt-result context">Context Stuffing<br><small>System Prompt</small></div>
+        </div>
+        <div class="dt-branch">
+          <div class="dt-ans" style="color:var(--warn);">❌ Não</div>
+          <div class="dt-q" style="margin-top:8px;">Precisa buscar em textos?</div>
+          <div class="dt-arrow">↓</div>
+          <div class="dt-row">
+            <div class="dt-branch">
+              <div class="dt-ans">✅ Sim</div>
+              <div class="dt-result rag">RAG<br><small>Vector Search</small></div>
+            </div>
+            <div class="dt-branch">
+              <div class="dt-ans" style="color:var(--warn);">❌ Não</div>
+              <div class="dt-q" style="margin-top:8px;">Precisa executar ações / dados em tempo real?</div>
+              <div class="dt-arrow">↓</div>
+              <div class="dt-result tools">Tools / APIs<br><small>Function Calling</small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);width:100%;text-align:center;">
+        <div class="dt-q" style="display:inline-block;">Precisa de comportamento/tom muito específico?</div>
+        <div class="dt-arrow">↓</div>
+        <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:4px;">
+          <div class="dt-result ft">Fine-tuning<br><small>Último recurso</small></div>
+          <div class="dt-result context">Context / Exemplos<br><small>Tente primeiro</small></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="spacer"></div>
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:8px;">🎮 Exercício — Classifique os Cenários</h3>
+    <p style="font-size:14px;color:var(--text-muted);margin-bottom:0;">Para cada situação, escolha a abordagem correta. Clique na opção que você acredita ser a certa.</p>
+    <div class="scenario-grid" id="scenario-grid">
+      <!-- preenchido pelo JS -->
+    </div>
+
+    <div id="ex2-result" style="display:none;" class="insight-box success mt-6">
+      <div class="insight-icon">🎉</div>
+      <div class="insight-body">
+        <h4 id="ex2-result-title">Exercício concluído!</h4>
+        <p id="ex2-result-msg"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 7 — Quiz
+══════════════════════════════════════════════════════ -->
+<div class="section" id="sec-7" data-sec="7">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-number">Seção 7 / 7</div>
+      <h2>Quiz Final</h2>
+      <p>5 questões para consolidar o que você aprendeu.</p>
+    </div>
+
+    <div class="quiz-wrap" id="quiz-wrap"></div>
+
+    <div class="quiz-score" id="quiz-score">
+      <div class="quiz-score-num" id="quiz-score-num"></div>
+      <p id="quiz-score-msg"></p>
+      <button class="complete-btn" id="complete-btn" onclick="markComplete()" disabled>
+        ✅ Marcar Módulo como Concluído
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER NAV -->
+<div class="footer-nav">
+  <a href="../index.html" class="fn-btn">← Voltar ao Hub</a>
+  <a href="06-eval.html" class="fn-btn next">Módulo 6: Avaliação (Eval) →</a>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════════════════════ -->
+<script>
+/* ─────────────────────────────────────────────────────
+   DATA
+───────────────────────────────────────────────────── */
+const DOCS = [
+  // Suporte cluster (~upper-left)
+  { id:1,  title:"Como resetar senha",        topic:"suporte",    x:.12, y:.18, keywords:["senha","login","resetar","acesso","conta","credencial"] },
+  { id:2,  title:"Erro de login 2FA",          topic:"suporte",    x:.18, y:.28, keywords:["login","autenticação","2fa","erro","código"] },
+  { id:3,  title:"App não abre",               topic:"suporte",    x:.08, y:.38, keywords:["app","aplicativo","abre","erro","bug","tela"] },
+  { id:4,  title:"Atualizar dados cadastrais", topic:"suporte",    x:.22, y:.14, keywords:["dados","cadastro","atualizar","email","telefone"] },
+  { id:5,  title:"Suporte ao cliente",         topic:"suporte",    x:.14, y:.44, keywords:["suporte","atendimento","contato","problema"] },
+  // Vendas cluster (~upper-right)
+  { id:6,  title:"Planos e preços",            topic:"vendas",     x:.70, y:.12, keywords:["plano","preço","valor","assinatura","contrato","custo"] },
+  { id:7,  title:"Cancelamento de conta",      topic:"vendas",     x:.80, y:.22, keywords:["cancelar","encerrar","assinatura","conta","parar"] },
+  { id:8,  title:"Upgrade de plano",           topic:"vendas",     x:.75, y:.34, keywords:["upgrade","plano","premium","avançado","melhorar"] },
+  { id:9,  title:"Período de trial",           topic:"vendas",     x:.86, y:.14, keywords:["trial","gratuito","teste","período","grátis"] },
+  { id:10, title:"Desconto e promoções",       topic:"vendas",     x:.88, y:.38, keywords:["desconto","promoção","cupom","oferta","redução"] },
+  // RH cluster (~lower-left)
+  { id:11, title:"Política de férias",         topic:"rh",         x:.15, y:.70, keywords:["férias","folga","descanso","licença","período"] },
+  { id:12, title:"Benefícios da empresa",      topic:"rh",         x:.10, y:.82, keywords:["benefício","plano de saúde","vale","refeição","transporte"] },
+  { id:13, title:"Processo de onboarding",     topic:"rh",         x:.22, y:.86, keywords:["onboarding","integração","novo","contratação","admissão"] },
+  { id:14, title:"Avaliação de desempenho",    topic:"rh",         x:.30, y:.76, keywords:["avaliação","desempenho","performance","meta","objetivo"] },
+  { id:15, title:"Home office e flexibilidade",topic:"rh",         x:.06, y:.62, keywords:["home office","remoto","flexível","trabalho","horário"] },
+  // Financeiro cluster (~lower-right)
+  { id:16, title:"Política de reembolso",      topic:"financeiro", x:.65, y:.68, keywords:["reembolso","devolver","dinheiro","estorno","política"] },
+  { id:17, title:"Emissão de nota fiscal",     topic:"financeiro", x:.76, y:.78, keywords:["nota fiscal","nf","fiscal","imposto","fatura"] },
+  { id:18, title:"Formas de pagamento",        topic:"financeiro", x:.82, y:.60, keywords:["pagamento","pagar","cartão","boleto","pix"] },
+  { id:19, title:"Relatório financeiro",       topic:"financeiro", x:.88, y:.72, keywords:["relatório","financeiro","faturamento","receita","mês"] },
+  { id:20, title:"Cobranças e faturas",        topic:"financeiro", x:.72, y:.88, keywords:["cobrança","fatura","cobrado","vencimento","débito"] },
+];
+
+const TOPIC_COLORS = {
+  suporte:    "#7c6dff",
+  vendas:     "#3ecfff",
+  rh:         "#00e5b0",
+  financeiro: "#ffb347",
+};
+
+const AI_RESPONSES = {
+  suporte:    "Com base nos documentos de suporte encontrados, posso ajudá-lo com problemas técnicos. Recomendo seguir o processo de recuperação descrito na nossa base de conhecimento.",
+  vendas:     "Encontrei informações sobre seus planos e condições comerciais. Posso detalhar as opções disponíveis e condições de contratação ou cancelamento.",
+  rh:         "Localizei as políticas de RH relevantes. Com base nesses documentos, posso esclarecer suas dúvidas sobre benefícios, férias e processos internos.",
+  financeiro: "Analisei os documentos financeiros pertinentes. Posso fornecer informações precisas sobre pagamentos, reembolsos e procedimentos fiscais.",
+  mixed:      "Encontrei documentos de múltiplas categorias relacionados à sua consulta. Vou sintetizar as informações mais relevantes para responder com precisão.",
+};
+
+/* ─────────────────────────────────────────────────────
+   CANVAS EMBEDDING VIZ
+───────────────────────────────────────────────────── */
+let canvas, ctx, canvasW, canvasH;
+let animFrame = null;
+let highlightedDocs = [];
+let queryDot = null;
+let animProgress = 0;
+
+function initCanvas() {
+  canvas = document.getElementById("embed-canvas");
+  const wrap = document.getElementById("embed-canvas-wrap");
+  canvasW = wrap.clientWidth;
+  canvasH = wrap.clientHeight;
+  canvas.width  = canvasW;
+  canvas.height = canvasH;
+  ctx = canvas.getContext("2d");
+  drawDots([], null, 1);
+
+  canvas.addEventListener("mousemove", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const tooltip = document.getElementById("tooltip");
+    let hit = false;
+    for (const d of DOCS) {
+      const dx = d.x * canvasW - mx;
+      const dy = d.y * canvasH - my;
+      if (Math.sqrt(dx*dx+dy*dy) < 14) {
+        tooltip.style.left = (e.clientX + 12) + "px";
+        tooltip.style.top  = (e.clientY - 8) + "px";
+        tooltip.textContent = d.title;
+        tooltip.style.opacity = "1";
+        hit = true; break;
+      }
+    }
+    if (!hit) tooltip.style.opacity = "0";
+  });
+  canvas.addEventListener("mouseleave", () => {
+    document.getElementById("tooltip").style.opacity = "0";
+  });
+}
+
+function drawDots(highlighted, qDot, progress) {
+  ctx.clearRect(0, 0, canvasW, canvasH);
+  // grid subtle
+  ctx.strokeStyle = "rgba(100,120,255,.05)";
+  ctx.lineWidth = 1;
+  for (let x = 0; x < canvasW; x += 48) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvasH); ctx.stroke(); }
+  for (let y = 0; y < canvasH; y += 48) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvasW,y); ctx.stroke(); }
+
+  // draw connection lines
+  if (qDot && highlighted.length > 0) {
+    for (const d of highlighted) {
+      const tx = d.x * canvasW;
+      const ty = d.y * canvasH;
+      const qx = qDot.x * canvasW;
+      const qy = qDot.y * canvasH;
+      ctx.save();
+      ctx.globalAlpha = .55 * progress;
+      ctx.strokeStyle = TOPIC_COLORS[d.topic];
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(qx, qy);
+      ctx.lineTo(qx + (tx - qx) * progress, qy + (ty - qy) * progress);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  // draw docs
+  for (const d of DOCS) {
+    const x = d.x * canvasW;
+    const y = d.y * canvasH;
+    const isHL = highlighted.some(h => h.id === d.id);
+    const col = TOPIC_COLORS[d.topic];
+    ctx.save();
+    if (isHL) {
+      // glow
+      ctx.shadowColor = col;
+      ctx.shadowBlur = 14;
+    }
+    ctx.globalAlpha = highlighted.length === 0 ? 1 : (isHL ? 1 : 0.28);
+    ctx.beginPath();
+    ctx.arc(x, y, isHL ? 9 : 6, 0, Math.PI*2);
+    ctx.fillStyle = col;
+    ctx.fill();
+    if (isHL) {
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // draw query dot
+  if (qDot) {
+    const qx = qDot.x * canvasW;
+    const qy = qDot.y * canvasH;
+    ctx.save();
+    ctx.globalAlpha = progress;
+    ctx.shadowColor = "#fff";
+    ctx.shadowBlur = 16;
+    ctx.beginPath();
+    ctx.arc(qx, qy, 9, 0, Math.PI*2);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+    ctx.strokeStyle = "#ffb347";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+    // label
+    ctx.save();
+    ctx.globalAlpha = progress;
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 11px sans-serif";
+    ctx.fillText("query", qx + 12, qy + 4);
+    ctx.restore();
+  }
+}
+
+function scoreDoc(doc, keywords) {
+  let score = 0;
+  for (const kw of keywords) {
+    for (const dk of doc.keywords) {
+      if (dk.includes(kw) || kw.includes(dk)) score++;
+    }
+  }
+  return score;
+}
+
+function runRAGSearch() {
+  const q = document.getElementById("rag-query").value.trim().toLowerCase();
+  if (!q) return;
+
+  const terms = q.split(/\s+/).filter(t => t.length > 2);
+  if (!canvas) initCanvas();
+
+  const scored = DOCS.map(d => ({ doc: d, score: scoreDoc(d, terms) }));
+  scored.sort((a,b) => b.score - a.score);
+  const top3 = scored.slice(0,3).filter(s => true); // always show 3
+
+  highlightedDocs = top3.map(s => s.doc);
+
+  // Place query dot near centroid of results
+  const cx = highlightedDocs.reduce((a,d) => a + d.x, 0) / highlightedDocs.length;
+  const cy = highlightedDocs.reduce((a,d) => a + d.y, 0) / highlightedDocs.length;
+  queryDot = {
+    x: Math.max(.05, Math.min(.95, cx + (Math.random()-.5)*.2)),
+    y: Math.max(.05, Math.min(.95, cy + (Math.random()-.5)*.2))
+  };
+
+  // Animate
+  animProgress = 0;
+  if (animFrame) cancelAnimationFrame(animFrame);
+  function step() {
+    animProgress = Math.min(1, animProgress + .04);
+    drawDots(highlightedDocs, queryDot, animProgress);
+    if (animProgress < 1) animFrame = requestAnimationFrame(step);
+    else showRAGOutput(top3, q);
+  }
+  requestAnimationFrame(step);
+}
+
+function showRAGOutput(top3, query) {
+  const outEl  = document.getElementById("rag-output");
+  const docsEl = document.getElementById("rag-docs");
+  const respEl = document.getElementById("rag-response");
+
+  outEl.style.display = "grid";
+  docsEl.innerHTML = "";
+  respEl.classList.remove("show");
+  respEl.textContent = "";
+
+  top3.forEach((s, i) => {
+    const chip = document.createElement("div");
+    chip.className = "doc-chip";
+    chip.textContent = `${i+1}. ${s.doc.title}`;
+    chip.style.borderColor = TOPIC_COLORS[s.doc.topic] + "55";
+    chip.style.background  = TOPIC_COLORS[s.doc.topic] + "18";
+    chip.style.color       = TOPIC_COLORS[s.doc.topic];
+    docsEl.appendChild(chip);
+    setTimeout(() => chip.classList.add("show"), i * 150 + 100);
+  });
+
+  // Determine dominant topic
+  const topicCount = {};
+  top3.forEach(s => topicCount[s.doc.topic] = (topicCount[s.doc.topic]||0)+1);
+  const topics = Object.keys(topicCount);
+  const dominant = topics.length > 1 ? "mixed" : topics[0];
+
+  setTimeout(() => {
+    respEl.textContent = AI_RESPONSES[dominant] || AI_RESPONSES.mixed;
+    respEl.classList.add("show");
+  }, 600);
+}
+
+function resetRAG() {
+  if (animFrame) cancelAnimationFrame(animFrame);
+  highlightedDocs = [];
+  queryDot = null;
+  if (canvas) drawDots([], null, 1);
+  document.getElementById("rag-output").style.display = "none";
+  document.getElementById("rag-query").value = "";
+}
+
+/* ─────────────────────────────────────────────────────
+   SIMILARITY CALCULATOR
+───────────────────────────────────────────────────── */
+function tokenize(s) {
+  return s.toLowerCase()
+    .replace(/[^a-záéíóúâêîôûãõç\s]/g, "")
+    .split(/\s+/)
+    .filter(t => t.length > 2);
+}
+
+function calcSimilarity() {
+  const a = document.getElementById("sim-a").value;
+  const b = document.getElementById("sim-b").value;
+  if (!a.trim() || !b.trim()) { document.getElementById("sim-num").textContent = "—"; return; }
+
+  const ta = new Set(tokenize(a));
+  const tb = new Set(tokenize(b));
+  if (ta.size === 0 || tb.size === 0) { document.getElementById("sim-num").textContent = "0%"; return; }
+
+  let inter = 0;
+  for (const t of ta) if (tb.has(t)) inter++;
+  // Jaccard similarity
+  const union = new Set([...ta, ...tb]).size;
+  const score = Math.round((inter / union) * 100);
+  // Boost for high partial matches
+  let partialBoost = 0;
+  for (const t of ta) {
+    for (const u of tb) {
+      if (t !== u && (t.includes(u.slice(0,4)) || u.includes(t.slice(0,4)))) partialBoost++;
+    }
+  }
+  const final = Math.min(100, score + Math.round(partialBoost * 8));
+
+  document.getElementById("sim-num").textContent = final + "%";
+  document.getElementById("sim-bar").style.width = final + "%";
+}
+
+/* ─────────────────────────────────────────────────────
+   TOOLS ANIMATION
+───────────────────────────────────────────────────── */
+let currentAnimStep = 0;
+const TOTAL_ANIM_STEPS = 5;
+
+function updateAnim() {
+  const steps = document.querySelectorAll(".anim-step");
+  steps.forEach((s, i) => {
+    s.classList.toggle("highlight", i === currentAnimStep);
+  });
+  document.getElementById("step-counter").textContent = `Passo ${currentAnimStep+1} / ${TOTAL_ANIM_STEPS}`;
+  document.getElementById("anim-prev").disabled = currentAnimStep === 0;
+  document.getElementById("anim-next").disabled = currentAnimStep === TOTAL_ANIM_STEPS - 1;
+}
+
+function animNext() { if (currentAnimStep < TOTAL_ANIM_STEPS - 1) { currentAnimStep++; updateAnim(); } }
+function animPrev() { if (currentAnimStep > 0) { currentAnimStep--; updateAnim(); } }
+
+/* ─────────────────────────────────────────────────────
+   EXERCISE 2 — SCENARIO CLASSIFICATION
+───────────────────────────────────────────────────── */
+const SCENARIOS = [
+  {
+    id: 1,
+    icon: "📚",
+    title: "Base de FAQs com 10.000 artigos de suporte",
+    desc: "Uma grande coleção de artigos de help center. O usuário faz perguntas variadas.",
+    answer: "rag",
+    explanation: "10.000 artigos não cabem no contexto. RAG busca os artigos relevantes sob demanda.",
+  },
+  {
+    id: 2,
+    icon: "💳",
+    title: "Consultar saldo bancário do cliente",
+    desc: "O usuário pergunta: 'Qual meu saldo atual?' O dado é em tempo real.",
+    answer: "tools",
+    explanation: "Saldo em tempo real exige chamar uma API bancária — isso é Function Calling / Tools.",
+  },
+  {
+    id: 3,
+    icon: "📋",
+    title: "3 regras de negócio que sempre se aplicam",
+    desc: "Ex: 'Nunca oferecer desconto acima de 15%', 'Sempre escalar para humano em reclamações'.",
+    answer: "context",
+    explanation: "Regras curtas e sempre relevantes → System Prompt (Context). RAG seria overkill.",
+  },
+  {
+    id: 4,
+    icon: "🎨",
+    title: "IA precisa falar no tom específico da sua marca",
+    desc: "Linguagem informal, gírias específicas, personalidade única. Nenhum modelo faz isso naturalmente.",
+    answer: "ft",
+    explanation: "Tom muito específico que prompts não conseguem capturar consistentemente → Fine-tuning. Mas tente exemplos no context primeiro!",
+  },
+];
+
+const OPT_LABELS = { rag:"RAG", tools:"Tools/API", context:"Context", ft:"Fine-tuning" };
+const OPT_CLASS  = { rag:"opt-rag", tools:"opt-tools", context:"opt-context", ft:"opt-ft" };
+
+let scenarioAnswers = {};
+
+function buildScenarios() {
+  const grid = document.getElementById("scenario-grid");
+  grid.innerHTML = "";
+  SCENARIOS.forEach(s => {
+    const card = document.createElement("div");
+    card.className = "scenario-card";
+    card.id = "sc-" + s.id;
+
+    const opts = Object.keys(OPT_LABELS).map(key => `
+      <button class="opt-btn ${OPT_CLASS[key]}" data-sc="${s.id}" data-val="${key}" onclick="pickScenario(${s.id},'${key}')">
+        ${OPT_LABELS[key]}
+      </button>
+    `).join("");
+
+    card.innerHTML = `
+      <div class="scenario-icon">${s.icon}</div>
+      <h4>${s.title}</h4>
+      <p>${s.desc}</p>
+      <div class="scenario-options">${opts}</div>
+      <div class="scenario-feedback" id="sfb-${s.id}"></div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function pickScenario(id, val) {
+  if (scenarioAnswers[id] !== undefined) return; // already answered
+  scenarioAnswers[id] = val;
+
+  const s = SCENARIOS.find(s => s.id === id);
+  const card = document.getElementById("sc-" + id);
+  const fbEl = document.getElementById("sfb-" + id);
+  const correct = val === s.answer;
+
+  card.classList.add(correct ? "correct" : "incorrect");
+  fbEl.className = "scenario-feedback " + (correct ? "ok" : "err");
+  fbEl.textContent = correct
+    ? "✓ Correto! " + s.explanation
+    : `✗ Era ${OPT_LABELS[s.answer]}. ${s.explanation}`;
+
+  // Mark selected button
+  card.querySelectorAll(".opt-btn").forEach(b => {
+    if (b.dataset.val === val) b.classList.add("sel");
+    b.disabled = true;
+  });
+
+  // Check if all answered
+  if (Object.keys(scenarioAnswers).length === SCENARIOS.length) {
+    const correctCount = SCENARIOS.filter(s => scenarioAnswers[s.id] === s.answer).length;
+    const resEl = document.getElementById("ex2-result");
+    resEl.style.display = "flex";
+    document.getElementById("ex2-result-title").textContent =
+      `${correctCount}/${SCENARIOS.length} corretos!`;
+    document.getElementById("ex2-result-msg").textContent =
+      correctCount === SCENARIOS.length
+        ? "Perfeito! Você dominou quando usar cada abordagem."
+        : "Revise as explicações dos itens incorretos — a linha entre RAG e Tools é sutil.";
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   QUIZ
+───────────────────────────────────────────────────── */
+const QUIZ = [
+  {
+    q: "O que é um 'embedding'?",
+    opts: [
+      "Um tipo de banco de dados vetorial",
+      "Uma representação numérica de texto que captura significado semântico",
+      "O processo de re-treinar um modelo com novos dados",
+      "Um arquivo de configuração do modelo de linguagem",
+    ],
+    answer: 1,
+    explanation: "Embeddings são vetores numéricos que representam o significado semântico do texto — palavras com significados similares ficam próximas no espaço vetorial.",
+  },
+  {
+    q: "Num sistema RAG, qual é a ordem correta das etapas?",
+    opts: [
+      "Busca → Indexação → Geração",
+      "Geração → Busca → Indexação",
+      "Indexação → Busca → Geração",
+      "Indexação → Geração → Busca",
+    ],
+    answer: 2,
+    explanation: "Primeiro você indexa os documentos (offline), depois busca os relevantes para cada query, e finalmente a IA gera a resposta com o contexto encontrado.",
+  },
+  {
+    q: "Quando usar Tools/Function Calling em vez de RAG?",
+    opts: [
+      "Quando você tem muitos documentos de texto",
+      "Quando precisa de dados em tempo real ou executar ações externas",
+      "Quando o modelo precisa de personalidade específica",
+      "Quando os dados cabem no system prompt",
+    ],
+    answer: 1,
+    explanation: "Tools são ideais para dados dinâmicos (saldo, clima, estoque) e ações (enviar email, criar ticket). RAG é para busca em bases de texto estáticas.",
+  },
+  {
+    q: "O que é MCP (Model Context Protocol)?",
+    opts: [
+      "Um formato de arquivo para salvar embeddings",
+      "Uma técnica de fine-tuning mais eficiente",
+      "Um padrão universal para conectar tools à IA, como um 'USB para modelos'",
+      "Um protocolo de comunicação entre múltiplos LLMs",
+    ],
+    answer: 2,
+    explanation: "MCP é um protocolo aberto que padroniza como models de linguagem se comunicam com ferramentas externas — uma vez implementada, a tool funciona com qualquer modelo compatível.",
+  },
+  {
+    q: "Qual afirmação sobre Function Calling está CORRETA?",
+    opts: [
+      "A IA executa diretamente as queries no banco de dados",
+      "A IA gera uma chamada estruturada e o sistema é responsável por executá-la",
+      "Function Calling só funciona com modelos da OpenAI",
+      "A IA só pode chamar uma função por vez, nunca em paralelo",
+    ],
+    answer: 1,
+    explanation: "Correto! A IA gera a chamada (em JSON), mas nunca executa diretamente. Seu sistema recebe, valida, executa e devolve o resultado — isso mantém segurança e controle.",
+  },
+];
+
+let quizAnswers = {};
+
+function buildQuiz() {
+  const wrap = document.getElementById("quiz-wrap");
+  wrap.innerHTML = "";
+  QUIZ.forEach((q, qi) => {
+    const div = document.createElement("div");
+    div.className = "quiz-q";
+    div.id = "qq-" + qi;
+    div.innerHTML = `
+      <div class="quiz-q-num">Questão ${qi+1} / ${QUIZ.length}</div>
+      <div class="quiz-q-text">${q.q}</div>
+      <div class="quiz-options">
+        ${q.opts.map((o, oi) => `<button class="quiz-opt" onclick="answerQuiz(${qi},${oi})">${o}</button>`).join("")}
+      </div>
+      <div id="qfb-${qi}" style="display:none;"></div>
+    `;
+    wrap.appendChild(div);
+  });
+}
+
+function answerQuiz(qi, chosen) {
+  if (quizAnswers[qi] !== undefined) return;
+  quizAnswers[qi] = chosen;
+  const q = QUIZ[qi];
+  const correct = chosen === q.answer;
+  const qEl = document.getElementById("qq-" + qi);
+  qEl.classList.add(correct ? "answered-correct" : "answered-wrong");
+
+  const opts = qEl.querySelectorAll(".quiz-opt");
+  opts.forEach((btn, oi) => {
+    btn.disabled = true;
+    if (oi === q.answer) btn.classList.add("correct");
+    else if (oi === chosen && !correct) btn.classList.add("wrong");
+  });
+
+  const fb = document.getElementById("qfb-" + qi);
+  fb.style.display = "block";
+  fb.className = "quiz-feedback " + (correct ? "correct" : "wrong");
+  fb.textContent = (correct ? "✓ " : "✗ ") + q.explanation;
+
+  if (Object.keys(quizAnswers).length === QUIZ.length) showQuizScore();
+}
+
+function showQuizScore() {
+  const correct = QUIZ.filter((q, i) => quizAnswers[i] === q.answer).length;
+  const total = QUIZ.length;
+  const pct = Math.round(correct / total * 100);
+
+  const scoreEl = document.getElementById("quiz-score");
+  scoreEl.style.display = "block";
+  document.getElementById("quiz-score-num").textContent = correct + "/" + total;
+  document.getElementById("quiz-score-msg").textContent =
+    pct === 100 ? "Perfeito! Você dominou RAG & Tools." :
+    pct >= 80   ? "Muito bom! Revise os tópicos que errou." :
+    pct >= 60   ? "Bom progresso. Releia as seções 2 e 4." :
+                  "Continue estudando — revise o módulo e tente novamente.";
+
+  document.getElementById("complete-btn").disabled = (pct < 60);
+  scoreEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function markComplete() {
+  const btn = document.getElementById("complete-btn");
+  btn.textContent = "✅ Módulo Concluído!";
+  btn.disabled = true;
+  try {
+    const KEY = "ai-training-completed-v1";
+    const done = JSON.parse(localStorage.getItem(KEY) || "[]");
+    if (!done.includes(5)) { done.push(5); localStorage.setItem(KEY, JSON.stringify(done)); }
+  } catch {}
+}
+
+/* ─────────────────────────────────────────────────────
+   SECTION DOTS + SCROLL OBSERVER
+───────────────────────────────────────────────────── */
+const SECTION_IDS = ["sec-1","sec-2","sec-3","sec-4","sec-5","sec-6","sec-7"];
+const SECTION_NAMES = ["Problema","RAG","Embeddings","Tools","MCP","Quando Usar","Quiz"];
+let activeSec = 0;
+const doneSecs = new Set();
+
+function buildDots() {
+  const container = document.getElementById("section-dots");
+  container.innerHTML = "";
+  SECTION_IDS.forEach((id, i) => {
+    const dot = document.createElement("div");
+    dot.className = "s-dot" + (i === 0 ? " active" : "");
+    dot.title = SECTION_NAMES[i];
+    dot.onclick = () => document.getElementById(id).scrollIntoView({ behavior:"smooth" });
+    container.appendChild(dot);
+  });
+}
+
+function updateDots(activeIdx) {
+  const dots = document.querySelectorAll(".s-dot");
+  dots.forEach((d, i) => {
+    d.classList.remove("active","done");
+    if (i === activeIdx) d.classList.add("active");
+    else if (doneSecs.has(i)) d.classList.add("done");
+  });
+}
+
+function updateProgress() {
+  const scrolled = window.scrollY;
+  const total = document.body.scrollHeight - window.innerHeight;
+  const pct = total > 0 ? Math.min(100, scrolled / total * 100) : 0;
+  document.getElementById("progress-fill").style.width = pct + "%";
+}
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add("visible");
+      const idx = SECTION_IDS.indexOf(entry.target.id);
+      if (idx >= 0) {
+        if (idx > 0) doneSecs.add(idx - 1);
+        activeSec = idx;
+        updateDots(idx);
+      }
+    }
+  });
+}, { threshold: 0.15 });
+
+/* ─────────────────────────────────────────────────────
+   INIT
+───────────────────────────────────────────────────── */
+document.addEventListener("DOMContentLoaded", () => {
+  buildDots();
+  buildScenarios();
+  buildQuiz();
+  updateAnim();
+
+  SECTION_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+
+  window.addEventListener("scroll", updateProgress, { passive: true });
+  window.addEventListener("resize", () => {
+    if (canvas) {
+      const wrap = document.getElementById("embed-canvas-wrap");
+      canvasW = wrap.clientWidth;
+      canvasH = wrap.clientHeight;
+      canvas.width  = canvasW;
+      canvas.height = canvasH;
+      drawDots(highlightedDocs, queryDot, 1);
+    }
+  });
+
+  // Init canvas after layout
+  requestAnimationFrame(() => initCanvas());
+});
+</script>
+</body>
+</html>

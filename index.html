@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IA para Devs — Treinamento Interativo</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-base:        #0f172a;
+      --bg-surface:     #1e293b;
+      --bg-card:        #1e293b;
+      --bg-card-hover:  #263348;
+      --border:         #334155;
+      --border-hover:   #475569;
+      --purple:         #8b5cf6;
+      --purple-light:   #a78bfa;
+      --purple-dim:     rgba(139, 92, 246, 0.14);
+      --blue:           #3b82f6;
+      --blue-light:     #60a5fa;
+      --blue-dim:       rgba(59, 130, 246, 0.12);
+      --green:          #22c55e;
+      --green-dim:      rgba(34, 197, 94, 0.13);
+      --text-primary:   #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted:     #64748b;
+      --radius:         14px;
+      --radius-sm:      8px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                   'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── Subtle grid background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(139, 92, 246, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(139, 92, 246, 0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Ambient glow blobs ── */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 65%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Top progress bar ── */
+    #progress-bar-wrapper {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    #progress-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      white-space: nowrap;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    #progress-track {
+      flex: 1;
+      height: 5px;
+      background: rgba(51, 65, 85, 0.8);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    #progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--purple), var(--blue));
+      transition: width 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 0%;
+      box-shadow: 0 0 8px rgba(139, 92, 246, 0.5);
+    }
+
+    #progress-count {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--purple-light);
+      white-space: nowrap;
+      min-width: 36px;
+      text-align: right;
+    }
+
+    /* ── Page layout ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      width: 100%;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 68px 0 52px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--purple-light);
+      background: var(--purple-dim);
+      border: 1px solid rgba(139, 92, 246, 0.28);
+      border-radius: 999px;
+      padding: 5px 15px;
+      margin-bottom: 26px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--purple);
+      box-shadow: 0 0 6px var(--purple);
+      animation: dot-pulse 2.2s ease-in-out infinite;
+    }
+
+    @keyframes dot-pulse {
+      0%, 100% { opacity: 1; transform: scale(1);   }
+      50%       { opacity: 0.4; transform: scale(1.5); }
+    }
+
+    header h1 {
+      font-size: clamp(30px, 5.5vw, 52px);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1.08;
+      background: linear-gradient(140deg, #f8fafc 25%, var(--purple-light) 62%, var(--blue-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+    }
+
+    header .subtitle {
+      font-size: clamp(15px, 2.2vw, 18px);
+      color: var(--text-secondary);
+      max-width: 500px;
+      margin: 0 auto 36px;
+    }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: inline-flex;
+      align-items: stretch;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .stat {
+      padding: 14px 28px;
+      text-align: center;
+    }
+
+    .stat + .stat {
+      border-left: 1px solid var(--border);
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+
+    .stat-value.accent { color: var(--purple-light); }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-top: 5px;
+    }
+
+    /* ── Section heading ── */
+    .section-heading {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-heading::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Module grid ── */
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    /* ── Module card ── */
+    .card {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      transition:
+        border-color 0.22s ease,
+        background   0.22s ease,
+        transform    0.18s ease,
+        box-shadow   0.22s ease;
+      overflow: hidden;
+    }
+
+    /* Gradient overlay */
+    .card-glow {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--purple-dim), transparent 55%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      border-radius: inherit;
+    }
+
+    .card:hover {
+      border-color: rgba(139, 92, 246, 0.6);
+      background: var(--bg-card-hover);
+      transform: translateY(-4px);
+      box-shadow:
+        0 16px 40px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(139, 92, 246, 0.18);
+    }
+
+    .card:hover .card-glow { opacity: 1; }
+
+    .card.completed {
+      border-color: rgba(34, 197, 94, 0.35);
+    }
+
+    .card.completed .card-glow {
+      background: linear-gradient(135deg, var(--green-dim), transparent 55%);
+      opacity: 1;
+    }
+
+    .card.completed:hover {
+      border-color: rgba(34, 197, 94, 0.7);
+      box-shadow:
+        0 16px 40px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(34, 197, 94, 0.2);
+    }
+
+    /* Card inner — all content sits above overlay */
+    .card-inner {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      flex: 1;
+    }
+
+    /* Top row: icon + meta */
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      border-radius: var(--radius-sm);
+      background: var(--purple-dim);
+      border: 1px solid rgba(139, 92, 246, 0.22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover .card-icon { transform: scale(1.1) rotate(-3deg); }
+
+    .card-right-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 7px;
+    }
+
+    .module-number {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .checkmark {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--green);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.5);
+      animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    }
+
+    @keyframes pop {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    /* Text block */
+    .card-text { flex: 1; }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 7px;
+      line-height: 1.3;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.58;
+    }
+
+    /* Footer row */
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 14px;
+      border-top: 1px solid rgba(51, 65, 85, 0.7);
+      margin-top: 4px;
+    }
+
+    .card-time {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .card-cta {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--purple-light);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: gap 0.2s ease, color 0.2s ease;
+    }
+
+    .card.completed .card-cta { color: var(--green); }
+    .card:hover .card-cta { gap: 8px; }
+
+    /* ── Reset button ── */
+    .reset-wrap {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .btn-reset {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 12px;
+      padding: 8px 22px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-reset:hover {
+      border-color: var(--text-muted);
+      color: var(--text-secondary);
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: auto;
+      border-top: 1px solid var(--border);
+      padding: 24px;
+      text-align: center;
+    }
+
+    footer p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    footer strong { color: var(--purple-light); font-weight: 600; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--green);
+      color: var(--text-primary);
+      padding: 12px 22px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+      transition:
+        transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+        opacity   0.3s ease;
+      opacity: 0;
+      z-index: 300;
+      pointer-events: none;
+    }
+
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .container { padding: 0 16px; }
+      header { padding: 44px 0 36px; }
+      .stats-row { flex-wrap: wrap; }
+      .stat { flex: 1; min-width: 80px; }
+      .modules-grid { grid-template-columns: 1fr; }
+      #progress-bar-wrapper { padding: 10px 16px; gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top sticky progress bar -->
+  <div id="progress-bar-wrapper">
+    <span id="progress-label">Progresso</span>
+    <div id="progress-track">
+      <div id="progress-fill"></div>
+    </div>
+    <span id="progress-count">0 / 6</span>
+  </div>
+
+  <div class="page">
+    <div class="container">
+
+      <!-- Header -->
+      <header>
+        <div class="eyebrow">
+          <span class="eyebrow-dot"></span>
+          Trilha de Aprendizado
+        </div>
+        <h1>IA para Devs<br>Treinamento Interativo</h1>
+        <p class="subtitle">De zero a especialista em IA aplicada — aprenda no seu ritmo, com exemplos práticos do dia a dia.</p>
+        <div class="stats-row">
+          <div class="stat">
+            <div class="stat-value">6</div>
+            <div class="stat-label">Módulos</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">~1h</div>
+            <div class="stat-label">Total</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value accent" id="stat-completed">0</div>
+            <div class="stat-label">Concluídos</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Module cards -->
+      <div class="section-heading">Módulos da trilha</div>
+
+      <div class="modules-grid" id="modules-grid">
+        <!-- Populated by JS -->
+      </div>
+
+      <div class="reset-wrap">
+        <button class="btn-reset" id="btn-reset">Resetar progresso</button>
+      </div>
+
+    </div><!-- /.container -->
+
+    <!-- Footer -->
+    <footer>
+      <p>Criado para o time <strong>Sua Empresa</strong> &mdash; Relivox AI Training &copy; 2025</p>
+    </footer>
+  </div><!-- /.page -->
+
+  <!-- Toast notification -->
+  <div id="toast"></div>
+
+  <script>
+    'use strict';
+
+    const MODULES = [
+      {
+        id: 1,
+        icon: '🧠',
+        title: 'Fundamentos de IA Generativa',
+        desc:  'O que é LLM, tokens, como funciona — a base de tudo que vem depois.',
+        time:  '~15 min',
+        href:  'modules/01-fundamentos.html',
+      },
+      {
+        id: 2,
+        icon: '✍️',
+        title: 'Prompt Engineering',
+        desc:  'A arte de conversar com IA. Técnicas práticas para extrair respostas melhores.',
+        time:  '~15 min',
+        href:  'modules/02-prompt-engineering.html',
+      },
+      {
+        id: 3,
+        icon: '🗂️',
+        title: 'Context Engineering',
+        desc:  'Projetando o contexto perfeito. Monte janelas de contexto que maximizam a qualidade.',
+        time:  '~10 min',
+        href:  'modules/03-context-engineering.html',
+      },
+      {
+        id: 4,
+        icon: '🤖',
+        title: 'Agentes de IA',
+        desc:  'Quando a IA age por conta própria. Decisões, ferramentas e ações encadeadas.',
+        time:  '~15 min',
+        href:  'modules/04-agentes.html',
+      },
+      {
+        id: 5,
+        icon: '🔍',
+        title: 'RAG & Tools',
+        desc:  'Dando memória e ferramentas à IA. RAG, function calling e integração com sistemas reais.',
+        time:  '~15 min',
+        href:  'modules/05-rag-tools.html',
+      },
+      {
+        id: 6,
+        icon: '📊',
+        title: 'Avaliação (Eval)',
+        desc:  'Como medir se a IA está funcionando. Métricas, benchmarks e prevenção de regressões.',
+        time:  '~10 min',
+        href:  'modules/06-eval.html',
+      },
+    ];
+
+    const STORAGE_KEY = 'ai-training-completed-v1';
+    const TOTAL = MODULES.length;
+
+    function getCompleted() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+      catch { return []; }
+    }
+
+    function saveCompleted(list) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+
+    function updateProgress(completed) {
+      const n   = completed.length;
+      const pct = Math.round((n / TOTAL) * 100);
+      document.getElementById('progress-fill').style.width = pct + '%';
+      document.getElementById('progress-count').textContent = n + ' / ' + TOTAL;
+      document.getElementById('stat-completed').textContent = n;
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2800);
+    }
+
+    function buildCard(mod, isDone) {
+      const card = document.createElement('a');
+      card.href      = mod.href;
+      card.className = 'card' + (isDone ? ' completed' : '');
+      card.setAttribute('aria-label', mod.title);
+
+      card.innerHTML = `
+        <div class="card-glow"></div>
+        <div class="card-inner">
+          <div class="card-top">
+            <div class="card-icon">${mod.icon}</div>
+            <div class="card-right-meta">
+              <span class="module-number">Módulo ${String(mod.id).padStart(2, '0')}</span>
+              ${isDone ? '<div class="checkmark">✓</div>' : ''}
+            </div>
+          </div>
+          <div class="card-text">
+            <div class="card-title">${mod.title}</div>
+            <div class="card-desc">${mod.desc}</div>
+          </div>
+          <div class="card-footer">
+            <span class="card-time">⏱ ${mod.time}</span>
+            <span class="card-cta">${isDone ? 'Revisar' : 'Começar'} →</span>
+          </div>
+        </div>
+      `;
+
+      /* Mark module as visited when user clicks */
+      card.addEventListener('click', () => {
+        const current = getCompleted();
+        if (!current.includes(mod.id)) {
+          saveCompleted([...current, mod.id]);
+        }
+      });
+
+      return card;
+    }
+
+    function render() {
+      const completed = getCompleted();
+      const grid = document.getElementById('modules-grid');
+      grid.innerHTML = '';
+      MODULES.forEach(mod => grid.appendChild(buildCard(mod, completed.includes(mod.id))));
+      updateProgress(completed);
+    }
+
+    /* Reset handler */
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      if (confirm('Tem certeza que deseja resetar todo o seu progresso?')) {
+        saveCompleted([]);
+        render();
+        showToast('Progresso resetado com sucesso.');
+      }
+    });
+
+    /* Re-render when user returns to the tab from a module page */
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') render();
+    });
+
+    render();
+  </script>
+</body>
+</html>

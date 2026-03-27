@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 4 — Agentes de IA | IA para Devs</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg:          #04060f;
+    --bg-card:     rgba(14,18,38,0.85);
+    --border:      rgba(99,102,241,0.18);
+    --border-h:    rgba(99,102,241,0.55);
+    --indigo-500:  #6366f1;
+    --indigo-400:  #818cf8;
+    --indigo-300:  #a5b4fc;
+    --violet-500:  #8b5cf6;
+    --violet-400:  #a78bfa;
+    --cyan-400:    #22d3ee;
+    --blue-400:    #60a5fa;
+    --green-400:   #4ade80;
+    --red-400:     #f87171;
+    --amber-400:   #fbbf24;
+    --text-1:      #f0f4ff;
+    --text-2:      #94a3b8;
+    --text-3:      #475569;
+    --radius:      14px;
+    --t:           0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text-1); min-height: 100vh; overflow-x: hidden; }
+
+  .nebula { position:fixed; border-radius:50%; filter:blur(120px); pointer-events:none; z-index:0; mix-blend-mode:screen; }
+  .n1 { width:700px;height:500px;top:-150px;left:-150px; background:radial-gradient(ellipse,rgba(67,56,202,.2) 0%,transparent 70%); }
+  .n2 { width:500px;height:600px;bottom:-100px;right:-100px; background:radial-gradient(ellipse,rgba(124,58,237,.16) 0%,transparent 70%); }
+  .n3 { width:400px;height:400px;top:45%;left:55%;transform:translate(-50%,-50%); background:radial-gradient(ellipse,rgba(34,211,238,.07) 0%,transparent 70%); }
+
+  .page { position:relative; z-index:1; max-width:900px; margin:0 auto; padding:0 24px 80px; }
+
+  .top-nav { display:flex; align-items:center; justify-content:space-between; padding:20px 0 0; }
+  .nav-back { display:inline-flex; align-items:center; gap:8px; font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-2); text-decoration:none; transition:color var(--t); }
+  .nav-back:hover { color:var(--indigo-300); }
+  .nav-back svg { width:14px;height:14px; }
+  .module-badge { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--violet-400); background:rgba(139,92,246,.1); border:1px solid rgba(139,92,246,.25); border-radius:100px; padding:5px 14px; }
+
+  .mod-header { padding:48px 0 56px; text-align:center; }
+  .mod-eyebrow { display:inline-flex; align-items:center; gap:8px; font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--indigo-400); background:rgba(99,102,241,.1); border:1px solid rgba(99,102,241,.25); border-radius:100px; padding:6px 16px; margin-bottom:24px; }
+  .mod-eyebrow::before { content:''; width:6px;height:6px;border-radius:50%; background:var(--cyan-400); box-shadow:0 0 8px var(--cyan-400); animation:pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+  .mod-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(42px,8vw,88px); letter-spacing:.03em; line-height:.9; }
+  .mod-title .accent { background:linear-gradient(135deg,var(--indigo-300) 0%,var(--violet-400) 45%,var(--cyan-400) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; filter:drop-shadow(0 0 25px rgba(129,140,248,.45)); }
+  .mod-subtitle { font-size:17px; font-weight:300; color:var(--text-2); margin-top:18px; max-width:580px; margin-left:auto; margin-right:auto; line-height:1.65; }
+  .mod-meta { font-family:'DM Mono',monospace; font-size:11px; color:var(--text-3); margin-top:14px; letter-spacing:.08em; }
+
+  .section { margin-bottom:72px; }
+  .section-header { display:flex; align-items:center; gap:16px; margin-bottom:32px; }
+  .section-num { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.12em; color:var(--text-3); text-transform:uppercase; white-space:nowrap; }
+  .section-title { font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:.05em; }
+  .section-line { flex:1; height:1px; background:linear-gradient(to right,rgba(99,102,241,.25),transparent); }
+
+  .card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:28px; transition:border-color var(--t), transform var(--t), box-shadow var(--t); position:relative; overflow:hidden; }
+  .card:hover { border-color:var(--border-h); transform:translateY(-2px); box-shadow:0 12px 40px rgba(0,0,0,.4); }
+  .card-glow { position:absolute; inset:0; border-radius:inherit; pointer-events:none; background:linear-gradient(135deg,rgba(99,102,241,.06),transparent 60%); opacity:0; transition:opacity var(--t); }
+  .card:hover .card-glow { opacity:1; }
+
+  .compare-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media(max-width:600px){.compare-grid{grid-template-columns:1fr;}}
+  .compare-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:24px; }
+  .compare-card.chatbot { border-top:2px solid var(--blue-400); }
+  .compare-card.agent   { border-top:2px solid var(--violet-500); }
+  .compare-icon { font-size:28px; margin-bottom:12px; }
+  .compare-name { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:.05em; margin-bottom:8px; }
+  .compare-name.blue   { color:var(--blue-400); }
+  .compare-name.violet { color:var(--violet-400); }
+  .compare-desc { font-size:14px; color:var(--text-2); line-height:1.6; }
+  .compare-list { list-style:none; margin-top:12px; display:flex; flex-direction:column; gap:6px; }
+  .compare-list li { font-size:13px; color:var(--text-2); display:flex; align-items:baseline; gap:8px; }
+  .compare-list li::before { content:'→'; color:var(--text-3); font-size:11px; flex-shrink:0; }
+
+  .analogy-box { margin-top:20px; padding:20px 24px; background:rgba(139,92,246,.07); border:1px solid rgba(139,92,246,.2); border-radius:12px; }
+  .analogy-box .label { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--violet-400); margin-bottom:10px; }
+  .analogy-box p { font-size:14px; color:var(--text-2); line-height:1.65; }
+  .analogy-box strong { color:var(--text-1); }
+
+  .exercise-wrap { background:rgba(10,14,30,.7); border:1px solid rgba(99,102,241,.2); border-radius:var(--radius); padding:28px; margin-top:20px; }
+  .exercise-label { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--cyan-400); display:flex; align-items:center; gap:8px; margin-bottom:20px; }
+  .exercise-label::before { content:''; width:6px;height:6px;border-radius:50%; background:var(--cyan-400); box-shadow:0 0 6px var(--cyan-400); }
+
+  .classify-grid { display:flex; flex-direction:column; gap:10px; }
+  .classify-item { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 18px; background:rgba(14,18,38,.9); border:1px solid var(--border); border-radius:10px; flex-wrap:wrap; transition:border-color var(--t); }
+  .classify-item.correct-chatbot { border-color:var(--blue-400); }
+  .classify-item.correct-agent   { border-color:var(--violet-500); }
+  .classify-item .task-text { font-size:14px; color:var(--text-1); flex:1; min-width:160px; }
+  .classify-btns { display:flex; gap:8px; }
+  .classify-btn { padding:6px 14px; border-radius:8px; border:1px solid; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; transition:all var(--t); background:transparent; }
+  .classify-btn.chatbot { color:var(--blue-400); border-color:rgba(59,130,246,.3); }
+  .classify-btn.chatbot:hover { background:rgba(59,130,246,.12); }
+  .classify-btn.agent   { color:var(--violet-400); border-color:rgba(139,92,246,.3); }
+  .classify-btn.agent:hover { background:rgba(139,92,246,.12); }
+  .classify-btn:disabled { cursor:default; pointer-events:none; }
+  .classify-btn.chosen.chatbot { background:rgba(59,130,246,.2); border-color:var(--blue-400); }
+  .classify-btn.chosen.agent   { background:rgba(139,92,246,.2); border-color:var(--violet-500); }
+  .classify-result { font-size:12px; font-weight:600; white-space:nowrap; display:none; }
+  .classify-result.show { display:block; }
+  .classify-result.ok  { color:var(--green-400); }
+  .classify-result.err { color:var(--red-400); }
+  .classify-score { margin-top:16px; text-align:center; font-family:'DM Mono',monospace; font-size:13px; color:var(--text-2); display:none; }
+  .classify-score span { color:var(--cyan-400); font-size:18px; font-weight:700; }
+
+  .loop-diagram { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:8px; padding:24px 0; margin-bottom:8px; }
+  .loop-node { padding:8px 16px; border-radius:100px; font-size:13px; font-weight:500; white-space:nowrap; border:1px solid; }
+  .loop-node.goal    { background:rgba(251,191,36,.12); border-color:rgba(251,191,36,.3);  color:var(--amber-400); }
+  .loop-node.plan    { background:rgba(99,102,241,.12); border-color:rgba(99,102,241,.3);  color:var(--indigo-300); }
+  .loop-node.act     { background:rgba(139,92,246,.12); border-color:rgba(139,92,246,.3);  color:var(--violet-400); }
+  .loop-node.observe { background:rgba(34,211,238,.1);  border-color:rgba(34,211,238,.25); color:var(--cyan-400); }
+  .loop-node.done    { background:rgba(74,222,128,.1);  border-color:rgba(74,222,128,.25); color:var(--green-400); }
+  .loop-arrow { color:var(--text-3); font-size:16px; }
+  .loop-branch { display:flex; align-items:center; justify-content:center; gap:8px; font-size:12px; color:var(--text-3); flex-wrap:wrap; padding-top:6px; }
+  .loop-branch .yes { color:var(--green-400); font-weight:600; }
+  .loop-branch .no  { color:var(--red-400);   font-weight:600; }
+
+  .sim-wrap { display:grid; grid-template-columns:1fr 280px; gap:16px; margin-top:20px; }
+  @media(max-width:700px){.sim-wrap{grid-template-columns:1fr;}}
+  .sim-main { background:rgba(10,14,30,.8); border:1px solid rgba(99,102,241,.2); border-radius:var(--radius); padding:24px; display:flex; flex-direction:column; gap:16px; }
+  .sim-log  { background:rgba(6,9,20,.9); border:1px solid rgba(99,102,241,.15); border-radius:var(--radius); padding:16px; display:flex; flex-direction:column; gap:8px; max-height:440px; overflow-y:auto; }
+  .sim-log-title { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-3); margin-bottom:6px; border-bottom:1px solid rgba(99,102,241,.1); padding-bottom:8px; }
+  .log-entry { font-family:'DM Mono',monospace; font-size:11px; line-height:1.5; padding:6px 10px; border-radius:6px; animation:logIn .3s ease both; }
+  @keyframes logIn { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:none} }
+  .log-entry.think   { color:var(--indigo-300); background:rgba(99,102,241,.08); }
+  .log-entry.action  { color:var(--violet-400); background:rgba(139,92,246,.08); }
+  .log-entry.observe { color:var(--cyan-400);   background:rgba(34,211,238,.07); }
+  .log-entry.success { color:var(--green-400);  background:rgba(74,222,128,.08); }
+
+  .sim-phase    { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-3); }
+  .sim-question { font-size:15px; color:var(--text-1); line-height:1.6; font-weight:500; }
+  .sim-options  { display:flex; flex-direction:column; gap:8px; }
+  .sim-opt { padding:12px 16px; border-radius:10px; border:1px solid var(--border); background:rgba(14,18,38,.8); cursor:pointer; font-size:14px; color:var(--text-2); transition:all var(--t); text-align:left; }
+  .sim-opt:hover { border-color:var(--border-h); color:var(--text-1); background:rgba(20,26,52,.9); }
+  .sim-opt.correct { border-color:var(--green-400); color:var(--green-400); background:rgba(74,222,128,.08); cursor:default; }
+  .sim-opt.wrong   { border-color:var(--red-400);   color:var(--red-400);   background:rgba(248,113,113,.08); cursor:default; }
+  .sim-opt:disabled { pointer-events:none; }
+
+  .sim-feedback { padding:14px 18px; border-radius:10px; font-size:14px; line-height:1.55; display:none; }
+  .sim-feedback.show { display:block; animation:logIn .3s ease both; }
+  .sim-feedback.ok  { background:rgba(74,222,128,.08);  border:1px solid rgba(74,222,128,.25);  color:var(--green-400); }
+  .sim-feedback.err { background:rgba(248,113,113,.08); border:1px solid rgba(248,113,113,.25); color:var(--red-400); }
+
+  .sim-code { font-family:'DM Mono',monospace; font-size:12px; line-height:1.7; background:rgba(4,6,15,.9); border:1px solid rgba(99,102,241,.2); border-radius:10px; padding:16px; color:var(--text-2); display:none; animation:logIn .4s ease both; }
+  .sim-code.show { display:block; }
+  .sim-code .kw  { color:var(--violet-400); }
+  .sim-code .fn  { color:var(--blue-400); }
+  .sim-code .num { color:var(--amber-400); }
+  .sim-code .cmt { color:var(--text-3); font-style:italic; }
+  .sim-code .err-line { background:rgba(248,113,113,.12); display:block; border-left:2px solid var(--red-400); padding-left:8px; }
+
+  .sim-btn { padding:10px 22px; border-radius:10px; border:1px solid rgba(99,102,241,.35); background:rgba(99,102,241,.12); color:var(--indigo-300); font-family:'DM Mono',monospace; font-size:12px; letter-spacing:.06em; text-transform:uppercase; cursor:pointer; transition:all var(--t); align-self:flex-start; }
+  .sim-btn:hover { background:rgba(99,102,241,.22); border-color:var(--indigo-400); }
+  .sim-btn:disabled { opacity:.4; cursor:not-allowed; }
+
+  .sim-progress { display:flex; gap:6px; align-items:center; margin-bottom:4px; }
+  .sim-dot { width:8px;height:8px;border-radius:50%; background:rgba(99,102,241,.2); border:1px solid rgba(99,102,241,.3); transition:all var(--t); }
+  .sim-dot.done    { background:var(--indigo-500); box-shadow:0 0 6px rgba(99,102,241,.5); }
+  .sim-dot.current { background:var(--cyan-400); box-shadow:0 0 8px rgba(34,211,238,.5); animation:pulse 1.5s infinite; }
+
+  .sim-complete { text-align:center; padding:24px; display:none; animation:fadeIn .5s ease both; }
+  .sim-complete.show { display:block; }
+  @keyframes fadeIn { from{opacity:0;transform:scale(.97)} to{opacity:1;transform:none} }
+  .sim-complete .big { font-family:'Bebas Neue',sans-serif; font-size:36px; letter-spacing:.05em; color:var(--green-400); margin-bottom:8px; }
+  .sim-complete p { font-size:14px; color:var(--text-2); line-height:1.6; }
+
+  .pattern-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media(max-width:620px){.pattern-grid{grid-template-columns:1fr;}}
+  .pattern-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); cursor:pointer; transition:border-color var(--t), box-shadow var(--t); overflow:hidden; }
+  .pattern-card:hover    { border-color:var(--border-h); }
+  .pattern-card.expanded { border-color:var(--border-h); box-shadow:0 8px 32px rgba(0,0,0,.35); }
+  .pattern-head { display:flex; align-items:center; gap:12px; padding:20px 22px; }
+  .pattern-icon { font-size:24px; }
+  .pattern-info { flex:1; }
+  .pattern-name { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:.04em; }
+  .pattern-tag  { font-size:12px; color:var(--text-3); margin-top:2px; }
+  .pattern-arrow { color:var(--text-3); font-size:14px; transition:transform var(--t); }
+  .pattern-card.expanded .pattern-arrow { transform:rotate(90deg); }
+  .pattern-body { max-height:0; overflow:hidden; transition:max-height .45s cubic-bezier(0.4,0,0.2,1); }
+  .pattern-card.expanded .pattern-body { max-height:420px; border-top:1px solid var(--border); }
+  .pattern-body-inner { padding:20px 22px; }
+  .pattern-desc { font-size:14px; color:var(--text-2); line-height:1.65; margin-bottom:14px; }
+  .pattern-when { font-family:'DM Mono',monospace; font-size:11px; color:var(--text-3); margin-bottom:10px; text-transform:uppercase; letter-spacing:.1em; }
+  .pattern-when span { color:var(--amber-400); }
+  .pattern-visual { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:12px 16px; background:rgba(4,6,15,.6); border-radius:10px; margin-bottom:10px; }
+  .pv-node { padding:5px 12px; border-radius:100px; font-size:12px; white-space:nowrap; border:1px solid; }
+  .pv-node.main   { background:rgba(139,92,246,.15); border-color:rgba(139,92,246,.4);  color:var(--violet-400); }
+  .pv-node.worker { background:rgba(59,130,246,.12); border-color:rgba(59,130,246,.3);  color:var(--blue-400); font-size:11px; }
+  .pv-node.step   { background:rgba(34,211,238,.1);  border-color:rgba(34,211,238,.25); color:var(--cyan-400); font-size:11px; }
+  .pv-node.human  { background:rgba(251,191,36,.1);  border-color:rgba(251,191,36,.25); color:var(--amber-400); }
+  .pv-node.gate   { background:rgba(74,222,128,.1);  border-color:rgba(74,222,128,.25); color:var(--green-400); font-size:11px; }
+  .pv-arr { color:var(--text-3); font-size:13px; }
+  .pattern-note { font-size:12px; color:var(--indigo-300); font-style:italic; background:rgba(99,102,241,.08); border-radius:8px; padding:8px 12px; }
+
+  .tools-exercise { display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start; }
+  @media(max-width:640px){.tools-exercise{grid-template-columns:1fr;}}
+  .tools-list { display:flex; flex-direction:column; gap:10px; }
+  .tool-toggle { display:flex; align-items:center; gap:12px; padding:14px 16px; background:rgba(14,18,38,.8); border:1px solid var(--border); border-radius:10px; cursor:pointer; transition:all var(--t); user-select:none; }
+  .tool-toggle:hover  { border-color:var(--border-h); }
+  .tool-toggle.active { border-color:var(--violet-500); background:rgba(139,92,246,.08); }
+  .tool-icon   { font-size:18px; }
+  .tool-name   { flex:1; }
+  .tool-switch { width:36px; height:20px; border-radius:100px; background:rgba(99,102,241,.2); border:1px solid rgba(99,102,241,.3); position:relative; transition:all var(--t); flex-shrink:0; }
+  .tool-switch::after { content:''; position:absolute; width:14px;height:14px;border-radius:50%; background:var(--text-3); top:2px; left:2px; transition:all var(--t); }
+  .tool-toggle.active .tool-switch { background:var(--violet-500); border-color:var(--violet-400); }
+  .tool-toggle.active .tool-switch::after { background:#fff; left:18px; box-shadow:0 0 6px rgba(139,92,246,.5); }
+
+  .agent-response { background:rgba(6,9,20,.9); border:1px solid rgba(99,102,241,.2); border-radius:var(--radius); padding:20px; }
+  .agent-response-label { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-3); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid rgba(99,102,241,.1); }
+  .cap-label { font-size:12px; color:var(--text-2); margin-bottom:6px; }
+  .cap-bar-bg { height:8px; background:rgba(99,102,241,.12); border-radius:100px; overflow:hidden; margin-bottom:16px; }
+  .cap-bar { height:100%; border-radius:100px; background:linear-gradient(90deg,var(--violet-500),var(--cyan-400)); transition:width .6s cubic-bezier(0.4,0,0.2,1); box-shadow:0 0 10px rgba(139,92,246,.4); }
+  .agent-text { font-size:14px; color:var(--text-2); line-height:1.7; }
+  .agent-text .highlight { color:var(--indigo-300); font-weight:500; }
+
+  .guard-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media(max-width:640px){.guard-grid{grid-template-columns:1fr;}}
+  .guard-scenario { background:rgba(14,18,38,.8); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:16px; }
+  .guard-scenario .label { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-3); margin-bottom:12px; }
+  .guard-scenario h4 { font-size:15px; color:var(--text-1); margin-bottom:8px; }
+  .guard-scenario p  { font-size:13px; color:var(--text-2); line-height:1.6; }
+  .guard-perms { display:flex; flex-direction:column; gap:8px; }
+  .guard-perm { display:flex; align-items:center; gap:10px; padding:10px 14px; background:rgba(6,9,20,.7); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all var(--t); user-select:none; }
+  .guard-perm:hover   { border-color:var(--border-h); }
+  .guard-perm.on      { border-color:rgba(74,222,128,.35);  background:rgba(74,222,128,.06); }
+  .guard-perm.danger.on { border-color:rgba(248,113,113,.35); background:rgba(248,113,113,.06); }
+  .perm-cb { width:16px;height:16px;border-radius:4px;border:1.5px solid var(--text-3); background:transparent; transition:all var(--t); flex-shrink:0; position:relative; }
+  .guard-perm.on .perm-cb { background:var(--green-400); border-color:var(--green-400); }
+  .guard-perm.on .perm-cb::after { content:'✓'; position:absolute; top:50%;left:50%;transform:translate(-50%,-50%); font-size:10px; font-weight:800; color:#000; }
+  .guard-perm.danger.on .perm-cb { background:var(--red-400); border-color:var(--red-400); }
+  .perm-text { flex:1; font-size:13px; }
+  .perm-text small { display:block; font-size:11px; color:var(--text-3); margin-top:2px; }
+  .perm-risk { font-size:10px; font-family:'DM Mono',monospace; letter-spacing:.06em; }
+
+  .risk-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .risk-header span { font-size:12px; color:var(--text-2); }
+  .risk-val { font-family:'DM Mono',monospace; font-size:13px; font-weight:700; }
+  .risk-bar-bg { height:12px; background:rgba(99,102,241,.12); border-radius:100px; overflow:hidden; }
+  .risk-bar { height:100%; border-radius:100px; transition:width .5s ease, background .5s ease; }
+  .risk-msg { margin-top:12px; padding:10px 14px; border-radius:8px; font-size:13px; display:none; }
+  .risk-msg.show { display:block; }
+  .risk-msg.low  { background:rgba(74,222,128,.08);  border:1px solid rgba(74,222,128,.2);  color:var(--green-400); }
+  .risk-msg.med  { background:rgba(251,191,36,.08);  border:1px solid rgba(251,191,36,.2);  color:var(--amber-400); }
+  .risk-msg.high { background:rgba(248,113,113,.08); border:1px solid rgba(248,113,113,.2); color:var(--red-400); }
+  .risk-msg.off  { background:rgba(99,102,241,.08);  border:1px solid rgba(99,102,241,.2);  color:var(--text-3); }
+
+  .quiz-wrap { display:flex; flex-direction:column; gap:24px; }
+  .quiz-q { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:24px; transition:border-color var(--t); }
+  .quiz-q.answered { border-color:rgba(99,102,241,.3); }
+  .quiz-q-num  { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-3); margin-bottom:10px; }
+  .quiz-q-text { font-size:15px; color:var(--text-1); font-weight:500; margin-bottom:16px; line-height:1.55; }
+  .quiz-options { display:flex; flex-direction:column; gap:8px; }
+  .quiz-opt { padding:12px 16px; border-radius:10px; border:1px solid var(--border); background:rgba(14,18,38,.8); cursor:pointer; font-size:14px; color:var(--text-2); transition:all var(--t); text-align:left; }
+  .quiz-opt:hover:not(:disabled) { border-color:var(--border-h); color:var(--text-1); }
+  .quiz-opt.correct { border-color:var(--green-400); color:var(--green-400); background:rgba(74,222,128,.08); }
+  .quiz-opt.wrong   { border-color:var(--red-400);   color:var(--red-400);   background:rgba(248,113,113,.08); }
+  .quiz-opt:disabled { cursor:default; }
+  .quiz-explanation { margin-top:12px; padding:12px 16px; border-radius:8px; font-size:13px; color:var(--text-2); line-height:1.6; display:none; background:rgba(99,102,241,.08); border:1px solid rgba(99,102,241,.15); }
+  .quiz-explanation.show { display:block; animation:logIn .3s ease both; }
+  .quiz-result { background:var(--bg-card); border:1px solid rgba(139,92,246,.3); border-radius:var(--radius); padding:32px; text-align:center; display:none; }
+  .quiz-result.show { display:block; animation:fadeIn .5s ease both; }
+  .quiz-result .big { font-family:'Bebas Neue',sans-serif; font-size:56px; letter-spacing:.05em; background:linear-gradient(135deg,var(--indigo-300),var(--violet-400)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .quiz-result p   { font-size:15px; color:var(--text-2); margin-top:8px; }
+  .quiz-result .sub{ font-size:13px; color:var(--text-3); margin-top:6px; }
+
+  .bottom-nav { display:flex; align-items:center; justify-content:space-between; padding:40px 0 20px; border-top:1px solid rgba(99,102,241,.12); margin-top:24px; gap:12px; }
+  .nav-link { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:10px; border:1px solid var(--border); background:var(--bg-card); color:var(--text-2); text-decoration:none; font-size:14px; transition:all var(--t); }
+  .nav-link:hover      { border-color:var(--border-h); color:var(--text-1); transform:translateX(-3px); }
+  .nav-link.next:hover { transform:translateX(3px); }
+  .nav-link svg { width:14px;height:14px;flex-shrink:0; }
+  .nav-link .lbl { font-size:11px; font-family:'DM Mono',monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--text-3); display:block; margin-bottom:2px; }
+  .nav-link .ttl { display:block; }
+</style>
+</head>
+<body>
+
+<div class="nebula n1"></div>
+<div class="nebula n2"></div>
+<div class="nebula n3"></div>
+
+<div class="page">
+
+  <nav class="top-nav">
+    <a href="../index.html" class="nav-back">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2L4 7l5 5"/></svg>
+      Início
+    </a>
+    <span class="module-badge">Módulo 04</span>
+  </nav>
+
+  <header class="mod-header">
+    <div class="mod-eyebrow">Agentes de IA</div>
+    <h1 class="mod-title">
+      QUANDO A IA<br>
+      <span class="accent">AGE POR CONTA</span><br>
+      PRÓPRIA
+    </h1>
+    <p class="mod-subtitle">
+      Do chatbot que responde perguntas ao agente que lê código, planeja, executa ferramentas e entrega resultados sem precisar de você em cada passo.
+    </p>
+    <p class="mod-meta">6 seções · ~20 min · exercício interativo principal</p>
+  </header>
+
+  <!-- S1 -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Chatbot vs Agente</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="compare-grid">
+      <div class="compare-card chatbot">
+        <div class="compare-icon">💬</div>
+        <div class="compare-name blue">Chatbot</div>
+        <p class="compare-desc">Você pergunta, ele responde. Ciclo encerrado.</p>
+        <ul class="compare-list">
+          <li>Responde uma pergunta por vez</li>
+          <li>Não toma ações no mundo</li>
+          <li>Não usa ferramentas externas</li>
+          <li>Não itera sobre resultados</li>
+        </ul>
+      </div>
+      <div class="compare-card agent">
+        <div class="compare-icon">🤖</div>
+        <div class="compare-name violet">Agente</div>
+        <p class="compare-desc">Você dá um OBJETIVO. Ele planeja, age, itera.</p>
+        <ul class="compare-list">
+          <li>Quebra o objetivo em passos</li>
+          <li>Usa ferramentas (lê arquivos, roda código)</li>
+          <li>Avalia resultados e ajusta o plano</li>
+          <li>Para quando o objetivo foi atingido</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="analogy-box">
+      <div class="label">Analogia</div>
+      <p>
+        <strong>Chatbot = busca no Google</strong> — você pergunta, ele mostra resultados. Tudo que acontece depois é com você.<br><br>
+        <strong>Agente = contratar um dev júnior</strong> — você descreve o que precisa, ele descobre os passos, escreve o código, testa, traz dúvidas específicas quando está bloqueado. Você só entra quando precisa.
+      </p>
+    </div>
+
+    <div class="exercise-wrap">
+      <div class="exercise-label">Exercício — Classifique as tarefas</div>
+      <p style="font-size:14px;color:var(--text-2);margin-bottom:20px;line-height:1.6">
+        Para cada tarefa abaixo, decida: um chatbot normal consegue responder, ou a tarefa precisa de um agente com ferramentas?
+      </p>
+      <div class="classify-grid" id="classifyGrid"></div>
+      <div class="classify-score" id="classifyScore">
+        Resultado: <span id="classifyScoreVal">—</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- S2 -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Anatomia de um Agente</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-glow"></div>
+      <p style="font-size:14px;color:var(--text-2);margin-bottom:20px;line-height:1.6">
+        Todo agente executa um loop: planeja o próximo passo, age usando uma ferramenta, observa o resultado e decide se o objetivo foi atingido ou se precisa replanejar.
+      </p>
+      <div class="loop-diagram">
+        <div class="loop-node goal">🎯 Objetivo</div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-node plan">🧠 Planejar</div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-node act">⚡ Agir (tool)</div>
+        <div class="loop-arrow">→</div>
+        <div class="loop-node observe">👁 Observar</div>
+      </div>
+      <div class="loop-branch">
+        <span>Objetivo atingido?</span>
+        <span class="yes">Sim →</span>
+        <div class="loop-node done">✅ Entregar</div>
+        <span style="margin-left:16px" class="no">Não →</span>
+        <span>replanejar e agir novamente</span>
+      </div>
+    </div>
+
+    <div class="exercise-wrap" style="margin-top:24px">
+      <div class="exercise-label">Exercício Principal — Simulador de Agente</div>
+      <p style="font-size:14px;color:var(--text-2);margin-bottom:4px;line-height:1.6">
+        <strong style="color:var(--text-1)">Cenário:</strong> Você é o agente. Sua missão é corrigir o bug:
+        <em style="color:var(--amber-400)">"a função <code>calcularDesconto</code> retorna valor negativo quando o desconto é maior que o preço."</em>
+      </p>
+      <p style="font-size:13px;color:var(--text-3);margin-bottom:20px">Siga o loop do agente passo a passo.</p>
+      <div class="sim-wrap">
+        <div class="sim-main" id="simMain">
+          <div><div class="sim-progress" id="simProgress"></div></div>
+          <div id="simContent"></div>
+        </div>
+        <div class="sim-log" id="simLog">
+          <div class="sim-log-title">📋 Agent Log</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- S3 -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Padrões de Agentes</h2>
+      <div class="section-line"></div>
+    </div>
+    <p style="font-size:14px;color:var(--text-2);margin-bottom:24px;line-height:1.6">
+      Assim como arquitetura de software tem padrões (MVC, microservices, event-driven), sistemas de agentes também têm padrões recorrentes. Clique em cada card para expandir.
+    </p>
+    <div class="pattern-grid" id="patternGrid"></div>
+  </section>
+
+  <!-- S4 -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2 class="section-title">Tools — As Mãos do Agente</h2>
+      <div class="section-line"></div>
+    </div>
+    <p style="font-size:14px;color:var(--text-2);margin-bottom:24px;line-height:1.6">
+      Sem tools, um agente só consegue pensar e conversar. Com tools, ele pode ler arquivos, rodar comandos, consultar bancos de dados, chamar APIs. Cada tool que você habilita expande o que ele consegue resolver.
+    </p>
+    <div class="exercise-wrap">
+      <div class="exercise-label">Exercício — Expanda as capacidades do agente</div>
+      <p style="font-size:14px;color:var(--text-2);margin-bottom:20px">
+        Pergunta ao agente: <strong style="color:var(--text-1)">"Quantos registros tem na tabela de clientes?"</strong><br>
+        <span style="font-size:13px;color:var(--text-3)">Habilite tools e veja a resposta mudar em tempo real.</span>
+      </p>
+      <div class="tools-exercise">
+        <div class="tools-list" id="toolsList"></div>
+        <div class="agent-response">
+          <div class="agent-response-label">Resposta do agente</div>
+          <div class="cap-label">Capacidade de resolver: <span id="capPct">0%</span></div>
+          <div class="cap-bar-bg"><div class="cap-bar" id="capBar" style="width:0%"></div></div>
+          <div class="agent-text" id="agentText"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- S5 -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2 class="section-title">Guardrails — Os Limites do Agente</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-glow"></div>
+      <p style="font-size:14px;color:var(--text-2);line-height:1.65;margin-bottom:16px">
+        Um agente sem limites é perigoso. Pode deletar arquivos de produção, enviar e-mails para clientes, rodar migrations sem confirmação. Guardrails definem o que o agente <em style="color:var(--text-1)">pode</em> fazer autonomamente e o que precisa de aprovação.
+      </p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">
+        <div style="padding:14px;background:rgba(4,6,15,.6);border:1px solid var(--border);border-radius:10px">
+          <div style="font-size:18px;margin-bottom:6px">🔑</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:4px">Permissões</div>
+          <div style="font-size:12px;color:var(--text-2)">Quais tools o agente pode usar?</div>
+        </div>
+        <div style="padding:14px;background:rgba(4,6,15,.6);border:1px solid var(--border);border-radius:10px">
+          <div style="font-size:18px;margin-bottom:6px">📂</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:4px">Escopo</div>
+          <div style="font-size:12px;color:var(--text-2)">Quais arquivos pode acessar?</div>
+        </div>
+        <div style="padding:14px;background:rgba(4,6,15,.6);border:1px solid var(--border);border-radius:10px">
+          <div style="font-size:18px;margin-bottom:6px">🧑‍💼</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:4px">Human gates</div>
+          <div style="font-size:12px;color:var(--text-2)">O que precisa de aprovação?</div>
+        </div>
+        <div style="padding:14px;background:rgba(4,6,15,.6);border:1px solid var(--border);border-radius:10px">
+          <div style="font-size:18px;margin-bottom:6px">🔁</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:4px">Safety loops</div>
+          <div style="font-size:12px;color:var(--text-2)">Testes antes de declarar sucesso</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exercise-wrap">
+      <div class="exercise-label">Exercício — Configure as permissões</div>
+      <p style="font-size:14px;color:var(--text-2);margin-bottom:20px;line-height:1.6">
+        <strong style="color:var(--text-1)">Cenário:</strong> Um agente precisa corrigir um bug em produção. Configure as permissões: poucas e ele fica bloqueado; demais e fica perigoso. Encontre o equilíbrio certo.
+      </p>
+      <div class="guard-grid">
+        <div>
+          <div class="guard-scenario">
+            <div class="label">Tarefa do agente</div>
+            <h4>Corrigir bug em produção</h4>
+            <p>Identificar e corrigir um bug em um endpoint que está retornando 500. O fix deve ser testado antes de ir pro ar.</p>
+          </div>
+          <div class="guard-perms" id="guardPerms"></div>
+        </div>
+        <div>
+          <div class="risk-header" style="margin-bottom:6px">
+            <span>Nível de risco</span>
+            <span class="risk-val" id="riskVal">—</span>
+          </div>
+          <div class="risk-bar-bg" style="margin-bottom:16px"><div class="risk-bar" id="riskBar" style="width:0%"></div></div>
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px">Capacidade de completar a tarefa</div>
+          <div class="cap-bar-bg" style="margin-bottom:6px"><div class="cap-bar" id="capabilityBar" style="width:0%"></div></div>
+          <div style="font-size:12px;color:var(--text-3);margin-bottom:4px" id="capabilityLabel">0% — Agente bloqueado</div>
+          <div class="risk-msg" id="riskMsg"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- S6 -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2 class="section-title">Quiz Final</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="quiz-wrap" id="quizWrap"></div>
+    <div class="quiz-result" id="quizResult">
+      <div class="big" id="quizScore">0/5</div>
+      <p id="quizMsg">—</p>
+      <p class="sub" id="quizSub">—</p>
+    </div>
+  </section>
+
+  <nav class="bottom-nav">
+    <a href="03-context-engineering.html" class="nav-link">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2L4 7l5 5"/></svg>
+      <span>
+        <span class="lbl">Anterior</span>
+        <span class="ttl">Context Engineering</span>
+      </span>
+    </a>
+    <a href="05-rag-tools.html" class="nav-link next">
+      <span style="text-align:right">
+        <span class="lbl">Próximo</span>
+        <span class="ttl">RAG e Tools</span>
+      </span>
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 2l5 5-5 5"/></svg>
+    </a>
+  </nav>
+
+</div>
+
+<script>
+/* ─── 1. CLASSIFY ─── */
+var tasks = [
+  { text: '"Qual a capital da França?"',                                                   answer: 'chatbot' },
+  { text: '"Refatore essa classe para usar dependency injection"',                         answer: 'agent'   },
+  { text: '"Traduza essa frase pro inglês"',                                               answer: 'chatbot' },
+  { text: '"Encontre todos os endpoints sem autenticação e adicione middleware"',           answer: 'agent'   },
+  { text: '"Explique o que é REST"',                                                       answer: 'chatbot' },
+];
+var classifyDone = 0, classifyCorrect = 0;
+
+function buildClassify() {
+  var grid = document.getElementById('classifyGrid');
+  tasks.forEach(function(task, i) {
+    var item = document.createElement('div');
+    item.className = 'classify-item';
+    item.id = 'ci-' + i;
+    item.innerHTML =
+      '<span class="task-text">' + task.text + '</span>' +
+      '<div class="classify-btns">' +
+        '<button class="classify-btn chatbot" onclick="classify(' + i + ',\'chatbot\')">💬 Chatbot consegue</button>' +
+        '<button class="classify-btn agent" onclick="classify(' + i + ',\'agent\')">🤖 Precisa de agente</button>' +
+      '</div>' +
+      '<span class="classify-result" id="cr-' + i + '"></span>';
+    grid.appendChild(item);
+  });
+}
+
+function classify(i, choice) {
+  var task   = tasks[i];
+  var item   = document.getElementById('ci-' + i);
+  var result = document.getElementById('cr-' + i);
+  item.querySelectorAll('.classify-btn').forEach(function(b) { b.disabled = true; b.classList.add('chosen'); });
+  var ok = choice === task.answer;
+  result.className = 'classify-result show ' + (ok ? 'ok' : 'err');
+  result.textContent = ok ? '✓ Correto!' : ('✗ Era ' + (task.answer === 'chatbot' ? 'Chatbot' : 'Agente'));
+  item.classList.add('correct-' + task.answer);
+  if (ok) classifyCorrect++;
+  classifyDone++;
+  if (classifyDone === tasks.length) {
+    var s = document.getElementById('classifyScore');
+    s.style.display = 'block';
+    document.getElementById('classifyScoreVal').textContent = classifyCorrect + '/5';
+    saveProgress('classify', classifyCorrect);
+  }
+}
+
+/* ─── 2. SIMULATOR ─── */
+var buggyCode =
+  '<span class="kw">function</span> <span class="fn">calcularDesconto</span>(preco, desconto) {\n' +
+  '  <span class="kw">if</span> (<span class="kw">typeof</span> preco !== <span class="num">\'number\'</span>) {\n' +
+  '    <span class="kw">return</span> <span class="num">0</span>;\n' +
+  '  }\n\n' +
+  '  <span class="kw">const</span> resultado = preco - desconto;\n' +
+  '<span class="err-line">  <span class="kw">return</span> resultado; <span class="cmt">// bug: pode ser negativo!</span></span>\n' +
+  '}\n\n' +
+  '<span class="cmt">// calcularDesconto(100, 30) → 70  ✓</span>\n' +
+  '<span class="cmt">// calcularDesconto(50, 80)  → -30 ✗</span>';
+
+var simSteps = [
+  {
+    phase: 'FASE 1 — PLANEJAR',
+    question: 'Você recebeu o objetivo. Qual é o seu primeiro passo como agente?',
+    type: 'choice',
+    options: [
+      { text: 'Corrigir o código imediatamente — sei que é só adicionar um Math.max', correct: false },
+      { text: 'Ler a função primeiro para entender o que ela faz', correct: true },
+      { text: 'Rodar os testes para ver o que falha', correct: false },
+    ],
+    feedbackOk:  '✓ Correto. Um agente responsável lê antes de agir. Assumir o bug sem ver o código é fonte clássica de erros novos.',
+    feedbackErr: '✗ Cuidado. Agir sem contexto é a causa #1 de bugs introduzidos durante correções. Leia o código primeiro.',
+    logEntries: [
+      { type: 'think',  text: '🧠 Objetivo recebido: corrigir calcularDesconto' },
+      { type: 'think',  text: '🧠 Melhor estratégia: ler o código antes de agir' },
+    ]
+  },
+  {
+    phase: 'FASE 2 — AGIR',
+    question: 'Você decidiu ler o arquivo. Clique na ferramenta para executá-la.',
+    type: 'tool',
+    toolLabel: '📂 Ler arquivo: desconto.js',
+    feedbackMsg: '✓ Arquivo lido com sucesso. O código da função aparecerá no próximo passo para análise.',
+    logEntries: [
+      { type: 'action',  text: '⚡ Tool: read_file("desconto.js")' },
+      { type: 'observe', text: '👁 Arquivo carregado — 12 linhas' },
+    ]
+  },
+  {
+    phase: 'FASE 3 — OBSERVAR',
+    question: 'Você leu a função. Qual é o bug?',
+    type: 'choice',
+    showCode: true,
+    options: [
+      { text: 'O tipo do parâmetro está errado — preço deveria ser string', correct: false },
+      { text: 'Não há validação: se desconto > preço, o resultado vira negativo', correct: true },
+      { text: 'A função não trata o caso de desconto = 0 corretamente', correct: false },
+    ],
+    feedbackOk:  '✓ Exato. preco - desconto pode ser negativo quando desconto > preco. Precisamos garantir que o resultado seja no mínimo 0.',
+    feedbackErr: '✗ Observe a linha marcada em vermelho: não há nenhuma verificação para impedir que o resultado fique abaixo de zero.',
+    logEntries: [
+      { type: 'think',  text: '🧠 Analisando função... linha 7 sem guard clause' },
+      { type: 'think',  text: '🧠 Bug: sem Math.max(0, ...) — resultado pode ser negativo' },
+    ]
+  },
+  {
+    phase: 'FASE 4 — AGIR',
+    question: 'Bug identificado. Qual correção aplicar?',
+    type: 'choice',
+    options: [
+      { text: 'return Math.max(0, preco - desconto)', correct: true },
+      { text: 'if (desconto > preco) throw new Error("Desconto inválido")', correct: false },
+      { text: 'return preco - Math.min(desconto, 100)', correct: false },
+    ],
+    feedbackOk:  '✓ Perfeito. Math.max(0, preco - desconto) garante que o resultado nunca seja negativo. Simples e sem quebrar o contrato da função.',
+    feedbackErr: '✗ Essa abordagem muda o contrato da função — quem a chama não espera uma exceção. Math.max(0, ...) é mais seguro e compatível.',
+    logEntries: [
+      { type: 'action',  text: '⚡ Tool: write_file("desconto.js") — aplicando fix' },
+      { type: 'observe', text: '👁 Arquivo salvo com sucesso' },
+    ]
+  },
+  {
+    phase: 'FASE 5 — OBSERVAR',
+    question: 'Fix aplicado. Antes de entregar, o agente precisa verificar. Clique para rodar os testes.',
+    type: 'tool',
+    toolLabel: '🧪 Rodar testes: npm test',
+    feedbackMsg: '✓ Testes passando! 5/5. O fix está correto e não quebrou nenhum comportamento existente.',
+    logEntries: [
+      { type: 'action',  text: '⚡ Tool: run_command("npm test")' },
+      { type: 'observe', text: '👁 Tests: 5 passed, 0 failed ✓' },
+      { type: 'success', text: '✅ Objetivo atingido — bug corrigido e testes passando' },
+    ]
+  }
+];
+
+var simStep = 0;
+var simDots = [];
+
+function buildSimProgress() {
+  var prog = document.getElementById('simProgress');
+  prog.innerHTML = '';
+  simDots = [];
+  simSteps.forEach(function(_, i) {
+    var d = document.createElement('div');
+    d.className = 'sim-dot' + (i === 0 ? ' current' : '');
+    prog.appendChild(d);
+    simDots.push(d);
+  });
+}
+
+function updateSimDots(current) {
+  simDots.forEach(function(d, i) {
+    d.className = 'sim-dot';
+    if (i < current)   d.classList.add('done');
+    if (i === current) d.classList.add('current');
+  });
+}
+
+function addLog(entry) {
+  var log = document.getElementById('simLog');
+  var el  = document.createElement('div');
+  el.className   = 'log-entry ' + entry.type;
+  el.textContent = entry.text;
+  log.appendChild(el);
+  log.scrollTop = log.scrollHeight;
+}
+
+function renderSimStep() {
+  var step    = simSteps[simStep];
+  var content = document.getElementById('simContent');
+
+  if (!step) {
+    content.innerHTML =
+      '<div class="sim-complete show">' +
+        '<div class="big">ENTREGUE ✅</div>' +
+        '<p>Você completou o loop do agente: planejou, leu o código, identificou o bug, aplicou o fix e verificou com testes.</p>' +
+        '<p style="margin-top:12px;font-size:13px;color:var(--indigo-300)">É exatamente assim que o Claude Code (e outros agentes reais) trabalham.</p>' +
+      '</div>';
+    saveProgress('simulator', 1);
+    return;
+  }
+
+  var html =
+    '<div class="sim-phase">' + step.phase + '</div>' +
+    '<div class="sim-question">' + step.question + '</div>';
+
+  if (step.showCode) {
+    html += '<div class="sim-code show">' + buggyCode + '</div>';
+  }
+
+  if (step.type === 'choice') {
+    html += '<div class="sim-options">';
+    step.options.forEach(function(opt, oi) {
+      html += '<button class="sim-opt" onclick="simChoose(' + oi + ')">' + opt.text + '</button>';
+    });
+    html += '</div>';
+    html += '<div class="sim-feedback" id="simFeedback"></div>';
+    html += '<button class="sim-btn" id="simNext" style="display:none" onclick="simAdvance()">Continuar →</button>';
+  } else {
+    html +=
+      '<button class="sim-btn" id="simToolBtn" onclick="simUseTool()">' + step.toolLabel + '</button>' +
+      '<div class="sim-feedback" id="simFeedback"></div>' +
+      '<button class="sim-btn" id="simNext" style="display:none" onclick="simAdvance()">Continuar →</button>';
+  }
+
+  content.innerHTML = html;
+}
+
+function simChoose(oi) {
+  var step = simSteps[simStep];
+  var opts = document.querySelectorAll('.sim-opt');
+  var fb   = document.getElementById('simFeedback');
+  var next = document.getElementById('simNext');
+  opts.forEach(function(o) { o.disabled = true; });
+  opts.forEach(function(o, i) { if (step.options[i].correct) o.classList.add('correct'); });
+  if (!step.options[oi].correct) opts[oi].classList.add('wrong');
+  var ok = step.options[oi].correct;
+  fb.className   = 'sim-feedback show ' + (ok ? 'ok' : 'err');
+  fb.textContent = ok ? step.feedbackOk : step.feedbackErr;
+  step.logEntries.forEach(function(e) { addLog(e); });
+  next.style.display = 'flex';
+}
+
+function simUseTool() {
+  var step = simSteps[simStep];
+  var btn  = document.getElementById('simToolBtn');
+  var next = document.getElementById('simNext');
+  var fb   = document.getElementById('simFeedback');
+  btn.disabled    = true;
+  btn.textContent = '⏳ Executando...';
+  step.logEntries.forEach(function(e, i) {
+    setTimeout(function() { addLog(e); }, i * 600);
+  });
+  setTimeout(function() {
+    btn.textContent    = '✓ Concluído';
+    fb.className       = 'sim-feedback show ok';
+    fb.textContent     = step.feedbackMsg;
+    next.style.display = 'flex';
+  }, step.logEntries.length * 600 + 200);
+}
+
+function simAdvance() {
+  simStep++;
+  updateSimDots(simStep);
+  renderSimStep();
+}
+
+/* ─── 3. PATTERNS ─── */
+var patterns = [
+  {
+    icon: '⭕', name: 'Single Agent', tag: 'Um agente faz tudo', color: 'var(--violet-400)',
+    desc: 'Um único agente recebe o objetivo, usa todas as ferramentas necessárias e entrega o resultado. Simples de configurar e fácil de depurar.',
+    when: 'Tarefas bem delimitadas e autocontidas',
+    visual: [{l:'🤖 Agente',c:'main'},{l:'→',c:'arr'},{l:'read_file',c:'worker'},{l:'→',c:'arr'},{l:'write_file',c:'worker'},{l:'→',c:'arr'},{l:'run_tests',c:'worker'}],
+    note: null
+  },
+  {
+    icon: '🏗', name: 'Delegação', tag: 'Orquestrador → Especialistas', color: 'var(--blue-400)',
+    desc: 'Um agente orquestrador decompõe o objetivo e delega partes para sub-agentes especialistas. Cada um tem contexto e ferramentas específicas para seu papel.',
+    when: 'Tarefas complexas que exigem habilidades diferentes',
+    visual: [{l:'🎯 Orquestrador',c:'main'},{l:'→',c:'arr'},{l:'🔍 Explorer',c:'worker'},{l:'→',c:'arr'},{l:'💻 Coder',c:'worker'},{l:'→',c:'arr'},{l:'🧪 Tester',c:'worker'}],
+    note: 'É assim que funciona o Claude Code com subagents!'
+  },
+  {
+    icon: '🔗', name: 'Pipeline', tag: 'Cada agente faz um passo', color: 'var(--cyan-400)',
+    desc: 'Cada agente executa uma etapa específica e passa o resultado para o próximo. A saída de um é a entrada do outro. Previsível e auditável.',
+    when: 'Workflows sequenciais bem definidos',
+    visual: [{l:'🔍 Explorar',c:'step'},{l:'→',c:'arr'},{l:'📋 Planejar',c:'step'},{l:'→',c:'arr'},{l:'💻 Codar',c:'step'},{l:'→',c:'arr'},{l:'🧪 Testar',c:'step'},{l:'→',c:'arr'},{l:'👁 Review',c:'step'}],
+    note: null
+  },
+  {
+    icon: '🧑‍💼', name: 'Human-in-the-loop', tag: 'Aprovação humana em pontos críticos', color: 'var(--amber-400)',
+    desc: 'O agente pausa em decisões de alto risco e aguarda aprovação humana antes de continuar. Combina autonomia com supervisão onde importa.',
+    when: 'Deploys, deleções, decisões de arquitetura',
+    visual: [{l:'🤖 Agente',c:'main'},{l:'→',c:'arr'},{l:'Agir',c:'step'},{l:'→',c:'arr'},{l:'🚧 Gate',c:'gate'},{l:'→',c:'arr'},{l:'🧑 Aprovar',c:'human'},{l:'→',c:'arr'},{l:'Continuar',c:'step'}],
+    note: null
+  },
+];
+
+function buildPatterns() {
+  var grid = document.getElementById('patternGrid');
+  patterns.forEach(function(p) {
+    var card = document.createElement('div');
+    card.className = 'pattern-card';
+    var vis = p.visual.map(function(v) {
+      if (v.c === 'arr') return '<span class="pv-arr">→</span>';
+      return '<span class="pv-node ' + v.c + '">' + v.l + '</span>';
+    }).join('');
+    card.innerHTML =
+      '<div class="pattern-head">' +
+        '<span class="pattern-icon">' + p.icon + '</span>' +
+        '<div class="pattern-info">' +
+          '<div class="pattern-name" style="color:' + p.color + '">' + p.name + '</div>' +
+          '<div class="pattern-tag">' + p.tag + '</div>' +
+        '</div>' +
+        '<span class="pattern-arrow">›</span>' +
+      '</div>' +
+      '<div class="pattern-body">' +
+        '<div class="pattern-body-inner">' +
+          '<p class="pattern-desc">' + p.desc + '</p>' +
+          '<div class="pattern-when">Ideal para: <span>' + p.when + '</span></div>' +
+          '<div class="pattern-visual">' + vis + '</div>' +
+          (p.note ? '<div class="pattern-note">💡 ' + p.note + '</div>' : '') +
+        '</div>' +
+      '</div>';
+    card.addEventListener('click', function() {
+      var open = card.classList.contains('expanded');
+      document.querySelectorAll('.pattern-card').forEach(function(c) { c.classList.remove('expanded'); });
+      if (!open) card.classList.add('expanded');
+    });
+    grid.appendChild(card);
+  });
+}
+
+/* ─── 4. TOOLS ─── */
+var toolsData = [
+  { icon: '🗄', name: 'SQL Tool',    desc: 'Executar queries no banco',     cap: 70 },
+  { icon: '📂', name: 'File Reader', desc: 'Ler arquivos do projeto',        cap: 15 },
+  { icon: '💻', name: 'Terminal',    desc: 'Rodar comandos no servidor',     cap: 15 },
+];
+var agentResponses = [
+  '<span style="color:var(--red-400)">Não tenho acesso ao banco de dados. Sem uma ferramenta de banco não consigo consultar a tabela de clientes. Geralmente em sistemas desse tipo a contagem pode variar bastante... mas não consigo te dar um número real.</span>',
+  '<span class="highlight">Conectando ao banco...</span> Executando: <code style="color:var(--amber-400)">SELECT COUNT(*) FROM clientes</code>... <span style="color:var(--green-400)">Resultado: <strong>1.247 registros</strong> na tabela de clientes.</span>',
+  '<span class="highlight">Lendo schema do projeto...</span> Tabela "clientes" confirmada. <span class="highlight">Executando query...</span> <span style="color:var(--green-400)"><strong>1.247 registros</strong>. Colunas: id, nome, email, criado_em.</span>',
+  '<span class="highlight">Conectado via terminal + SQL Tool.</span> <code style="color:var(--amber-400)">SELECT COUNT(*) FROM clientes</code> → <span style="color:var(--green-400)"><strong>1.247 registros.</strong></span> Verificação via pg_stat_user_tables confirma. Dados consistentes.',
+];
+var activeTools = {};
+
+function buildTools() {
+  var list = document.getElementById('toolsList');
+  toolsData.forEach(function(t, i) {
+    var el = document.createElement('div');
+    el.className = 'tool-toggle';
+    el.id = 'tool-' + i;
+    el.innerHTML =
+      '<span class="tool-icon">' + t.icon + '</span>' +
+      '<div class="tool-name"><strong style="font-size:14px">' + t.name + '</strong>' +
+        '<span style="display:block;font-size:12px;color:var(--text-3)">' + t.desc + '</span></div>' +
+      '<div class="tool-switch"></div>';
+    el.addEventListener('click', function() { toggleTool(i, el); });
+    list.appendChild(el);
+  });
+  updateAgentResponse();
+}
+
+function toggleTool(i, el) {
+  if (activeTools[i]) { delete activeTools[i]; el.classList.remove('active'); }
+  else                { activeTools[i] = true;  el.classList.add('active'); }
+  updateAgentResponse();
+}
+
+function updateAgentResponse() {
+  var cap = 0;
+  Object.keys(activeTools).forEach(function(i) { cap += toolsData[i].cap; });
+  cap = Math.min(100, cap);
+  document.getElementById('capPct').textContent = cap + '%';
+  document.getElementById('capBar').style.width = cap + '%';
+  var idx = cap === 0 ? 0 : cap <= 70 ? 1 : cap <= 85 ? 2 : 3;
+  document.getElementById('agentText').innerHTML = agentResponses[idx];
+}
+
+/* ─── 5. GUARDRAILS ─── */
+var perms = [
+  { label: 'Ler arquivos de código',            desc: 'src/, tests/',                        risk: 0,  cap: 20, safe: true  },
+  { label: 'Escrever arquivos de código',       desc: 'src/ apenas',                         risk: 10, cap: 25, safe: true  },
+  { label: 'Rodar testes',                      desc: 'npm test, dotnet test',                risk: 5,  cap: 20, safe: true  },
+  { label: 'Acessar banco de produção',         desc: 'leitura e escrita no prod DB',         risk: 35, cap: 15, safe: false },
+  { label: 'Fazer deploy automático',           desc: 'sem aprovação humana',                 risk: 40, cap: 10, safe: false },
+  { label: 'Enviar notificações a clientes',    desc: 'email/SMS automático',                 risk: 30, cap: 5,  safe: false },
+  { label: 'Deletar arquivos sem confirmação',  desc: 'ação irreversível',                    risk: 45, cap: 5,  safe: false },
+];
+var activePerms = {};
+
+function buildGuard() {
+  var container = document.getElementById('guardPerms');
+  perms.forEach(function(p, i) {
+    var el = document.createElement('div');
+    el.className = 'guard-perm' + (p.safe ? '' : ' danger');
+    el.id = 'gp-' + i;
+    el.innerHTML =
+      '<div class="perm-cb"></div>' +
+      '<div class="perm-text">' + p.label + '<small>' + p.desc + '</small></div>' +
+      '<span class="perm-risk" style="color:' + (p.safe ? 'var(--green-400)' : 'var(--red-400)') + '">' + (p.safe ? 'seguro' : 'risco') + '</span>';
+    el.addEventListener('click', function() { togglePerm(i, el); });
+    container.appendChild(el);
+  });
+  updateRisk();
+}
+
+function togglePerm(i, el) {
+  if (activePerms[i]) { delete activePerms[i]; el.classList.remove('on'); }
+  else                { activePerms[i] = true;  el.classList.add('on'); }
+  updateRisk();
+}
+
+function updateRisk() {
+  var totalRisk = 0, totalCap = 0;
+  Object.keys(activePerms).forEach(function(i) { totalRisk += perms[i].risk; totalCap += perms[i].cap; });
+  totalRisk = Math.min(100, totalRisk);
+  totalCap  = Math.min(100, totalCap);
+
+  var riskBar  = document.getElementById('riskBar');
+  var riskVal  = document.getElementById('riskVal');
+  var riskMsg  = document.getElementById('riskMsg');
+  var capBar   = document.getElementById('capabilityBar');
+  var capLabel = document.getElementById('capabilityLabel');
+
+  riskBar.style.width = totalRisk + '%';
+  if      (totalRisk === 0) { riskBar.style.background = 'var(--text-3)';    riskVal.style.color = 'var(--text-3)';    riskVal.textContent = '—'; }
+  else if (totalRisk <= 20) { riskBar.style.background = 'var(--green-400)'; riskVal.style.color = 'var(--green-400)'; riskVal.textContent = totalRisk + '%'; }
+  else if (totalRisk <= 50) { riskBar.style.background = 'var(--amber-400)'; riskVal.style.color = 'var(--amber-400)'; riskVal.textContent = totalRisk + '%'; }
+  else                      { riskBar.style.background = 'var(--red-400)';   riskVal.style.color = 'var(--red-400)';   riskVal.textContent = totalRisk + '%'; }
+
+  capBar.style.width = totalCap + '%';
+  if      (totalCap === 0)  capLabel.textContent = '0% — Agente bloqueado';
+  else if (totalCap <= 40)  capLabel.textContent = totalCap + '% — Capacidade insuficiente';
+  else if (totalCap <= 70)  capLabel.textContent = totalCap + '% — Consegue parte da tarefa';
+  else                      capLabel.textContent = totalCap + '% — Consegue completar a tarefa';
+
+  riskMsg.className = 'risk-msg';
+  if (Object.keys(activePerms).length === 0) {
+    riskMsg.className = 'risk-msg show off';
+    riskMsg.textContent = 'Nenhuma permissão ativa. O agente não consegue nem ler o código.';
+  } else if (totalRisk > 70) {
+    riskMsg.className = 'risk-msg show high';
+    riskMsg.textContent = 'Risco alto demais. Deploy automático + delete + banco de prod sem gate humano é uma receita para desastre.';
+  } else if (totalRisk > 30) {
+    riskMsg.className = 'risk-msg show med';
+    riskMsg.textContent = 'Risco médio. Permissões sensíveis ativas. Considere human gates para essas ações específicas.';
+  } else if (totalCap >= 60) {
+    riskMsg.className = 'risk-msg show low';
+    riskMsg.textContent = 'Bom equilíbrio! O agente tem permissões suficientes para trabalhar sem risco excessivo.';
+  } else {
+    riskMsg.className = 'risk-msg show off';
+    riskMsg.textContent = 'O agente ainda não tem permissões suficientes. Adicione as essenciais para a tarefa.';
+  }
+}
+
+/* ─── 6. QUIZ ─── */
+var quizData = [
+  {
+    q: 'O que diferencia fundamentalmente um agente de IA de um chatbot tradicional?',
+    opts: [
+      'Agentes usam modelos maiores e mais caros',
+      'Agentes podem planejar, usar ferramentas e iterar até atingir um objetivo',
+      'Agentes sempre requerem aprovação humana em cada passo',
+      'Agentes são apenas chatbots com mais memória de contexto',
+    ],
+    correct: 1,
+    exp: 'A diferença fundamental é o loop autônomo: o agente planeja, age usando ferramentas, observa o resultado e repete até completar o objetivo — sem precisar de intervenção humana em cada passo.'
+  },
+  {
+    q: 'No padrão de "Delegação", qual é o papel do agente orquestrador?',
+    opts: [
+      'Executar todas as ferramentas diretamente',
+      'Revisar o código escrito pelos outros agentes',
+      'Decompor o objetivo e delegar partes para sub-agentes especialistas',
+      'Ser o único ponto de contato com o usuário',
+    ],
+    correct: 2,
+    exp: 'O orquestrador não executa o trabalho — ele divide o objetivo em partes e delega cada parte para um sub-agente especialista (explorer, coder, tester etc.).'
+  },
+  {
+    q: 'Por que guardrails são importantes em sistemas agênticos?',
+    opts: [
+      'Para tornar os agentes mais lentos e auditáveis',
+      'Porque sem limites, o agente pode tomar ações destrutivas (deletar dados, fazer deploy sem aprovação, etc.)',
+      'Para economizar tokens de LLM',
+      'Apenas por requisito legal de compliance',
+    ],
+    correct: 1,
+    exp: 'Agentes com tools poderosas podem causar danos reais se não houver limites. Guardrails definem o que pode ser feito autonomamente e o que precisa de aprovação humana.'
+  },
+  {
+    q: 'Qual padrão de agente é mais adequado para: explorar código → gerar PR → revisar → aprovar?',
+    opts: [
+      'Single Agent — um agente faz tudo em sequência',
+      'Pipeline — cada etapa é um agente que passa o resultado para o próximo',
+      'Human-in-the-loop — humano aprova cada etapa',
+      'Delegação — orquestrador decide qual etapa pular',
+    ],
+    correct: 1,
+    exp: 'O Pipeline é ideal: cada etapa tem responsabilidade única e saída clara que alimenta a próxima. É previsível, auditável e fácil de diagnosticar quando algo falha.'
+  },
+  {
+    q: 'Um agente sem nenhuma tool recebe: "Analise os logs de erro das últimas 24h e sugira correções". O que ele consegue fazer?',
+    opts: [
+      'Analisar os logs usando sua memória interna do treinamento',
+      'Estimar os erros com base no nome do projeto',
+      'Apenas conversar sobre o assunto — não tem acesso real aos logs',
+      'Conectar ao servidor automaticamente via SSH',
+    ],
+    correct: 2,
+    exp: 'Sem tools, o agente só consegue pensar e falar. Não tem acesso a logs reais, arquivos ou sistemas externos. Tools são o que transformam raciocínio em ação concreta.'
+  },
+];
+var quizAnswers = {};
+
+function buildQuiz() {
+  var wrap = document.getElementById('quizWrap');
+  quizData.forEach(function(q, qi) {
+    var card = document.createElement('div');
+    card.className = 'quiz-q';
+    card.id = 'qq-' + qi;
+    var optsHtml = q.opts.map(function(o, oi) {
+      return '<button class="quiz-opt" onclick="quizAnswer(' + qi + ',' + oi + ')">' + o + '</button>';
+    }).join('');
+    card.innerHTML =
+      '<div class="quiz-q-num">Questão ' + (qi + 1) + ' de ' + quizData.length + '</div>' +
+      '<div class="quiz-q-text">' + q.q + '</div>' +
+      '<div class="quiz-options">' + optsHtml + '</div>' +
+      '<div class="quiz-explanation" id="qe-' + qi + '">' + q.exp + '</div>';
+    wrap.appendChild(card);
+  });
+}
+
+function quizAnswer(qi, oi) {
+  if (quizAnswers[qi] !== undefined) return;
+  quizAnswers[qi] = oi;
+  var q    = quizData[qi];
+  var card = document.getElementById('qq-' + qi);
+  var opts = card.querySelectorAll('.quiz-opt');
+  var exp  = document.getElementById('qe-' + qi);
+  opts.forEach(function(o) { o.disabled = true; });
+  opts.forEach(function(o, i) { if (i === q.correct) o.classList.add('correct'); });
+  if (oi !== q.correct) opts[oi].classList.add('wrong');
+  card.classList.add('answered');
+  exp.classList.add('show');
+  if (Object.keys(quizAnswers).length === quizData.length) showQuizResult();
+}
+
+function showQuizResult() {
+  var correct = 0;
+  quizData.forEach(function(q, i) { if (quizAnswers[i] === q.correct) correct++; });
+  var tier = correct === 5 ? 2 : correct >= 3 ? 1 : 0;
+  var msgs = [
+    ['Continue praticando. Reveja as seções anteriores.', 'Foco no loop do agente e nos guardrails — são os conceitos-chave.'],
+    ['Bom trabalho! Você entende os fundamentos.', 'Revise as questões erradas para consolidar o conhecimento.'],
+    ['Perfeito! Você dominou os conceitos de agentes de IA.', 'Você entende o loop, os padrões, as tools e os guardrails.'],
+  ];
+  document.getElementById('quizScore').textContent = correct + '/5';
+  document.getElementById('quizMsg').textContent   = msgs[tier][0];
+  document.getElementById('quizSub').textContent   = msgs[tier][1];
+  var result = document.getElementById('quizResult');
+  result.classList.add('show');
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  saveProgress('quiz', correct);
+}
+
+/* ─── PERSISTENCE ─── */
+function saveProgress(key, val) {
+  try {
+    var data = JSON.parse(localStorage.getItem('ia-training-progress') || '{}');
+    data['mod04-' + key] = val;
+    data['mod04-visited'] = true;
+    localStorage.setItem('ia-training-progress', JSON.stringify(data));
+  } catch(e) {}
+}
+
+/* ─── INIT ─── */
+buildClassify();
+buildSimProgress();
+renderSimStep();
+buildPatterns();
+buildTools();
+buildGuard();
+buildQuiz();
+updateAgentResponse();
+</script>
+</body>
+</html>

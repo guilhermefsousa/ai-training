@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 2 — Prompt Engineering | IA para Devs</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap');
+
+  /* ── TOKENS ─────────────────────────────────────────── */
+  :root {
+    --cosmos-black:   #04060f;
+    --cosmos-deep:    #070c1a;
+    --cosmos-navy:    #0b1128;
+    --cosmos-ink:     #111827;
+    --indigo-900:     #1e1b4b;
+    --indigo-800:     #2e2a6e;
+    --indigo-700:     #3730a3;
+    --indigo-500:     #6366f1;
+    --indigo-400:     #818cf8;
+    --indigo-300:     #a5b4fc;
+    --violet-600:     #7c3aed;
+    --violet-500:     #8b5cf6;
+    --violet-400:     #a78bfa;
+    --cyan-400:       #22d3ee;
+    --cyan-300:       #67e8f9;
+    --gold-400:       #fbbf24;
+    --gold-300:       #fde68a;
+    --green-400:      #34d399;
+    --green-500:      #10b981;
+    --red-400:        #f87171;
+    --red-500:        #ef4444;
+    --blue-400:       #60a5fa;
+    --blue-500:       #3b82f6;
+    --text-primary:   #f0f4ff;
+    --text-secondary: #94a3b8;
+    --text-muted:     #475569;
+    --card-bg:        rgba(14, 18, 38, 0.85);
+    --card-border:    rgba(99, 102, 241, 0.18);
+    --card-border-h:  rgba(99, 102, 241, 0.55);
+    --glow-violet:    rgba(139, 92, 246, 0.3);
+    --radius-card:    16px;
+    --transition:     0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cosmos-black);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND ──────────────────────────────────────── */
+  .nebula {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+    mix-blend-mode: screen;
+    animation: nebulaDrift 25s ease-in-out infinite alternate;
+  }
+  .nebula-1 {
+    width: 700px; height: 500px;
+    top: -150px; left: -150px;
+    background: radial-gradient(ellipse, rgba(67, 56, 202, 0.20) 0%, transparent 70%);
+    animation-duration: 28s;
+  }
+  .nebula-2 {
+    width: 550px; height: 600px;
+    bottom: -100px; right: -80px;
+    background: radial-gradient(ellipse, rgba(124, 58, 237, 0.16) 0%, transparent 70%);
+    animation-duration: 22s;
+    animation-delay: -8s;
+  }
+  @keyframes nebulaDrift {
+    0%   { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(30px, 40px) scale(1.06); }
+  }
+
+  /* ── LAYOUT ──────────────────────────────────────────── */
+  .page-wrapper {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ── NAV BAR ─────────────────────────────────────────── */
+  .top-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 0 20px;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.12);
+    margin-bottom: 48px;
+  }
+  .nav-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--indigo-400);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color var(--transition);
+  }
+  .nav-back:hover { color: var(--cyan-400); }
+  .progress-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+  }
+  .progress-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    opacity: 0.3;
+  }
+  .progress-dot.active {
+    background: var(--violet-500);
+    opacity: 1;
+    box-shadow: 0 0 8px var(--violet-500);
+  }
+  .progress-dot.done {
+    background: var(--green-500);
+    opacity: 1;
+  }
+
+  /* ── HERO ────────────────────────────────────────────── */
+  .module-hero {
+    text-align: center;
+    padding: 0 0 56px;
+  }
+  .module-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--violet-400);
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    border-radius: 100px;
+    padding: 6px 16px;
+    margin-bottom: 24px;
+    animation: fadeSlideDown 0.6s ease both;
+  }
+  .module-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 7vw, 70px);
+    letter-spacing: 0.03em;
+    line-height: 0.95;
+    animation: fadeSlideDown 0.6s 0.1s ease both;
+  }
+  .module-title .accent {
+    background: linear-gradient(135deg, var(--violet-400) 0%, var(--cyan-400) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.5));
+  }
+  .module-subtitle {
+    font-size: 17px;
+    font-weight: 300;
+    color: var(--text-secondary);
+    margin-top: 16px;
+    animation: fadeSlideDown 0.6s 0.2s ease both;
+  }
+  .module-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    animation: fadeSlideDown 0.6s 0.3s ease both;
+    flex-wrap: wrap;
+  }
+
+  @keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%       { transform: translateX(-6px); }
+    40%       { transform: translateX(6px); }
+    60%       { transform: translateX(-4px); }
+    80%       { transform: translateX(4px); }
+  }
+  @keyframes popIn {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.03); }
+    100% { transform: scale(1); }
+  }
+
+  /* ── SECTION ─────────────────────────────────────────── */
+  .section { margin-bottom: 64px; }
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--violet-500);
+    margin-bottom: 12px;
+  }
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 1px;
+    background: var(--violet-500);
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(26px, 4vw, 38px);
+    letter-spacing: 0.03em;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+  }
+  .section-intro {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.75;
+    margin-bottom: 28px;
+  }
+  .section-intro strong { color: var(--text-primary); font-weight: 600; }
+
+  /* ── CARD ────────────────────────────────────────────── */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-card);
+    padding: 28px;
+    backdrop-filter: blur(12px);
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+  .card:hover {
+    border-color: var(--card-border-h);
+    box-shadow: 0 0 32px rgba(99, 102, 241, 0.08);
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.2), transparent);
+    margin: 48px 0;
+  }
+
+  /* ── ANALOGY BOX ─────────────────────────────────────── */
+  .analogy-box {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(99, 102, 241, 0.05) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-left: 3px solid var(--violet-500);
+    border-radius: var(--radius-card);
+    padding: 22px 26px;
+    margin-bottom: 28px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .analogy-icon { font-size: 30px; flex-shrink: 0; margin-top: 2px; }
+  .analogy-text { font-size: 14px; color: var(--text-secondary); line-height: 1.75; }
+  .analogy-text strong { color: var(--violet-400); }
+
+  /* ── PROMPT COMPARISON ───────────────────────────────── */
+  .comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  @media (max-width: 580px) { .comparison-grid { grid-template-columns: 1fr; } }
+  .prompt-option {
+    border-radius: 12px;
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: all var(--transition);
+    border: 2px solid transparent;
+    position: relative;
+    user-select: none;
+  }
+  .prompt-option.bad  { background: rgba(239,68,68,0.06);  border-color: rgba(239,68,68,0.2);  }
+  .prompt-option.good { background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.2); }
+  .prompt-option:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+  .prompt-option.bad:hover  { border-color: rgba(239,68,68,0.5);  }
+  .prompt-option.good:hover { border-color: rgba(16,185,129,0.5); }
+  .prompt-option.selected-wrong { background: rgba(239,68,68,0.15); border-color: var(--red-500); animation: shake 0.4s ease; }
+  .prompt-option.selected-right { background: rgba(16,185,129,0.15); border-color: var(--green-500); animation: popIn 0.3s ease; }
+  .prompt-label { font-family: 'DM Mono',monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; }
+  .prompt-option.bad  .prompt-label { color: var(--red-400); }
+  .prompt-option.good .prompt-label { color: var(--green-400); }
+  .prompt-text { font-family: 'DM Mono',monospace; font-size: 12px; line-height: 1.65; color: var(--text-primary); }
+  .prompt-badge { position: absolute; top: 10px; right: 10px; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; opacity: 0; transition: opacity 0.2s; }
+  .prompt-option.selected-right .prompt-badge,
+  .prompt-option.selected-wrong .prompt-badge { opacity: 1; }
+  .feedback-text { font-size: 13px; margin-top: 8px; padding: 10px 14px; border-radius: 8px; display: none; }
+  .feedback-text.show { display: block; animation: fadeIn 0.3s ease; }
+  .feedback-text.correct { background: rgba(16,185,129,0.1); color: var(--green-400); }
+  .feedback-text.wrong   { background: rgba(239,68,68,0.1);  color: var(--red-400);   }
+
+  /* ── TECHNIQUE TABS ──────────────────────────────────── */
+  .technique-tabs { display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; }
+  .tab-btn {
+    font-family: 'DM Mono',monospace; font-size: 12px; font-weight: 500;
+    padding: 8px 16px; border-radius: 8px;
+    border: 1px solid var(--card-border);
+    background: transparent; color: var(--text-muted);
+    cursor: pointer; transition: all var(--transition); letter-spacing: 0.05em;
+  }
+  .tab-btn:hover { border-color: var(--violet-500); color: var(--violet-400); }
+  .tab-btn.active { background: rgba(139,92,246,0.15); border-color: var(--violet-500); color: var(--violet-400); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+  /* ── PROMPT / RESPONSE BOXES ─────────────────────────── */
+  .prompt-box {
+    background: rgba(4,6,15,0.7); border: 1px solid rgba(99,102,241,0.2); border-radius: 12px;
+    padding: 18px 22px; font-family: 'DM Mono',monospace; font-size: 12px;
+    line-height: 1.75; color: var(--text-primary); margin-bottom: 10px;
+  }
+  .prompt-box .box-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; display: block; }
+  .prompt-box .hi-v  { color: var(--violet-400); }
+  .prompt-box .hi-g  { color: var(--green-400);  }
+  .prompt-box .hi-b  { color: var(--blue-400);   }
+  .prompt-box .hi-go { color: var(--gold-400);   }
+  .response-box {
+    background: rgba(16,185,129,0.04); border: 1px solid rgba(16,185,129,0.15); border-radius: 12px;
+    padding: 18px 22px; font-size: 13px; line-height: 1.75; color: var(--text-secondary); margin-top: 10px;
+  }
+  .response-box .box-label { font-family: 'DM Mono',monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--green-500); margin-bottom: 8px; display: block; }
+
+  /* ── FEW-SHOT ─────────────────────────────────────────── */
+  .fewshot-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 660px) { .fewshot-wrapper { grid-template-columns: 1fr; } }
+  .fewshot-panel { border-radius: 12px; padding: 18px; border: 1px solid var(--card-border); background: var(--card-bg); backdrop-filter: blur(12px); }
+  .fewshot-panel-title { font-family: 'DM Mono',monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .example-chip {
+    display: flex; align-items: center; gap: 6px; width: 100%;
+    background: rgba(139,92,246,0.12); border: 1px dashed rgba(139,92,246,0.35);
+    border-radius: 8px; padding: 7px 12px; font-family: 'DM Mono',monospace; font-size: 11px; color: var(--violet-400);
+    cursor: grab; transition: all 0.2s; user-select: none; margin: 4px 0;
+  }
+  .example-chip:hover { background: rgba(139,92,246,0.2); transform: translateY(-1px); }
+  .example-chip.dragging { opacity: 0.4; cursor: grabbing; }
+  .drop-zone {
+    min-height: 76px; border: 2px dashed rgba(99,102,241,0.25);
+    border-radius: 10px; padding: 10px; transition: all 0.2s;
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  .drop-zone.drag-over { border-color: var(--violet-500); background: rgba(139,92,246,0.08); }
+  .drop-zone-hint { font-size: 12px; color: var(--text-muted); text-align: center; padding: 10px 0; }
+  .fewshot-result { margin-top: 14px; padding: 12px 14px; border-radius: 10px; font-size: 13px; line-height: 1.6; display: none; }
+  .fewshot-result.show { display: block; animation: fadeSlideUp 0.4s ease; }
+  .fewshot-result.mediocre { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2); color: var(--gold-400); }
+  .fewshot-result.great    { background: rgba(16,185,129,0.08);  border: 1px solid rgba(16,185,129,0.2);  color: var(--green-400); }
+
+  /* ── COT ─────────────────────────────────────────────── */
+  .cot-toggle { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+  .cot-toggle-label { font-size: 14px; color: var(--text-secondary); }
+  .toggle-switch { display: flex; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); border-radius: 8px; overflow: hidden; }
+  .toggle-btn { padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer; background: transparent; border: none; color: var(--text-muted); transition: all 0.2s; }
+  .toggle-btn.active { background: rgba(139,92,246,0.2); color: var(--violet-400); }
+  .thinking-steps { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .thinking-step { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--text-secondary); opacity: 0; transform: translateX(-10px); transition: all 0.4s ease; }
+  .thinking-step.visible { opacity: 1; transform: translateX(0); }
+  .step-num { width: 22px; height: 22px; border-radius: 50%; background: rgba(139,92,246,0.2); border: 1px solid var(--violet-500); display: flex; align-items: center; justify-content: center; font-family: 'DM Mono',monospace; font-size: 10px; color: var(--violet-400); flex-shrink: 0; margin-top: 1px; }
+
+  /* ── PERSONA ─────────────────────────────────────────── */
+  .persona-selector { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+  .persona-btn { padding: 9px 16px; border-radius: 100px; border: 1px solid var(--card-border); background: transparent; color: var(--text-secondary); font-size: 13px; font-weight: 500; cursor: pointer; transition: all var(--transition); display: flex; align-items: center; gap: 7px; }
+  .persona-btn:hover { border-color: var(--violet-500); color: var(--violet-400); }
+  .persona-btn.active { background: rgba(139,92,246,0.15); border-color: var(--violet-500); color: var(--violet-400); }
+  .persona-response { border-radius: 12px; padding: 18px 22px; font-size: 14px; line-height: 1.75; color: var(--text-secondary); border: 1px solid var(--card-border); background: var(--card-bg); min-height: 110px; transition: all 0.3s ease; }
+  .persona-response.updating { opacity: 0.25; transform: translateY(4px); }
+
+  /* ── CRISP BUILDER ───────────────────────────────────── */
+  .crisp-letters {
+    display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-bottom: 28px;
+  }
+  .crisp-letter-card {
+    text-align: center; padding: 14px 6px;
+    border-radius: 12px; border: 1px solid rgba(99,102,241,0.15);
+  }
+  .cl-big { font-family: 'Bebas Neue',sans-serif; font-size: 26px; line-height: 1; }
+  .cl-small { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  .crisp-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }
+  @media (max-width: 680px) { .crisp-layout { grid-template-columns: 1fr; } }
+  .crisp-fields { display: flex; flex-direction: column; gap: 13px; }
+  .crisp-field { display: flex; flex-direction: column; gap: 5px; }
+  .crisp-field-label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .cl-tag { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 6px; font-family: 'Bebas Neue',sans-serif; font-size: 15px; }
+  .crisp-field textarea {
+    background: rgba(4,6,15,0.7); border: 1px solid var(--card-border); border-radius: 8px;
+    padding: 9px 13px; font-family: 'DM Sans',sans-serif; font-size: 13px;
+    color: var(--text-primary); resize: vertical; transition: border-color var(--transition); outline: none; min-height: 56px;
+  }
+  .crisp-field textarea::placeholder { color: var(--text-muted); }
+  .crisp-field textarea:focus { border-color: var(--violet-500); }
+
+  .crisp-preview { position: sticky; top: 24px; display: flex; flex-direction: column; gap: 14px; }
+  .crisp-prompt-preview {
+    background: rgba(4,6,15,0.8); border: 1px solid rgba(99,102,241,0.2); border-radius: 12px;
+    padding: 16px 18px; font-family: 'DM Mono',monospace; font-size: 11px; line-height: 1.85;
+    color: var(--text-secondary); min-height: 150px;
+  }
+  .preview-label { color: var(--violet-400); font-weight: 500; }
+  .preview-section { color: var(--text-primary); }
+
+  .quality-meter-wrap { padding: 14px 18px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; }
+  .quality-meter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; font-weight: 600; }
+  .quality-label { transition: color 0.3s; }
+  .quality-pct { font-family: 'DM Mono',monospace; font-size: 11px; color: var(--text-muted); }
+  .quality-bar-bg { height: 6px; background: rgba(255,255,255,0.06); border-radius: 100px; overflow: hidden; }
+  .quality-bar { height: 100%; border-radius: 100px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1), background 0.5s; width: 0%; }
+
+  .crisp-ai-response {
+    padding: 14px 18px; background: rgba(16,185,129,0.04); border: 1px solid rgba(16,185,129,0.12);
+    border-radius: 12px; font-size: 13px; line-height: 1.7; color: var(--text-secondary); min-height: 90px;
+  }
+  .crisp-ai-response .resp-label { font-family: 'DM Mono',monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--green-500); margin-bottom: 7px; display: block; }
+
+  /* ── FLIP CARDS ──────────────────────────────────────── */
+  .flip-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+  @media (max-width: 560px) { .flip-grid { grid-template-columns: 1fr; } }
+  .flip-card-wrap { height: 180px; perspective: 1000px; cursor: pointer; }
+  .flip-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.55s cubic-bezier(0.4,0,0.2,1); transform-style: preserve-3d; }
+  .flip-card-wrap.flipped .flip-card-inner { transform: rotateY(180deg); }
+  .flip-face { position: absolute; inset: 0; border-radius: 14px; padding: 18px; backface-visibility: hidden; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+  .flip-front { background: rgba(239,68,68,0.07); border: 1px solid rgba(239,68,68,0.2); }
+  .flip-back  { background: rgba(16,185,129,0.07); border: 1px solid rgba(16,185,129,0.2); transform: rotateY(180deg); }
+  .flip-face-tag { font-family: 'DM Mono',monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; }
+  .flip-front .flip-face-tag { color: var(--red-400); }
+  .flip-back  .flip-face-tag { color: var(--green-400); }
+  .flip-face-title { font-size: 14px; font-weight: 600; color: var(--text-primary); line-height: 1.3; }
+  .flip-face-text  { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+  .flip-hint { font-family: 'DM Mono',monospace; font-size: 10px; color: var(--text-muted); text-align: center; margin-top: 10px; letter-spacing: 0.08em; }
+
+  /* ── QUIZ ────────────────────────────────────────────── */
+  .quiz-question { margin-bottom: 28px; animation: fadeSlideUp 0.4s ease both; }
+  .quiz-q-text { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; line-height: 1.5; }
+  .quiz-options { display: flex; flex-direction: column; gap: 7px; }
+  .quiz-option { padding: 11px 15px; border-radius: 10px; border: 1px solid var(--card-border); background: rgba(14,18,38,0.6); cursor: pointer; font-size: 13px; color: var(--text-secondary); transition: all 0.2s; text-align: left; }
+  .quiz-option:hover:not(:disabled) { border-color: var(--violet-500); color: var(--text-primary); background: rgba(139,92,246,0.08); }
+  .quiz-option.correct { border-color: var(--green-500); background: rgba(16,185,129,0.1); color: var(--green-400); }
+  .quiz-option.wrong   { border-color: var(--red-500);   background: rgba(239,68,68,0.1);  color: var(--red-400);   }
+  .quiz-option:disabled { cursor: default; }
+  .quiz-feedback { margin-top: 8px; font-size: 13px; padding: 8px 12px; border-radius: 8px; display: none; }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.correct { background: rgba(16,185,129,0.1); color: var(--green-400); }
+  .quiz-feedback.wrong   { background: rgba(239,68,68,0.1);  color: var(--red-400);   }
+
+  .quiz-result { text-align: center; padding: 36px 24px; display: none; }
+  .quiz-result.show { display: block; animation: fadeSlideUp 0.5s ease; }
+  .quiz-score { font-family: 'Bebas Neue',sans-serif; font-size: 80px; letter-spacing: 0.05em; line-height: 1; background: linear-gradient(135deg, var(--violet-400) 0%, var(--cyan-400) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .quiz-score-label { font-size: 16px; color: var(--text-secondary); margin-top: 8px; }
+  .quiz-retry-btn { margin-top: 22px; padding: 11px 26px; background: rgba(139,92,246,0.15); border: 1px solid var(--violet-500); border-radius: 10px; color: var(--violet-400); font-size: 14px; font-weight: 600; cursor: pointer; transition: all var(--transition); }
+  .quiz-retry-btn:hover { background: rgba(139,92,246,0.3); }
+
+  /* ── BOTTOM NAV ──────────────────────────────────────── */
+  .bottom-nav { display: flex; align-items: center; justify-content: space-between; padding-top: 44px; border-top: 1px solid rgba(99,102,241,0.12); margin-top: 44px; gap: 14px; flex-wrap: wrap; }
+  .nav-module-btn { display: inline-flex; align-items: center; gap: 10px; padding: 11px 18px; border-radius: 10px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500; transition: all var(--transition); backdrop-filter: blur(8px); }
+  .nav-module-btn:hover { border-color: var(--violet-500); color: var(--violet-400); transform: translateX(3px); }
+  .nav-module-btn.prev:hover { transform: translateX(-3px); }
+  .arrow { font-size: 18px; }
+  .nav-module-meta { font-family: 'DM Mono',monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 2px; }
+
+  /* ── COMPLETION ──────────────────────────────────────── */
+  .completion-banner { display: none; margin-top: 18px; padding: 14px 18px; background: linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(34,211,238,0.06) 100%); border: 1px solid rgba(16,185,129,0.25); border-radius: 12px; text-align: center; font-size: 15px; color: var(--green-400); }
+  .completion-banner.show { display: block; animation: fadeSlideUp 0.5s ease; }
+
+  code { font-family: 'DM Mono',monospace; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); border-radius: 4px; padding: 1px 6px; font-size: 12px; color: var(--indigo-300); }
+
+  .info-chip { padding: 12px 15px; border-radius: 10px; font-size: 13px; margin-bottom: 18px; }
+  .info-chip.blue  { background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.15); color: var(--blue-400); }
+  .info-chip.gold  { background: rgba(251,191,36,0.06); border: 1px solid rgba(251,191,36,0.15); color: var(--gold-400); }
+</style>
+</head>
+<body>
+<div class="nebula nebula-1"></div>
+<div class="nebula nebula-2"></div>
+
+<div class="page-wrapper">
+
+  <!-- ── TOP NAV ── -->
+  <nav class="top-nav">
+    <a href="../index.html" class="nav-back">← Voltar ao índice</a>
+    <div class="progress-indicator">
+      <div class="progress-dot done"></div>
+      <div class="progress-dot active"></div>
+      <div class="progress-dot"></div>
+      <div class="progress-dot"></div>
+      <div class="progress-dot"></div>
+      <span style="margin-left:6px;">2 / 5</span>
+    </div>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <header class="module-hero">
+    <div class="module-badge">🎯 Módulo 2</div>
+    <h1 class="module-title">
+      Prompt Engineering<br>
+      <span class="accent">A Arte de Conversar com IA</span>
+    </h1>
+    <p class="module-subtitle">Aprenda a falar a língua da IA — e faça ela trabalhar do jeito que você quer.</p>
+    <div class="module-meta">
+      <span>⏱️ ~25 min</span>
+      <span>🎮 6 exercícios interativos</span>
+      <span>📐 Framework CRISP</span>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SEÇÃO 1: O QUE É UM PROMPT? -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <section class="section">
+    <div class="section-label">Seção 1</div>
+    <h2 class="section-title">O que é um Prompt? 💬</h2>
+    <p class="section-intro">
+      Um <strong>prompt</strong> é simplesmente a instrução que você dá para a IA. É o texto de entrada que define o que você quer que ela faça, como quer que ela responda e qual contexto ela deve considerar.
+    </p>
+
+    <div class="analogy-box">
+      <div class="analogy-icon">🧑‍💼</div>
+      <div class="analogy-text">
+        <strong>Pense assim:</strong> a IA é um estagiário extremamente inteligente, mas muito literal. Ele faz exatamente o que você pede — nem mais, nem menos. Se você pede <em>"escreve um código"</em>, ele vai escrever qualquer coisa. Se você pede <em>"escreve uma função Python que valida email e retorna booleano"</em>, ele entrega exatamente isso.<br><br>
+        A <strong>qualidade do seu prompt determina diretamente a qualidade da resposta.</strong>
+      </div>
+    </div>
+
+    <!-- Exercício 1: Escolha o melhor prompt -->
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+        <span style="font-size:20px;">🎯</span>
+        <div>
+          <div style="font-weight:600;font-size:15px;">Exercício: Qual prompt é melhor?</div>
+          <div style="font-size:13px;color:var(--text-muted);margin-top:2px;">Clique no prompt que você acha mais eficiente para cada situação</div>
+        </div>
+      </div>
+
+      <!-- Par 1 -->
+      <div style="margin-bottom:22px;">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--text-muted);text-transform:uppercase;margin-bottom:9px;">Par 1 — Tarefa de código</div>
+        <div class="comparison-grid" id="pair1">
+          <div class="prompt-option bad" onclick="checkPrompt('pair1','bad',this)">
+            <div class="prompt-label">opção A</div>
+            <div class="prompt-text">"Escreva um código"</div>
+            <div class="prompt-badge">❌</div>
+          </div>
+          <div class="prompt-option good" onclick="checkPrompt('pair1','good',this)">
+            <div class="prompt-label">opção B</div>
+            <div class="prompt-text">"Escreva uma função Python que valida emails usando regex. Deve retornar True se válido, False caso contrário."</div>
+            <div class="prompt-badge">✅</div>
+          </div>
+        </div>
+        <div class="feedback-text" id="feedback-pair1"></div>
+      </div>
+
+      <!-- Par 2 -->
+      <div style="margin-bottom:22px;">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--text-muted);text-transform:uppercase;margin-bottom:9px;">Par 2 — Debugging</div>
+        <div class="comparison-grid" id="pair2">
+          <div class="prompt-option bad" onclick="checkPrompt('pair2','bad',this)">
+            <div class="prompt-label">opção A</div>
+            <div class="prompt-text">"Me ajuda com o bug"</div>
+            <div class="prompt-badge">❌</div>
+          </div>
+          <div class="prompt-option good" onclick="checkPrompt('pair2','good',this)">
+            <div class="prompt-label">opção B</div>
+            <div class="prompt-text">"A função calcularTotal retorna NaN quando o array está vazio. O esperado é retornar 0. Aqui está o código: [...]"</div>
+            <div class="prompt-badge">✅</div>
+          </div>
+        </div>
+        <div class="feedback-text" id="feedback-pair2"></div>
+      </div>
+
+      <!-- Par 3 -->
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--text-muted);text-transform:uppercase;margin-bottom:9px;">Par 3 — Revisão de texto</div>
+        <div class="comparison-grid" id="pair3">
+          <div class="prompt-option bad" onclick="checkPrompt('pair3','bad',this)">
+            <div class="prompt-label">opção A</div>
+            <div class="prompt-text">"Melhora esse email"</div>
+            <div class="prompt-badge">❌</div>
+          </div>
+          <div class="prompt-option good" onclick="checkPrompt('pair3','good',this)">
+            <div class="prompt-label">opção B</div>
+            <div class="prompt-text">"Reescreva esse email de suporte ao cliente para ser mais empático, manter o conteúdo técnico e terminar com uma pergunta de acompanhamento."</div>
+            <div class="prompt-badge">✅</div>
+          </div>
+        </div>
+        <div class="feedback-text" id="feedback-pair3"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SEÇÃO 2: TÉCNICAS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <section class="section">
+    <div class="section-label">Seção 2</div>
+    <h2 class="section-title">Técnicas de Prompt Engineering 🛠️</h2>
+    <p class="section-intro">
+      Diferentes situações pedem técnicas diferentes. Aqui estão as quatro mais usadas no dia a dia do desenvolvimento.
+    </p>
+
+    <div class="technique-tabs">
+      <button class="tab-btn active" onclick="switchTab('zero-shot')">⚡ Zero-shot</button>
+      <button class="tab-btn" onclick="switchTab('few-shot')">🎯 Few-shot</button>
+      <button class="tab-btn" onclick="switchTab('cot')">🧠 Chain-of-Thought</button>
+      <button class="tab-btn" onclick="switchTab('persona')">🎭 Role / Persona</button>
+    </div>
+
+    <!-- ── ZERO-SHOT ── -->
+    <div class="tab-panel active" id="tab-zero-shot">
+      <div class="card">
+        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:18px;">
+          <span style="font-size:26px;">⚡</span>
+          <div>
+            <div style="font-weight:700;font-size:16px;margin-bottom:4px;">Zero-shot — Perguntar direto</div>
+            <div style="font-size:14px;color:var(--text-secondary);line-height:1.6;">Você pede algo sem dar nenhum exemplo. Funciona bem para tarefas simples e bem definidas.</div>
+          </div>
+        </div>
+        <div class="prompt-box">
+          <span class="box-label">📝 Prompt zero-shot</span>
+          Classifique o sentimento deste review como Positivo, Negativo ou Neutro:<br>
+          <span class="hi-v">"O produto chegou rápido mas a embalagem estava amassada."</span>
+        </div>
+        <div class="response-box">
+          <span class="box-label">🤖 Resposta da IA</span>
+          <strong>Neutro</strong> — O review menciona um ponto positivo (entrega rápida) e um negativo (embalagem danificada), sem predominância de nenhum dos dois.
+        </div>
+        <div class="info-chip gold" style="margin-top:14px;margin-bottom:0;">
+          💡 <strong>Quando usar:</strong> Tarefas únicas, classificações simples, perguntas diretas onde o modelo já tem contexto suficiente.
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FEW-SHOT ── -->
+    <div class="tab-panel" id="tab-few-shot">
+      <div class="card">
+        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;">
+          <span style="font-size:26px;">🎯</span>
+          <div>
+            <div style="font-weight:700;font-size:16px;margin-bottom:4px;">Few-shot — Dar exemplos antes de pedir</div>
+            <div style="font-size:14px;color:var(--text-secondary);line-height:1.6;">Você fornece 2–5 exemplos do padrão que quer antes de fazer o pedido real. Melhora consistência dramaticamente.</div>
+          </div>
+        </div>
+
+        <div class="info-chip blue">
+          🎮 <strong>Exercício interativo:</strong> Arraste os exemplos para o prompt e veja a qualidade da resposta melhorar!
+        </div>
+
+        <div class="fewshot-wrapper">
+          <div class="fewshot-panel">
+            <div class="fewshot-panel-title">
+              <span style="color:var(--violet-400);">📦</span>
+              <span style="color:var(--text-muted);">Exemplos disponíveis</span>
+            </div>
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Arraste para o prompt →</p>
+            <div id="examples-pool">
+              <div class="example-chip" draggable="true" data-id="ex1" ondragstart="dragStart(event)" ondragend="dragEnd(event)">
+                ✅ "Entrega perfeita" → Positivo
+              </div>
+              <div class="example-chip" draggable="true" data-id="ex2" ondragstart="dragStart(event)" ondragend="dragEnd(event)">
+                ✅ "Produto horrível" → Negativo
+              </div>
+              <div class="example-chip" draggable="true" data-id="ex3" ondragstart="dragStart(event)" ondragend="dragEnd(event)">
+                ✅ "Ok, nada especial" → Neutro
+              </div>
+            </div>
+          </div>
+
+          <div class="fewshot-panel">
+            <div class="fewshot-panel-title">
+              <span style="color:var(--green-400);">📝</span>
+              <span style="color:var(--text-muted);">Prompt com exemplos</span>
+            </div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);margin-bottom:8px;line-height:1.75;">
+              Classifique o sentimento:<br>
+              <span id="dropped-examples" style="color:var(--violet-400);">(adicione exemplos aqui)</span><br>
+              Review: "Atendimento demorado, mas produto excelente."
+            </div>
+            <div class="drop-zone" id="drop-zone"
+              ondragover="allowDrop(event)"
+              ondragleave="dragLeave(event)"
+              ondrop="dropExample(event)">
+              <div class="drop-zone-hint" id="drop-hint">⬆ Solte exemplos aqui</div>
+            </div>
+            <div id="fewshot-result" class="fewshot-result"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CHAIN-OF-THOUGHT ── -->
+    <div class="tab-panel" id="tab-cot">
+      <div class="card">
+        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;">
+          <span style="font-size:26px;">🧠</span>
+          <div>
+            <div style="font-weight:700;font-size:16px;margin-bottom:4px;">Chain-of-Thought — Pense passo a passo</div>
+            <div style="font-size:14px;color:var(--text-secondary);line-height:1.6;">Pedir que a IA raciocine explicitamente antes de responder. Reduz erros em problemas complexos de lógica e matemática.</div>
+          </div>
+        </div>
+
+        <div class="info-chip blue">
+          🎮 <strong>Exercício:</strong> Ative o "Pense passo a passo" e veja a diferença no resultado!
+        </div>
+
+        <div class="cot-toggle">
+          <span class="cot-toggle-label">Modo do prompt:</span>
+          <div class="toggle-switch">
+            <button class="toggle-btn active" id="cot-btn-off" onclick="setCot(false)">Sem CoT</button>
+            <button class="toggle-btn" id="cot-btn-on" onclick="setCot(true)">+ "Pense passo a passo"</button>
+          </div>
+        </div>
+
+        <div class="prompt-box" style="margin-bottom:14px;">
+          <span class="box-label">📝 Problema</span>
+          Um array começa com <span class="hi-v">128 elementos</span>. A cada iteração, você remove metade.<br>
+          <span class="hi-b">Após quantas iterações o array terá menos de 10 elementos?</span>
+          <div id="cot-suffix" style="margin-top:8px;display:none;color:var(--green-400);">
+            <br>💭 <em>Pense passo a passo antes de responder.</em>
+          </div>
+        </div>
+
+        <div id="cot-no-thinking" class="response-box">
+          <span class="box-label">🤖 Resposta sem CoT</span>
+          <span style="color:var(--red-400);">❌ A resposta é <strong>3 iterações</strong>.</span>
+          <div style="margin-top:5px;font-size:12px;color:var(--text-muted);">(Errado — o modelo chutou sem calcular)</div>
+        </div>
+
+        <div id="cot-with-thinking" style="display:none;">
+          <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:12px;padding:14px 18px;margin-bottom:10px;">
+            <span style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--violet-400);display:block;margin-bottom:10px;">🧠 Raciocínio da IA</span>
+            <div class="thinking-steps">
+              <div class="thinking-step" id="step1"><div class="step-num">1</div><div>Início: <strong style="color:var(--text-primary);">128</strong> elementos</div></div>
+              <div class="thinking-step" id="step2"><div class="step-num">2</div><div>Iteração 1: 128 ÷ 2 = <strong style="color:var(--text-primary);">64</strong> elementos</div></div>
+              <div class="thinking-step" id="step3"><div class="step-num">3</div><div>Iteração 2: 64 ÷ 2 = <strong style="color:var(--text-primary);">32</strong> elementos</div></div>
+              <div class="thinking-step" id="step4"><div class="step-num">4</div><div>Iteração 3: 32 ÷ 2 = <strong style="color:var(--text-primary);">16</strong> elementos</div></div>
+              <div class="thinking-step" id="step5"><div class="step-num">5</div><div>Iteração 4: 16 ÷ 2 = <strong style="color:var(--text-primary);">8</strong> elementos → <span style="color:var(--green-400);">menor que 10! ✓</span></div></div>
+            </div>
+          </div>
+          <div class="response-box">
+            <span class="box-label">🤖 Resposta com CoT</span>
+            <span style="color:var(--green-400);">✅ Após <strong>4 iterações</strong>, o array terá 8 elementos — menos que 10.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PERSONA ── -->
+    <div class="tab-panel" id="tab-persona">
+      <div class="card">
+        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;">
+          <span style="font-size:26px;">🎭</span>
+          <div>
+            <div style="font-weight:700;font-size:16px;margin-bottom:4px;">Role / Persona — Definir quem a IA é</div>
+            <div style="font-size:14px;color:var(--text-secondary);line-height:1.6;">O papel que você atribui muda completamente o vocabulário, profundidade e tom da resposta.</div>
+          </div>
+        </div>
+
+        <div class="info-chip blue">
+          🎮 <strong>Exercício:</strong> Selecione uma persona e veja a mesma pergunta respondida de formas completamente diferentes!
+        </div>
+
+        <div class="prompt-box" style="margin-bottom:18px;">
+          <span class="box-label">❓ Pergunta em todas as personas</span>
+          "O que é um banco de dados?"
+        </div>
+
+        <div class="persona-selector">
+          <button class="persona-btn active" onclick="selectPersona('dev',this)">👨‍💻 Dev Sênior</button>
+          <button class="persona-btn" onclick="selectPersona('teacher',this)">👨‍🏫 Professor</button>
+          <button class="persona-btn" onclick="selectPersona('lawyer',this)">⚖️ Advogado</button>
+          <button class="persona-btn" onclick="selectPersona('kid',this)">🧒 Para criança</button>
+        </div>
+
+        <div class="persona-response" id="persona-response"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SEÇÃO 3: FRAMEWORK CRISP -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <section class="section">
+    <div class="section-label">Seção 3</div>
+    <h2 class="section-title">O Framework CRISP 🧩</h2>
+    <p class="section-intro">
+      CRISP é um framework de cinco componentes para montar prompts de alta qualidade. Quanto mais componentes você preencher, mais precisa e útil será a resposta da IA.
+    </p>
+
+    <!-- Legenda das letras -->
+    <div class="crisp-letters">
+      <div class="crisp-letter-card" style="background:rgba(139,92,246,0.08);border-color:rgba(139,92,246,0.2);">
+        <div class="cl-big" style="color:var(--violet-400);">C</div>
+        <div class="cl-small">ontexto</div>
+      </div>
+      <div class="crisp-letter-card" style="background:rgba(96,165,250,0.08);border-color:rgba(96,165,250,0.2);">
+        <div class="cl-big" style="color:var(--blue-400);">R</div>
+        <div class="cl-small">ole</div>
+      </div>
+      <div class="crisp-letter-card" style="background:rgba(34,211,238,0.07);border-color:rgba(34,211,238,0.15);">
+        <div class="cl-big" style="color:var(--cyan-400);">I</div>
+        <div class="cl-small">nstrução</div>
+      </div>
+      <div class="crisp-letter-card" style="background:rgba(16,185,129,0.08);border-color:rgba(16,185,129,0.15);">
+        <div class="cl-big" style="color:var(--green-400);">S</div>
+        <div class="cl-small">aída</div>
+      </div>
+      <div class="crisp-letter-card" style="background:rgba(251,191,36,0.07);border-color:rgba(251,191,36,0.15);">
+        <div class="cl-big" style="color:var(--gold-400);">P</div>
+        <div class="cl-small">istas</div>
+      </div>
+    </div>
+
+    <!-- Builder -->
+    <div class="card" style="padding:28px 32px;">
+      <div style="margin-bottom:22px;">
+        <div style="font-weight:700;font-size:15px;margin-bottom:5px;">🔨 CRISP Builder — construa seu prompt ao vivo</div>
+        <div style="font-size:13px;color:var(--text-muted);">Cenário: você precisa que a IA escreva uma mensagem de boas-vindas para novos clientes do seu SaaS.</div>
+      </div>
+
+      <div class="crisp-layout">
+        <!-- Fields -->
+        <div class="crisp-fields">
+          <div class="crisp-field">
+            <label class="crisp-field-label">
+              <span class="cl-tag" style="background:rgba(139,92,246,0.15);color:var(--violet-400);">C</span>
+              Contexto <span style="font-size:11px;color:var(--text-muted);font-weight:400;">— informação de fundo</span>
+            </label>
+            <textarea id="crisp-c" placeholder="Ex: Meu SaaS é uma ferramenta de gestão de projetos para times ágeis. Os clientes acabaram de criar sua conta e ainda não configuraram nada." oninput="updateCrisp()"></textarea>
+          </div>
+          <div class="crisp-field">
+            <label class="crisp-field-label">
+              <span class="cl-tag" style="background:rgba(96,165,250,0.15);color:var(--blue-400);">R</span>
+              Role <span style="font-size:11px;color:var(--text-muted);font-weight:400;">— papel da IA</span>
+            </label>
+            <textarea id="crisp-r" placeholder="Ex: Você é um especialista em Customer Success com foco em onboarding de SaaS B2B." oninput="updateCrisp()" style="min-height:50px;"></textarea>
+          </div>
+          <div class="crisp-field">
+            <label class="crisp-field-label">
+              <span class="cl-tag" style="background:rgba(34,211,238,0.12);color:var(--cyan-400);">I</span>
+              Instrução <span style="font-size:11px;color:var(--text-muted);font-weight:400;">— o que fazer</span>
+            </label>
+            <textarea id="crisp-i" placeholder="Ex: Escreva uma mensagem de boas-vindas por email que incentive o usuário a completar o primeiro passo de setup." oninput="updateCrisp()"></textarea>
+          </div>
+          <div class="crisp-field">
+            <label class="crisp-field-label">
+              <span class="cl-tag" style="background:rgba(16,185,129,0.12);color:var(--green-400);">S</span>
+              Saída <span style="font-size:11px;color:var(--text-muted);font-weight:400;">— formato esperado</span>
+            </label>
+            <textarea id="crisp-s" placeholder="Ex: Email com assunto, saudação, 2 parágrafos e um CTA. Tom amigável e profissional." oninput="updateCrisp()" style="min-height:50px;"></textarea>
+          </div>
+          <div class="crisp-field">
+            <label class="crisp-field-label">
+              <span class="cl-tag" style="background:rgba(251,191,36,0.12);color:var(--gold-400);">P</span>
+              Pistas <span style="font-size:11px;color:var(--text-muted);font-weight:400;">— exemplos ou restrições</span>
+            </label>
+            <textarea id="crisp-p" placeholder="Ex: Não mencione preços. Evite jargões técnicos. Use o nome do usuário. Máximo 150 palavras." oninput="updateCrisp()" style="min-height:50px;"></textarea>
+          </div>
+        </div>
+
+        <!-- Preview side -->
+        <div class="crisp-preview">
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px;">📋 Prompt montado</div>
+            <div class="crisp-prompt-preview" id="crisp-preview-text">
+              <span style="color:var(--text-muted);font-style:italic;">Preencha os campos ao lado para ver o prompt se montar aqui em tempo real...</span>
+            </div>
+          </div>
+
+          <div class="quality-meter-wrap">
+            <div class="quality-meter-header">
+              <span class="quality-label" id="quality-label" style="color:var(--text-muted);">Prompt fraco</span>
+              <span class="quality-pct" id="quality-pct">0%</span>
+            </div>
+            <div class="quality-bar-bg">
+              <div class="quality-bar" id="quality-bar"></div>
+            </div>
+          </div>
+
+          <div class="crisp-ai-response" id="crisp-ai-response">
+            <span class="resp-label">🤖 Prévia da resposta</span>
+            <span style="color:var(--text-muted);font-style:italic;font-size:12px;">Adicione mais componentes para ver uma resposta mais completa...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SEÇÃO 4: ANTI-PATTERNS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <section class="section">
+    <div class="section-label">Seção 4</div>
+    <h2 class="section-title">Erros Comuns — Anti-patterns ⚠️</h2>
+    <p class="section-intro">
+      Clique nos cards para revelar o problema e a correção. Reconhecer esses padrões vai te salvar de muita frustração com a IA.
+    </p>
+
+    <div class="flip-grid">
+      <div class="flip-card-wrap" onclick="this.classList.toggle('flipped')">
+        <div class="flip-card-inner">
+          <div class="flip-face flip-front">
+            <div class="flip-face-tag">❌ Anti-pattern #1</div>
+            <div class="flip-face-title">Prompt muito vago</div>
+            <div class="flip-face-text">"Melhora meu código" — sem contexto, sem critério, sem objetivo claro.</div>
+          </div>
+          <div class="flip-face flip-back">
+            <div class="flip-face-tag">✅ A correção</div>
+            <div class="flip-face-title">Seja específico e contextual</div>
+            <div class="flip-face-text">"Refatore essa função para reduzir complexidade ciclomática e adicionar tratamento de erro para array null ou vazio."</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flip-card-wrap" onclick="this.classList.toggle('flipped')">
+        <div class="flip-card-inner">
+          <div class="flip-face flip-front">
+            <div class="flip-face-tag">❌ Anti-pattern #2</div>
+            <div class="flip-face-title">Instruções contraditórias</div>
+            <div class="flip-face-text">"Seja breve mas explique tudo detalhadamente" — a IA não sabe o que priorizar.</div>
+          </div>
+          <div class="flip-face flip-back">
+            <div class="flip-face-tag">✅ A correção</div>
+            <div class="flip-face-title">Priorize claramente</div>
+            <div class="flip-face-text">"Responda em no máximo 3 linhas. Se precisar de mais, use bullet points." — limite claro + estrutura definida.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flip-card-wrap" onclick="this.classList.toggle('flipped')">
+        <div class="flip-card-inner">
+          <div class="flip-face flip-front">
+            <div class="flip-face-tag">❌ Anti-pattern #3</div>
+            <div class="flip-face-title">Contexto demais (token waste)</div>
+            <div class="flip-face-text">Colar 500 linhas de código só para perguntar sobre 3 linhas específicas.</div>
+          </div>
+          <div class="flip-face flip-back">
+            <div class="flip-face-tag">✅ A correção</div>
+            <div class="flip-face-title">Inclua só o relevante</div>
+            <div class="flip-face-text">Extraia só a função problemática. Descreva o resto em texto. Menos tokens = resposta mais precisa e mais barata.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flip-card-wrap" onclick="this.classList.toggle('flipped')">
+        <div class="flip-card-inner">
+          <div class="flip-face flip-front">
+            <div class="flip-face-tag">❌ Anti-pattern #4</div>
+            <div class="flip-face-title">Não definir formato de saída</div>
+            <div class="flip-face-text">"Liste os erros do código" — pode voltar prosa, tabela, JSON, qualquer coisa.</div>
+          </div>
+          <div class="flip-face flip-back">
+            <div class="flip-face-tag">✅ A correção</div>
+            <div class="flip-face-title">Especifique o formato</div>
+            <div class="flip-face-text">"Retorne array JSON: [{linha, severidade, descricao, sugestao}]" — saída previsível = integração simples.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flip-hint">👆 Clique nos cards para revelar a correção</div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SEÇÃO 5: QUIZ FINAL -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <section class="section">
+    <div class="section-label">Seção 5</div>
+    <h2 class="section-title">Quiz Final 🏆</h2>
+    <p class="section-intro">5 perguntas para consolidar o que você aprendeu. Boa sorte!</p>
+
+    <div id="quiz-container">
+
+      <div class="quiz-question" id="q1">
+        <div class="quiz-q-text">1. Qual técnica consiste em fornecer exemplos antes de fazer o pedido real?</div>
+        <div class="quiz-options">
+          <button class="quiz-option" onclick="answerQuiz(1,0,false,'Zero-shot é quando você pergunta direto, sem exemplos.')">Zero-shot</button>
+          <button class="quiz-option" onclick="answerQuiz(1,1,true,'Correto! Few-shot = dar exemplos antes do pedido para guiar o padrão de resposta.')">Few-shot</button>
+          <button class="quiz-option" onclick="answerQuiz(1,2,false,'Chain-of-Thought é sobre pedir raciocínio passo a passo, não sobre exemplos.')">Chain-of-Thought</button>
+          <button class="quiz-option" onclick="answerQuiz(1,3,false,'Role/Persona é sobre definir quem a IA deve ser, não sobre exemplos.')">Role/Persona</button>
+        </div>
+        <div class="quiz-feedback" id="qf1"></div>
+      </div>
+
+      <div class="quiz-question" id="q2">
+        <div class="quiz-q-text">2. No framework CRISP, o que a letra "S" representa?</div>
+        <div class="quiz-options">
+          <button class="quiz-option" onclick="answerQuiz(2,0,false,'Sentimento não faz parte do CRISP.')">Sentimento</button>
+          <button class="quiz-option" onclick="answerQuiz(2,1,false,'Sistema não faz parte do CRISP.')">Sistema</button>
+          <button class="quiz-option" onclick="answerQuiz(2,2,true,'Correto! S = Saída — o formato esperado da resposta da IA.')">Saída</button>
+          <button class="quiz-option" onclick="answerQuiz(2,3,false,'Sintaxe não faz parte do CRISP.')">Sintaxe</button>
+        </div>
+        <div class="quiz-feedback" id="qf2"></div>
+      </div>
+
+      <div class="quiz-question" id="q3">
+        <div class="quiz-q-text">3. Um dev quer que a IA resolva um problema matemático complexo sem erros. Qual técnica é mais indicada?</div>
+        <div class="quiz-options">
+          <button class="quiz-option" onclick="answerQuiz(3,0,false,'Zero-shot funciona para tarefas simples, mas falha em raciocínio complexo sem guia.')">Zero-shot — perguntar direto</button>
+          <button class="quiz-option" onclick="answerQuiz(3,1,true,'Correto! Chain-of-Thought força a IA a raciocinar passo a passo, reduzindo erros lógicos.')">Chain-of-Thought — &quot;pense passo a passo&quot;</button>
+          <button class="quiz-option" onclick="answerQuiz(3,2,false,'Few-shot ajuda na consistência do formato, mas não garante raciocínio correto.')">Few-shot — dar exemplos de contas</button>
+          <button class="quiz-option" onclick="answerQuiz(3,3,false,'Role/Persona muda o tom, não a precisão do raciocínio matemático.')">Role — &quot;Você é um professor de matemática&quot;</button>
+        </div>
+        <div class="quiz-feedback" id="qf3"></div>
+      </div>
+
+      <div class="quiz-question" id="q4">
+        <div class="quiz-q-text">4. Qual é o principal problema com o prompt "Melhora meu código"?</div>
+        <div class="quiz-options">
+          <button class="quiz-option" onclick="answerQuiz(4,0,false,'O tamanho do prompt não é o problema neste caso.')">O prompt é muito longo</button>
+          <button class="quiz-option" onclick="answerQuiz(4,1,false,'A IA responde bem em português, o idioma não é o problema aqui.')">Está em português, deveria ser em inglês</button>
+          <button class="quiz-option" onclick="answerQuiz(4,2,true,'Correto! Sem critério, contexto ou objetivo, a IA não sabe o que melhorar significa para você.')">É muito vago — sem critério, contexto ou objetivo</button>
+          <button class="quiz-option" onclick="answerQuiz(4,3,false,'Não há instruções contraditórias nesse prompt.')">Contém instruções contraditórias</button>
+        </div>
+        <div class="quiz-feedback" id="qf4"></div>
+      </div>
+
+      <div class="quiz-question" id="q5">
+        <div class="quiz-q-text">5. Você precisa que a IA retorne dados estruturados para processar no seu sistema. Qual anti-pattern você deve evitar?</div>
+        <div class="quiz-options">
+          <button class="quiz-option" onclick="answerQuiz(5,0,false,'Dar contexto sobre o sistema é uma boa prática, não um anti-pattern.')">Dar contexto sobre o sistema</button>
+          <button class="quiz-option" onclick="answerQuiz(5,1,false,'Usar few-shot com exemplos do formato JSON seria uma prática excelente aqui.')">Usar few-shot com exemplos do formato JSON</button>
+          <button class="quiz-option" onclick="answerQuiz(5,2,false,'Definir o role pode ajudar na qualidade e especialização da resposta.')">Definir o role como especialista em dados</button>
+          <button class="quiz-option" onclick="answerQuiz(5,3,true,'Correto! Não definir formato de saída é o anti-pattern clássico. Sem especificar, você recebe prosa, markdown ou qualquer coisa imprevisível.')">Não especificar o formato de saída</button>
+        </div>
+        <div class="quiz-feedback" id="qf5"></div>
+      </div>
+
+    </div>
+
+    <div class="quiz-result" id="quiz-result">
+      <div class="quiz-score" id="quiz-score-display">0/5</div>
+      <div class="quiz-score-label" id="quiz-score-label">Calculando...</div>
+      <button class="quiz-retry-btn" onclick="retryQuiz()">🔄 Tentar novamente</button>
+    </div>
+
+    <div class="completion-banner" id="completion-banner">
+      🎉 Módulo 2 concluído! Você domina o básico de Prompt Engineering.
+    </div>
+  </section>
+
+  <!-- ── BOTTOM NAV ── -->
+  <nav class="bottom-nav">
+    <a href="../index.html" class="nav-module-btn prev">
+      <span class="arrow">←</span>
+      <div>
+        <span class="nav-module-meta">Início</span>
+        Índice do curso
+      </div>
+    </a>
+    <a href="03-context-engineering.html" class="nav-module-btn">
+      <div style="text-align:right;">
+        <span class="nav-module-meta">Módulo 3</span>
+        Context Engineering
+      </div>
+      <span class="arrow">→</span>
+    </a>
+  </nav>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// ─── SEÇÃO 1: Comparação de Prompts ──────────────────────────────────────────
+
+const feedbackMessages = {
+  pair1: {
+    good: '✅ Correto! O prompt B especifica linguagem (Python), funcionalidade (validação de email), método (regex) e retorno esperado (True/False). A IA tem tudo que precisa.',
+    bad:  '❌ "Escreva um código" poderia ser qualquer coisa, em qualquer linguagem. Clique no prompt B para ver a diferença.'
+  },
+  pair2: {
+    good: '✅ Correto! O prompt B identifica a função (calcularTotal), o sintoma (retorna NaN), a condição (array vazio) e o resultado esperado (0). Isso é debugging eficiente.',
+    bad:  '❌ "Me ajuda com o bug" não dá nenhuma informação. Qual bug? Qual função? Qual é o comportamento esperado? Clique no prompt B.'
+  },
+  pair3: {
+    good: '✅ Correto! O prompt B define a ação (reescrever), o público (suporte ao cliente), os critérios (empático, técnico) e um elemento concreto (pergunta de acompanhamento).',
+    bad:  '❌ "Melhora esse email" é subjetivo demais. Melhorar em quê? Tom? Estrutura? Tamanho? Clique no prompt B.'
+  }
+};
+
+function checkPrompt(pair, type, el) {
+  const container = document.getElementById(pair);
+  container.querySelectorAll('.prompt-option').forEach(o => { o.onclick = null; });
+  const feedback = document.getElementById('feedback-' + pair);
+  if (type === 'good') {
+    el.classList.add('selected-right');
+    feedback.textContent = feedbackMessages[pair].good;
+    feedback.className = 'feedback-text show correct';
+  } else {
+    el.classList.add('selected-wrong');
+    feedback.textContent = feedbackMessages[pair].bad;
+    feedback.className = 'feedback-text show wrong';
+  }
+}
+
+// ─── SEÇÃO 2: Tabs ────────────────────────────────────────────────────────────
+
+const tabKeys = ['zero-shot', 'few-shot', 'cot', 'persona'];
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', tabKeys[i] === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'persona') renderPersona('dev');
+  if (name === 'cot') setCot(false);
+}
+
+// ─── SEÇÃO 2b: Few-shot drag & drop ──────────────────────────────────────────
+
+let droppedExamples = [];
+
+function dragStart(e) {
+  e.dataTransfer.setData('text/plain', e.target.dataset.id);
+  e.target.classList.add('dragging');
+}
+function dragEnd(e) { e.target.classList.remove('dragging'); }
+function allowDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.add('drag-over');
+}
+function dragLeave(e) {
+  document.getElementById('drop-zone').classList.remove('drag-over');
+}
+function dropExample(e) {
+  e.preventDefault();
+  const id = e.dataTransfer.getData('text/plain');
+  const dz = document.getElementById('drop-zone');
+  dz.classList.remove('drag-over');
+  if (droppedExamples.includes(id)) return;
+  droppedExamples.push(id);
+
+  const chip = document.querySelector('[data-id="' + id + '"]');
+  const clone = chip.cloneNode(true);
+  clone.draggable = false;
+  clone.style.cursor = 'default';
+  clone.style.opacity = '0.7';
+  chip.style.opacity = '0.3';
+  chip.draggable = false;
+
+  document.getElementById('drop-hint').style.display = 'none';
+  dz.appendChild(clone);
+  updateDroppedDisplay();
+  updateFewShotResult();
+}
+
+function updateDroppedDisplay() {
+  const labels = { ex1: '"Entrega perfeita" → Positivo', ex2: '"Produto horrível" → Negativo', ex3: '"Ok, nada especial" → Neutro' };
+  const el = document.getElementById('dropped-examples');
+  el.innerHTML = droppedExamples.length === 0 ? '(adicione exemplos aqui)' : droppedExamples.map(id => labels[id]).join('<br>');
+}
+
+function updateFewShotResult() {
+  const result = document.getElementById('fewshot-result');
+  const n = droppedExamples.length;
+  if (n === 0) { result.className = 'fewshot-result'; return; }
+  if (n === 1) {
+    result.className = 'fewshot-result mediocre show';
+    result.innerHTML = '⚠️ <strong>Resultado parcial:</strong> Com 1 exemplo, a IA tenta classificar mas pode ser inconsistente em casos mistos.';
+  } else if (n === 2) {
+    result.className = 'fewshot-result mediocre show';
+    result.innerHTML = '🔶 <strong>Melhorando:</strong> Com 2 exemplos, a IA entende positivo e negativo, mas pode errar no review misto sem o exemplo neutro.';
+  } else {
+    result.className = 'fewshot-result great show';
+    result.innerHTML = '✅ <strong>Resultado excelente:</strong> "Atendimento demorado, mas produto excelente." → <strong>Neutro</strong>. Com 3 exemplos cobrindo os 3 casos, a IA classifica corretamente!';
+  }
+}
+
+// ─── SEÇÃO 2c: Chain-of-Thought ──────────────────────────────────────────────
+
+function setCot(active) {
+  document.getElementById('cot-btn-off').classList.toggle('active', !active);
+  document.getElementById('cot-btn-on').classList.toggle('active', active);
+  document.getElementById('cot-suffix').style.display = active ? 'block' : 'none';
+  document.getElementById('cot-no-thinking').style.display = active ? 'none' : 'block';
+  document.getElementById('cot-with-thinking').style.display = active ? 'block' : 'none';
+
+  if (active) {
+    document.querySelectorAll('.thinking-step').forEach(s => s.classList.remove('visible'));
+    document.querySelectorAll('.thinking-step').forEach(function(s, i) {
+      setTimeout(function() { s.classList.add('visible'); }, i * 350);
+    });
+  }
+}
+
+// ─── SEÇÃO 2d: Persona ────────────────────────────────────────────────────────
+
+const personaData = {
+  dev: {
+    label: 'Dev Sênior',
+    text: 'Um banco de dados é um sistema de armazenamento persistente que organiza dados em estruturas relacionais (RDBMS) ou documentos/chaves (NoSQL). Fornece ACID transactions, query optimizer, indexing e WAL para durabilidade. A escolha entre PostgreSQL, MongoDB ou Redis depende do seu access pattern — OLTP, OLAP ou cache/session store.'
+  },
+  teacher: {
+    label: 'Professor',
+    text: 'Um banco de dados é como uma <em>biblioteca muito organizada</em> para o computador. Cada livro é um registro, as prateleiras são as tabelas, e o catálogo é o índice. Sem um banco de dados, seria como guardar todos os livros espalhados pelo chão — você perderia muito tempo procurando qualquer informação.'
+  },
+  lawyer: {
+    label: 'Advogado',
+    text: 'Um banco de dados constitui um sistema tecnológico de armazenamento e recuperação de informações sujeito às disposições da Lei nº 13.709/2018 (LGPD). Recomenda-se atenção às obrigações de responsabilidade pelo tratamento de dados pessoais, incluindo base legal, medidas de segurança adequadas e portabilidade conforme o Art. 18.'
+  },
+  kid: {
+    label: 'criança de 10 anos',
+    text: 'Sabe quando você tem um caderninho onde anota os nomes dos seus amigos, seus filmes favoritos e as datas dos aniversários? Um banco de dados é a versão do computador desse caderninho! Só que muito maior — ele pode guardar milhões de informações e encontrar qualquer uma delas em menos de um segundo! 🚀'
+  }
+};
+
+let currentPersona = 'dev';
+
+function selectPersona(persona, btn) {
+  if (persona === currentPersona) return;
+  currentPersona = persona;
+  document.querySelectorAll('.persona-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderPersona(persona);
+}
+
+function renderPersona(persona) {
+  const r = document.getElementById('persona-response');
+  r.classList.add('updating');
+  setTimeout(function() {
+    const d = personaData[persona];
+    r.innerHTML = '<div style="margin-bottom:8px;font-size:11px;color:var(--text-muted);font-family:\'DM Mono\',monospace;">Prompt usado: <em style="color:var(--violet-400);">Você é um ' + d.label + '. O que é um banco de dados?</em></div>' + d.text;
+    r.classList.remove('updating');
+  }, 220);
+}
+
+document.addEventListener('DOMContentLoaded', function() { renderPersona('dev'); });
+
+// ─── SEÇÃO 3: CRISP Builder ───────────────────────────────────────────────────
+
+const crispResponses = [
+  'Adicione componentes ao prompt para gerar uma resposta...',
+  'Olá! Seja bem-vindo. Esperamos que você aproveite nossa ferramenta.',
+  'Olá [Nome], estou aqui para te ajudar a começar. Dê o primeiro passo e configure sua conta hoje!',
+  'Assunto: Seu primeiro passo começa agora 🚀\n\nOlá [Nome],\n\nSeja bem-vindo à nossa plataforma! Complete seu primeiro setup e comece a transformar sua gestão de projetos.\n\n👉 [Configurar agora]',
+  'Assunto: Você está a um passo de transformar sua gestão 🚀\n\nOlá [Nome],\n\nSeja muito bem-vindo! Nossa ferramenta foi criada para times ágeis como o seu.\n\nComplete seu setup inicial em menos de 5 minutos e libere o potencial da sua equipe.\n\n👉 [Iniciar configuração]\n\nTime de Customer Success',
+  'Assunto: Você está a um passo de transformar sua gestão 🚀\n\nOlá [Nome],\n\nSeja muito bem-vindo! Nossa plataforma foi feita para times ágeis — e seu sucesso começa com um primeiro passo simples.\n\nComplete sua configuração inicial agora e organize seu primeiro projeto em minutos.\n\n👉 [Iniciar configuração]\n\nConte sempre conosco!\nTime de Customer Success'
+];
+
+const qualityCfg = [
+  { label: '🔴 Prompt fraco',       color: '#ef4444', pct: 0   },
+  { label: '🟠 Precisa melhorar',   color: '#f97316', pct: 20  },
+  { label: '🟡 Razoável',           color: '#fbbf24', pct: 40  },
+  { label: '🟢 Bom prompt',         color: '#34d399', pct: 60  },
+  { label: '💙 Ótimo prompt',       color: '#60a5fa', pct: 80  },
+  { label: '✨ Prompt excelente!',  color: '#a78bfa', pct: 100 }
+];
+
+function updateCrisp() {
+  const ids = ['crisp-c', 'crisp-r', 'crisp-i', 'crisp-s', 'crisp-p'];
+  const vals = ids.map(function(id) { return document.getElementById(id).value.trim(); });
+  const filled = vals.filter(Boolean).length;
+
+  const cfg = qualityCfg[filled];
+  const bar = document.getElementById('quality-bar');
+  bar.style.width = cfg.pct + '%';
+  bar.style.background = cfg.color;
+  const lbl = document.getElementById('quality-label');
+  lbl.textContent = cfg.label;
+  lbl.style.color = cfg.color;
+  document.getElementById('quality-pct').textContent = cfg.pct + '%';
+
+  const preview = document.getElementById('crisp-preview-text');
+  if (filled === 0) {
+    preview.innerHTML = '<span style="color:var(--text-muted);font-style:italic;">Preencha os campos ao lado para ver o prompt se montar aqui em tempo real...</span>';
+  } else {
+    const fieldLabels = ['Contexto', 'Role', 'Instrução', 'Saída', 'Pistas'];
+    const parts = vals
+      .map(function(v, i) { return v ? '<span class="preview-label">[' + fieldLabels[i] + ']</span> <span class="preview-section">' + esc(v) + '</span>' : null; })
+      .filter(Boolean);
+    preview.innerHTML = parts.join('<br><br>');
+  }
+
+  const respEl = document.getElementById('crisp-ai-response');
+  respEl.innerHTML = '<span class="resp-label">🤖 Prévia da resposta</span>' + esc(crispResponses[filled]).replace(/\n/g, '<br>');
+}
+
+function esc(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ─── SEÇÃO 5: Quiz ────────────────────────────────────────────────────────────
+
+var quizAnswers = {};
+var quizScore = 0;
+
+function answerQuiz(q, optIndex, correct, explanation) {
+  if (quizAnswers[q] !== undefined) return;
+  quizAnswers[q] = correct;
+
+  var question = document.getElementById('q' + q);
+  var opts = question.querySelectorAll('.quiz-option');
+  opts.forEach(function(opt, i) {
+    opt.disabled = true;
+    if (i === optIndex) opt.classList.add(correct ? 'correct' : 'wrong');
+  });
+
+  var feedback = document.getElementById('qf' + q);
+  feedback.textContent = (correct ? '✅ ' : '❌ ') + explanation;
+  feedback.className = 'quiz-feedback show ' + (correct ? 'correct' : 'wrong');
+
+  if (correct) quizScore++;
+  if (Object.keys(quizAnswers).length === 5) setTimeout(showQuizResult, 600);
+}
+
+function showQuizResult() {
+  document.getElementById('quiz-result').classList.add('show');
+  document.getElementById('quiz-score-display').textContent = quizScore + '/5';
+  var labels = [
+    '😅 Revise o conteúdo e tente novamente!',
+    '🤔 Quase lá — mais uma lida resolve!',
+    '👍 Bom! Mas dá pra melhorar.',
+    '🎯 Muito bem! Você pegou o conceito.',
+    '🏆 Excelente! Quase perfeito!',
+    '🚀 Perfeito! Você domina Prompt Engineering!'
+  ];
+  document.getElementById('quiz-score-label').textContent = labels[quizScore];
+  if (quizScore >= 4) {
+    try {
+      const KEY = 'ai-training-completed-v1';
+      const done = JSON.parse(localStorage.getItem(KEY) || '[]');
+      if (!done.includes(2)) { done.push(2); localStorage.setItem(KEY, JSON.stringify(done)); }
+    } catch(e) {}
+    document.getElementById('completion-banner').classList.add('show');
+  }
+}
+
+function retryQuiz() {
+  quizAnswers = {};
+  quizScore = 0;
+  document.getElementById('quiz-result').classList.remove('show');
+  document.getElementById('completion-banner').classList.remove('show');
+  for (var q = 1; q <= 5; q++) {
+    document.getElementById('q' + q).querySelectorAll('.quiz-option').forEach(function(opt) {
+      opt.disabled = false;
+      opt.classList.remove('correct', 'wrong');
+    });
+    var fb = document.getElementById('qf' + q);
+    fb.className = 'quiz-feedback';
+    fb.textContent = '';
+  }
+}
+</script>
+</body>
+</html>

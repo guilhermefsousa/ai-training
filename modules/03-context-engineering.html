@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 3 — Context Engineering | IA para Desenvolvedores</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --cosmos-black: #04060f;
+    --indigo-500:   #6366f1;
+    --indigo-400:   #818cf8;
+    --indigo-300:   #a5b4fc;
+    --violet-600:   #7c3aed;
+    --violet-500:   #8b5cf6;
+    --violet-400:   #a78bfa;
+    --violet-300:   #c4b5fd;
+    --cyan-400:     #22d3ee;
+    --gold-400:     #fbbf24;
+    --emerald-400:  #34d399;
+    --rose-400:     #fb7185;
+    --blue-400:     #60a5fa;
+    --blue-500:     #3b82f6;
+    --text-primary:   #f0f4ff;
+    --text-secondary: #94a3b8;
+    --text-muted:     #475569;
+    --card-bg:      rgba(14,18,38,.85);
+    --card-border:  rgba(99,102,241,.18);
+    --card-border-h:rgba(99,102,241,.55);
+    --radius: 16px;
+    --tr: .35s cubic-bezier(.4,0,.2,1);
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:'DM Sans',sans-serif;background:var(--cosmos-black);color:var(--text-primary);min-height:100vh;overflow-x:hidden}
+
+  .nebula{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;mix-blend-mode:screen}
+  .n1{width:700px;height:500px;top:-150px;left:-150px;background:radial-gradient(ellipse,rgba(67,56,202,.2) 0%,transparent 70%);animation:nd 28s ease-in-out infinite alternate}
+  .n2{width:600px;height:600px;bottom:-100px;right:-100px;background:radial-gradient(ellipse,rgba(124,58,237,.15) 0%,transparent 70%);animation:nd 22s ease-in-out infinite alternate;animation-delay:-8s}
+  @keyframes nd{0%{transform:translate(0,0) scale(1)}100%{transform:translate(30px,40px) scale(1.06)}}
+
+  .pw{position:relative;z-index:1;min-height:100vh}
+  .c{width:100%;max-width:900px;margin:0 auto;padding:0 24px}
+
+  /* NAV */
+  .top-nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0;border-bottom:1px solid rgba(99,102,241,.1);gap:12px;flex-wrap:wrap}
+  .nav-back{display:inline-flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted);text-decoration:none;letter-spacing:.06em;transition:color var(--tr)}
+  .nav-back:hover{color:var(--indigo-300)}
+  .nav-badge{font-family:'DM Mono',monospace;font-size:11px;color:var(--violet-400);background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.25);border-radius:100px;padding:4px 14px;letter-spacing:.1em}
+  .nav-links{display:flex;gap:12px}
+  .nav-link{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);text-decoration:none;border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:6px 14px;transition:all var(--tr)}
+  .nav-link:hover{color:var(--indigo-300);border-color:rgba(99,102,241,.4);background:rgba(99,102,241,.08)}
+
+  /* HEADER */
+  .mhdr{padding:56px 0 48px;text-align:center}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--violet-400);background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);border-radius:100px;padding:6px 16px;margin-bottom:24px}
+  .eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--violet-400);box-shadow:0 0 8px var(--violet-400);animation:pulse 2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+  .mtitle{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,7vw,72px);letter-spacing:.03em;line-height:1;margin-bottom:16px}
+  .mtitle .acc{background:linear-gradient(135deg,var(--violet-300) 0%,var(--indigo-300) 50%,var(--cyan-400) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .msubt{font-size:17px;font-weight:300;color:var(--text-secondary);max-width:600px;margin:0 auto;line-height:1.6}
+  .mmeta{display:flex;align-items:center;justify-content:center;gap:24px;margin-top:32px;flex-wrap:wrap}
+  .mi{display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.06em}
+  .md{width:4px;height:4px;border-radius:50%;background:var(--violet-500)}
+
+  /* SECTIONS */
+  .sec{padding:64px 0;border-top:1px solid rgba(99,102,241,.08)}
+  .slabel{font-family:'DM Mono',monospace;font-size:11px;color:var(--violet-500);letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px}
+  .stitle{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:.04em;color:var(--text-primary);margin-bottom:20px;line-height:1.1}
+  .sbody{font-size:16px;line-height:1.75;color:var(--text-secondary);margin-bottom:16px}
+  .sbody strong{color:var(--text-primary);font-weight:500}
+
+  .card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius);padding:28px;backdrop-filter:blur(12px);transition:border-color var(--tr)}
+  .card:hover{border-color:var(--card-border-h)}
+
+  /* ANALOGY */
+  .analogy{background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(99,102,241,.06));border:1px solid rgba(139,92,246,.25);border-left:3px solid var(--violet-500);border-radius:12px;padding:20px 24px;margin:24px 0}
+  .analogy-lbl{font-family:'DM Mono',monospace;font-size:10px;color:var(--violet-400);letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px}
+  .analogy-txt{font-size:15px;color:var(--text-primary);line-height:1.65;font-style:italic}
+
+  /* CONTEXT DIAGRAM */
+  .ctxgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:32px 0}
+  @media(max-width:600px){.ctxgrid{grid-template-columns:1fr}}
+  .ctr{grid-column:1/-1;display:flex;justify-content:center}
+  .model-box{background:linear-gradient(135deg,rgba(99,102,241,.2),rgba(139,92,246,.15));border:2px solid var(--indigo-500);border-radius:16px;padding:18px 48px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.1em;color:var(--indigo-300);box-shadow:0 0 32px rgba(99,102,241,.22)}
+  .model-sub{display:block;font-size:11px;font-family:'DM Mono',monospace;color:var(--text-muted);letter-spacing:.14em;margin-bottom:4px}
+  .ctxel{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:16px 18px;cursor:pointer;transition:all var(--tr);position:relative;overflow:hidden}
+  .ctxel::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity var(--tr);border-radius:12px}
+  .ctxel:hover{border-color:var(--card-border-h);transform:translateY(-2px)}
+  .ctxel.active{border-color:var(--card-border-h)}
+  .ctxel.active::before{opacity:1}
+  .ctxel[data-c="violet"]::before{background:rgba(139,92,246,.1)}
+  .ctxel[data-c="blue"]::before{background:rgba(96,165,250,.1)}
+  .ctxel[data-c="gold"]::before{background:rgba(251,191,36,.1)}
+  .ctxel[data-c="cyan"]::before{background:rgba(34,211,238,.1)}
+  .ctxel[data-c="emerald"]::before{background:rgba(52,211,153,.1)}
+  .ctxicon{font-size:22px;margin-bottom:8px}
+  .ctxname{font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:4px}
+  .ctxhint{font-size:12px;color:var(--text-muted)}
+  .ctxtip{background:rgba(10,12,26,.97);border:1px solid rgba(139,92,246,.3);border-radius:12px;padding:20px;margin-top:16px;display:none;animation:fi .25s ease}
+  .ctxtip.on{display:block}
+  .ctxtip-title{font-weight:600;color:var(--violet-300);margin-bottom:8px;font-size:15px}
+  .ctxtip-body{font-size:14px;color:var(--text-secondary);line-height:1.65}
+  @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+  /* DRAG */
+  .cwlayout{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;margin-top:24px}
+  @media(max-width:700px){.cwlayout{grid-template-columns:1fr}}
+  .cwpanel{display:flex;flex-direction:column;gap:10px}
+  .cwi{background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:14px 16px;cursor:grab;user-select:none;display:flex;align-items:center;gap:12px;transition:all var(--tr)}
+  .cwi:hover{border-color:rgba(99,102,241,.4);transform:translateX(-3px)}
+  .cwi.dragging{opacity:.35;cursor:grabbing}
+  .cwi.used{opacity:.28;pointer-events:none}
+  .cwiico{font-size:18px;flex-shrink:0}
+  .cwiinfo{flex:1}
+  .cwiname{font-size:13px;font-weight:500;color:var(--text-primary)}
+  .cwitok{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);margin-top:2px}
+  .cwbadge{font-family:'DM Mono',monospace;font-size:10px;padding:3px 8px;border-radius:6px;font-weight:500;flex-shrink:0}
+  .br{background:rgba(52,211,153,.15);color:var(--emerald-400);border:1px solid rgba(52,211,153,.25)}
+  .bo{background:rgba(251,191,36,.15);color:var(--gold-400);border:1px solid rgba(251,191,36,.25)}
+  .bw{background:rgba(251,113,133,.15);color:var(--rose-400);border:1px solid rgba(251,113,133,.25)}
+  .cwwin{background:rgba(7,12,26,.9);border:2px dashed rgba(99,102,241,.25);border-radius:16px;min-height:280px;padding:16px;transition:all .2s;position:relative}
+  .cwwin.over{border-color:var(--violet-500);border-style:solid;background:rgba(139,92,246,.06)}
+  .cwwinlbl{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .cwwinlbl::after{content:'';flex:1;height:1px;background:rgba(99,102,241,.15)}
+  .cwdrophint{position:absolute;inset:40px 0 0 0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;pointer-events:none;transition:opacity .2s}
+  .cwdrophint.gone{opacity:0}
+  .cwdropico{font-size:28px;opacity:.3}
+  .cwdroptxt{font-size:13px;color:var(--text-muted)}
+  .cwslot{background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.18);border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;animation:si .25s ease}
+  @keyframes si{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+  .cwsname{font-size:13px;color:var(--text-primary);flex:1}
+  .cwstok{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted)}
+  .cwsrm{margin-left:4px;cursor:pointer;font-size:13px;color:var(--text-muted);transition:color .2s;background:none;border:none;padding:2px 6px;border-radius:4px;line-height:1}
+  .cwsrm:hover{color:var(--rose-400);background:rgba(251,113,133,.1)}
+  .caprow{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);margin-bottom:8px}
+  .barbg{background:rgba(99,102,241,.1);border-radius:100px;height:10px;overflow:hidden}
+  .barfill{height:100%;border-radius:100px;background:linear-gradient(to right,var(--indigo-500),var(--violet-500));transition:width .4s cubic-bezier(.4,0,.2,1),background .3s}
+  .barfill.w{background:linear-gradient(to right,var(--gold-400),#f97316)}
+  .barfill.x{background:linear-gradient(to right,#ef4444,#dc2626)}
+  .qpanel{margin-top:18px;background:rgba(7,12,26,.9);border:1px solid var(--card-border);border-radius:12px;padding:16px 18px}
+  .qhdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:13px;color:var(--text-secondary)}
+  .qscore{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--emerald-400);transition:color .3s;line-height:1}
+  .qscore.low{color:var(--rose-400)}
+  .qscore.mid{color:var(--gold-400)}
+  .qbarbg{background:rgba(52,211,153,.1);border-radius:100px;height:6px;overflow:hidden}
+  .qbarfill{height:100%;border-radius:100px;background:linear-gradient(to right,var(--emerald-400),var(--cyan-400));transition:width .5s cubic-bezier(.4,0,.2,1)}
+  .cwfb{font-size:12px;color:var(--text-muted);margin-top:8px;min-height:18px;font-style:italic;line-height:1.5}
+  .cwreset{margin-top:14px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);color:var(--indigo-300);border-radius:8px;padding:8px 16px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;transition:all var(--tr);width:100%}
+  .cwreset:hover{background:rgba(99,102,241,.2);border-color:rgba(99,102,241,.5)}
+
+  /* COMPARISON */
+  .cmpgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:28px 0}
+  @media(max-width:580px){.cmpgrid{grid-template-columns:1fr}}
+  .cmpc{border-radius:12px;padding:20px;border:1px solid}
+  .cmpc.bef{background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.2)}
+  .cmpc.aft{background:rgba(52,211,153,.05);border-color:rgba(52,211,153,.2)}
+  .cmplbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;font-weight:500}
+  .cmpc.bef .cmplbl{color:var(--rose-400)}
+  .cmpc.aft .cmplbl{color:var(--emerald-400)}
+  .cmptxt{font-size:13px;line-height:1.6;color:var(--text-secondary);font-style:italic}
+
+  /* TABS */
+  .tabs{margin-top:28px}
+  .tabbts{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid rgba(99,102,241,.15)}
+  .tabb{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.06em;padding:10px 16px;border:none;background:none;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;border-radius:6px 6px 0 0;white-space:nowrap}
+  .tabb:hover{color:var(--text-secondary);background:rgba(99,102,241,.06)}
+  .tabb.on{color:var(--violet-300);border-bottom-color:var(--violet-500);background:rgba(139,92,246,.08)}
+  .tabp{display:none;padding:28px 0 0;animation:fi .25s ease}
+  .tabp.on{display:block}
+  .tabptitle{font-size:18px;font-weight:600;color:var(--text-primary);margin-bottom:14px}
+
+  /* MODEL TABLE */
+  .mtbl{width:100%;border-collapse:collapse;font-size:14px;margin:20px 0}
+  .mtbl th{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);text-align:left;padding:10px 16px;border-bottom:1px solid rgba(99,102,241,.15)}
+  .mtbl td{padding:12px 16px;border-bottom:1px solid rgba(99,102,241,.07);color:var(--text-secondary);vertical-align:middle}
+  .mtbl tr:last-child td{border-bottom:none}
+  .mtbl td:first-child{color:var(--text-primary);font-weight:500}
+  .tokbar{display:flex;align-items:center;gap:10px}
+  .tokbarbg{flex:1;max-width:120px;height:6px;background:rgba(99,102,241,.1);border-radius:100px;overflow:hidden}
+  .tokbarfill{height:100%;border-radius:100px}
+
+  /* CODE */
+  .codeblock{background:rgba(4,6,15,.9);border:1px solid rgba(99,102,241,.15);border-radius:10px;padding:20px;font-family:'DM Mono',monospace;font-size:13px;line-height:1.7;color:var(--indigo-300);overflow-x:auto;margin:16px 0;white-space:pre}
+  .cc{color:var(--text-muted)}.ck{color:var(--violet-400)}.cv{color:var(--emerald-400)}.cs{color:var(--gold-400)}
+
+  /* MEMORY VISUAL */
+  .memvis{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:24px 0}
+  @media(max-width:580px){.memvis{grid-template-columns:1fr}}
+  .memcnv{background:rgba(7,12,26,.8);border:1px solid rgba(99,102,241,.15);border-radius:12px;padding:16px;font-size:13px}
+  .memcnvlbl{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px;font-weight:500}
+  .memcnv.wo .memcnvlbl{color:var(--rose-400)}
+  .memcnv.wi .memcnvlbl{color:var(--emerald-400)}
+  .msg{margin-bottom:10px;line-height:1.5}
+  .mu{color:var(--indigo-300)}.mu::before{content:'Você: ';font-weight:600}
+  .ma{color:var(--text-secondary)}.ma::before{content:'IA: ';font-weight:600;color:var(--violet-400)}
+  .ma.bad{color:var(--rose-400);opacity:.85}
+  .ma.good{color:var(--emerald-400);opacity:.9}
+
+  /* TOOL DEMO */
+  .tooldemo{background:rgba(7,12,26,.9);border:1px solid var(--card-border);border-radius:14px;overflow:hidden;margin:24px 0}
+  .toolhdr{background:rgba(99,102,241,.1);border-bottom:1px solid rgba(99,102,241,.15);padding:12px 18px;display:flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted);flex-wrap:wrap}
+  .tooltog{margin-left:auto;display:flex;align-items:center;gap:8px;cursor:pointer}
+  .tooltog input[type=checkbox]{accent-color:var(--violet-500);width:16px;height:16px;cursor:pointer}
+  .toolchat{padding:16px 18px;min-height:140px}
+  .chatmsg{margin-bottom:12px;font-size:14px;line-height:1.6}
+  .chatmsg .snd{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;margin-bottom:4px;letter-spacing:.06em}
+  .chatmsg.user .snd{color:var(--blue-400)}
+  .chatmsg.ai .snd{color:var(--violet-400)}
+  .chatmsg .bbl{background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.15);border-radius:0 10px 10px 10px;padding:10px 14px;color:var(--text-secondary)}
+  .chatmsg.user .bbl{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);border-radius:10px 0 10px 10px;color:var(--text-primary)}
+  .chatmsg.tc .bbl{background:rgba(251,191,36,.06);border-color:rgba(251,191,36,.2);border-radius:10px;font-family:'DM Mono',monospace;font-size:12px;color:var(--gold-400)}
+  .toolaskbtn{width:100%;background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.1));border:1px solid rgba(99,102,241,.3);color:var(--indigo-300);padding:10px;border-radius:8px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;transition:all var(--tr);margin-top:8px}
+  .toolaskbtn:hover{background:rgba(99,102,241,.25)}
+
+  /* BUILDER */
+  .blgrid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:28px}
+  @media(max-width:700px){.blgrid{grid-template-columns:1fr}}
+  .blctrls{display:flex;flex-direction:column;gap:20px}
+  .blfield{display:flex;flex-direction:column;gap:8px}
+  .bllbl{font-size:13px;font-weight:500;color:var(--text-primary);display:flex;align-items:center;gap:6px}
+  .bllbl .hint{font-size:11px;color:var(--text-muted);font-weight:400}
+  .bltxa{background:rgba(7,12,26,.8);border:1px solid rgba(99,102,241,.2);border-radius:10px;padding:12px 14px;color:var(--text-primary);font-family:'DM Mono',monospace;font-size:12px;line-height:1.6;resize:vertical;min-height:90px;transition:border-color .2s}
+  .bltxa:focus{outline:none;border-color:rgba(139,92,246,.5)}
+  .bltxa::placeholder{color:var(--text-muted)}
+  .toolcbs{display:flex;flex-direction:column;gap:8px}
+  .toolcbi{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-secondary);cursor:pointer;padding:8px 12px;border:1px solid rgba(99,102,241,.1);border-radius:8px;transition:all .2s}
+  .toolcbi:hover{border-color:rgba(99,102,241,.3);background:rgba(99,102,241,.05)}
+  .toolcbi input{accent-color:var(--violet-500);cursor:pointer}
+  .toolcbi.on{border-color:rgba(139,92,246,.3);background:rgba(139,92,246,.06);color:var(--text-primary)}
+  .blslider{-webkit-appearance:none;width:100%;height:6px;border-radius:100px;background:rgba(99,102,241,.15);outline:none;cursor:pointer}
+  .blslider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--violet-500);cursor:pointer;box-shadow:0 0 8px rgba(139,92,246,.5)}
+  .memtog{display:flex;align-items:center;gap:12px;cursor:pointer}
+  .togsw{position:relative;width:44px;height:24px;flex-shrink:0}
+  .togsw input{opacity:0;width:0;height:0}
+  .togsl{position:absolute;inset:0;background:rgba(99,102,241,.2);border-radius:100px;transition:background .3s;cursor:pointer}
+  .togsl::before{content:'';position:absolute;width:18px;height:18px;top:3px;left:3px;background:var(--text-muted);border-radius:50%;transition:all .3s}
+  .togsw input:checked+.togsl{background:rgba(139,92,246,.5)}
+  .togsw input:checked+.togsl::before{transform:translateX(20px);background:var(--violet-400)}
+  .blprev{background:rgba(7,12,26,.9);border:1px solid var(--card-border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+  .prevhdr{background:rgba(99,102,241,.08);border-bottom:1px solid rgba(99,102,241,.15);padding:12px 16px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase}
+  .prevmet{padding:16px;border-bottom:1px solid rgba(99,102,241,.1);display:flex;flex-direction:column;gap:12px}
+  .prevsmpl{padding:16px;flex:1}
+  .sturn{margin-bottom:12px;font-size:13px;line-height:1.6}
+  .sturn .who{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;font-weight:500}
+  .sturn.cl .who{color:var(--blue-400)}
+  .sturn.as .who{color:var(--violet-400)}
+  .sturn .tx{color:var(--text-secondary)}
+  .qbadge{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:10px;padding:3px 10px;border-radius:6px;font-weight:500}
+  .ql{background:rgba(239,68,68,.12);color:var(--rose-400);border:1px solid rgba(239,68,68,.25)}
+  .qm{background:rgba(251,191,36,.12);color:var(--gold-400);border:1px solid rgba(251,191,36,.25)}
+  .qh{background:rgba(52,211,153,.12);color:var(--emerald-400);border:1px solid rgba(52,211,153,.25)}
+  .qx{background:rgba(34,211,238,.12);color:var(--cyan-400);border:1px solid rgba(34,211,238,.25)}
+
+  /* RW CARDS */
+  .rwgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin:24px 0}
+  .rwcard{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:20px;transition:all var(--tr)}
+  .rwcard:hover{border-color:var(--card-border-h);transform:translateY(-3px)}
+  .rwico{font-size:28px;margin-bottom:12px}
+  .rwtit{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:6px}
+  .rwdesc{font-size:13px;color:var(--text-muted);line-height:1.55}
+  .rwtag{display:inline-block;margin-top:10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--violet-400);background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);border-radius:6px;padding:2px 8px}
+
+  /* INFO STRIP */
+  .istrip{display:flex;gap:16px;flex-wrap:wrap;margin:20px 0}
+  .ichip{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:6px 12px}
+  .ichip strong{color:var(--indigo-300)}
+
+  /* QUIZ */
+  .qprog{display:flex;align-items:center;gap:12px;margin-bottom:32px}
+  .qdots{display:flex;gap:6px}
+  .qdot{width:8px;height:8px;border-radius:50%;background:rgba(99,102,241,.2);transition:background .3s}
+  .qdot.done{background:var(--emerald-400)}
+  .qdot.active{background:var(--violet-500)}
+  .qctr{font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted);margin-left:auto}
+  .qq{font-size:17px;font-weight:500;color:var(--text-primary);line-height:1.55;margin-bottom:24px}
+  .qopts{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+  .qopt{background:rgba(7,12,26,.8);border:1px solid rgba(99,102,241,.2);border-radius:10px;padding:14px 18px;cursor:pointer;font-size:14px;color:var(--text-secondary);transition:all .2s;text-align:left;display:flex;align-items:center;gap:12px}
+  .qopt:hover:not(.dis){border-color:rgba(139,92,246,.4);background:rgba(139,92,246,.06);color:var(--text-primary)}
+  .qopt.ok{border-color:var(--emerald-400);background:rgba(52,211,153,.08);color:var(--text-primary)}
+  .qopt.ng{border-color:var(--rose-400);background:rgba(251,113,133,.08);color:var(--text-primary)}
+  .qopt.hint{border-color:var(--emerald-400);background:rgba(52,211,153,.05)}
+  .qopt.dis{cursor:default}
+  .oltr{width:24px;height:24px;border-radius:6px;background:rgba(99,102,241,.15);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;flex-shrink:0;color:var(--indigo-300)}
+  .qopt.ok .oltr{background:rgba(52,211,153,.2);color:var(--emerald-400)}
+  .qopt.ng .oltr{background:rgba(251,113,133,.2);color:var(--rose-400)}
+  .qfb{background:rgba(7,12,26,.9);border-radius:10px;padding:14px 18px;font-size:14px;color:var(--text-secondary);line-height:1.6;margin-bottom:20px;border-left:3px solid var(--violet-500);display:none}
+  .qfb.on{display:block;animation:fi .3s ease}
+  .qfb.ok{border-left-color:var(--emerald-400)}
+  .qfb.ng{border-left-color:var(--rose-400)}
+  .qnxt{background:linear-gradient(135deg,rgba(139,92,246,.3),rgba(99,102,241,.2));border:1px solid rgba(139,92,246,.4);color:var(--violet-300);padding:12px 28px;border-radius:10px;font-family:'DM Mono',monospace;font-size:13px;cursor:pointer;transition:all var(--tr);display:none}
+  .qnxt.on{display:inline-block}
+  .qnxt:hover{background:rgba(139,92,246,.4)}
+  .qend{text-align:center;padding:40px 20px;display:none}
+  .qend.on{display:block;animation:fi .5s ease}
+  .qscore{font-family:'Bebas Neue',sans-serif;font-size:72px;letter-spacing:.05em;background:linear-gradient(135deg,var(--violet-300),var(--cyan-400));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+  .qendmsg{font-size:18px;color:var(--text-secondary);margin-top:8px}
+  .qendbadge{display:inline-flex;align-items:center;gap:8px;margin-top:24px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:100px;padding:10px 24px;font-size:14px;color:var(--emerald-400)}
+
+  /* PROGRESS BAR */
+  .pbar{display:flex;gap:4px;margin:20px 0 40px}
+  .pstep{flex:1;height:3px;background:rgba(99,102,241,.15);border-radius:2px;transition:background .5s}
+  .pstep.on{background:var(--violet-500)}
+
+  /* BOTTOM NAV */
+  .bnav{padding:48px 0 64px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(99,102,241,.1);gap:16px;flex-wrap:wrap}
+  .bnavbtn{display:inline-flex;align-items:center;gap:10px;padding:14px 24px;border-radius:12px;font-size:14px;text-decoration:none;transition:all var(--tr);border:1px solid rgba(99,102,241,.2);color:var(--text-secondary);background:rgba(99,102,241,.06)}
+  .bnavbtn:hover{border-color:rgba(99,102,241,.45);color:var(--text-primary);background:rgba(99,102,241,.12)}
+  .bnavbtn.prim{background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(99,102,241,.2));border-color:rgba(139,92,246,.4);color:var(--violet-300)}
+  .bnavbtn.prim:hover{background:rgba(139,92,246,.35)}
+  .bnavlbl{font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;letter-spacing:.06em;display:block}
+</style>
+</head>
+<body>
+<div class="nebula n1"></div>
+<div class="nebula n2"></div>
+<div class="pw"><div class="c">
+
+  <!-- NAV -->
+  <nav class="top-nav">
+    <a href="../index.html" class="nav-back">← Início</a>
+    <span class="nav-badge">MÓDULO 03</span>
+    <div class="nav-links">
+      <a href="02-prompt-engineering.html" class="nav-link">← Anterior</a>
+      <a href="04-agentes.html" class="nav-link">Próximo →</a>
+    </div>
+  </nav>
+
+  <!-- HEADER -->
+  <header class="mhdr">
+    <div class="eyebrow">Context Engineering</div>
+    <h1 class="mtitle">Projetando o<br><span class="acc">Contexto Perfeito</span></h1>
+    <p class="msubt">Prompt engineering é uma pergunta. Context engineering é tudo que acontece antes dela — e muito depois também.</p>
+    <div class="mmeta">
+      <span class="mi"><span class="md"></span>~30 min</span>
+      <span class="mi"><span class="md"></span>6 seções</span>
+      <span class="mi"><span class="md"></span>5 exercícios interativos</span>
+    </div>
+  </header>
+
+  <div class="pbar" id="pbar">
+    <div class="pstep" data-s="0"></div>
+    <div class="pstep" data-s="1"></div>
+    <div class="pstep" data-s="2"></div>
+    <div class="pstep" data-s="3"></div>
+    <div class="pstep" data-s="4"></div>
+    <div class="pstep" data-s="5"></div>
+  </div>
+
+  <!-- SEC 1 -->
+  <section class="sec" data-section="0">
+    <div class="slabel">Seção 1 / 6</div>
+    <h2 class="stitle">De Prompt Engineering para Context Engineering</h2>
+    <p class="sbody"><strong>Prompt engineering</strong> ficou famoso como a arte de escrever perguntas melhores para uma IA. "Seja conciso", "pense passo a passo", "aja como um especialista" — você provavelmente já viu esses conselhos.</p>
+    <p class="sbody">Mas isso é só uma fatia do problema. O modelo não recebe apenas a sua mensagem. Ele recebe <strong>tudo</strong> que está na janela de contexto — e você controla muito mais do que imagina.</p>
+
+    <div class="analogy">
+      <div class="analogy-lbl">Analogia</div>
+      <div class="analogy-txt">"Prompt é uma pergunta. Contexto é toda a reunião — quem está na sala, quais documentos estão na mesa, qual o histórico da conversa, quais ferramentas estão disponíveis."</div>
+    </div>
+
+    <p class="sbody"><strong>Context engineering</strong> é a disciplina de projetar intencionalmente <em>tudo</em> que entra no contexto do modelo: instruções do sistema, histórico de conversa, documentos recuperados, ferramentas disponíveis — e também o que deliberadamente <em>não</em> entra.</p>
+
+    <div class="card" style="margin-top:32px">
+      <div class="slabel" style="margin-bottom:16px">Exercício Visual — O que o modelo recebe?</div>
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:20px">Clique em cada componente para entender o papel que ele desempenha no contexto.</p>
+
+      <div class="ctxgrid">
+        <div class="ctxel" data-c="violet" data-k="system" onclick="showCtx('system')">
+          <div class="ctxicon">⚙️</div>
+          <div class="ctxname">System Prompt</div>
+          <div class="ctxhint">Clique para saber mais</div>
+        </div>
+        <div class="ctxel" data-c="blue" data-k="history" onclick="showCtx('history')">
+          <div class="ctxicon">💬</div>
+          <div class="ctxname">Histórico de Conversa</div>
+          <div class="ctxhint">Clique para saber mais</div>
+        </div>
+        <div class="ctxel" data-c="gold" data-k="tools" onclick="showCtx('tools')">
+          <div class="ctxicon">🔧</div>
+          <div class="ctxname">Ferramentas Disponíveis</div>
+          <div class="ctxhint">Clique para saber mais</div>
+        </div>
+        <div class="ctxel" data-c="cyan" data-k="docs" onclick="showCtx('docs')">
+          <div class="ctxicon">📄</div>
+          <div class="ctxname">Documentos Recuperados</div>
+          <div class="ctxhint">Clique para saber mais</div>
+        </div>
+        <div class="ctxel" data-c="emerald" data-k="message" onclick="showCtx('message')">
+          <div class="ctxicon">✍️</div>
+          <div class="ctxname">Mensagem do Usuário</div>
+          <div class="ctxhint">Clique para saber mais</div>
+        </div>
+        <div class="ctr">
+          <div class="model-box"><span class="model-sub">processa tudo acima</span>LLM</div>
+        </div>
+      </div>
+
+      <div class="ctxtip" id="ctxtip">
+        <div class="ctxtip-title" id="ctxtip-title"></div>
+        <div class="ctxtip-body" id="ctxtip-body"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEC 2 -->
+  <section class="sec" data-section="1">
+    <div class="slabel">Seção 2 / 6</div>
+    <h2 class="stitle">A Janela de Contexto</h2>
+    <p class="sbody">O modelo não tem memória infinita. Ele só consegue "ver" o que está dentro da sua <strong>janela de contexto</strong> — uma quantidade limitada de texto, medida em tokens (aproximadamente ¾ de uma palavra em inglês, ou uma sílaba em português).</p>
+
+    <div class="analogy">
+      <div class="analogy-lbl">Metáfora</div>
+      <div class="analogy-txt">"É como uma mesa de trabalho. Uma mesa maior permite ter mais documentos abertos ao mesmo tempo. Mas mesmo a maior das mesas tem um limite — e você precisa decidir o que merece estar nela."</div>
+    </div>
+
+    <table class="mtbl">
+      <thead><tr><th>Modelo</th><th>Janela de Contexto</th><th>Equivale a</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>GPT-4o</td>
+          <td><div class="tokbar">128K tokens<div class="tokbarbg"><div class="tokbarfill" style="width:13%;background:linear-gradient(to right,#3b82f6,#60a5fa)"></div></div></div></td>
+          <td style="color:var(--text-muted);font-size:13px">~96.000 palavras</td>
+        </tr>
+        <tr>
+          <td>Claude 3.5 Sonnet</td>
+          <td><div class="tokbar">200K tokens<div class="tokbarbg"><div class="tokbarfill" style="width:20%;background:linear-gradient(to right,var(--violet-600),var(--violet-400))"></div></div></div></td>
+          <td style="color:var(--text-muted);font-size:13px">~150.000 palavras</td>
+        </tr>
+        <tr>
+          <td>Gemini 1.5 Pro</td>
+          <td><div class="tokbar">1M+ tokens<div class="tokbarbg"><div class="tokbarfill" style="width:100%;background:linear-gradient(to right,var(--emerald-400),var(--cyan-400))"></div></div></div></td>
+          <td style="color:var(--text-muted);font-size:13px">~750.000 palavras</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="sbody" style="margin-top:16px">Mesmo com janelas cada vez maiores, o problema de <em>o que priorizar</em> não desaparece. Pesquisas mostram que modelos perdem atenção para informações no meio de contextos muito longos — fenômeno chamado <strong>"lost in the middle"</strong>. Qualidade importa mais que quantidade.</p>
+
+    <!-- Drag exercise -->
+    <div class="card" style="margin-top:32px">
+      <div class="slabel" style="margin-bottom:8px">Exercício — Monte sua Janela de Contexto</div>
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:8px">Arraste os itens para a janela e observe como capacidade e qualidade mudam. Limite: <strong style="color:var(--text-primary)">8.000 tokens</strong>.</p>
+
+      <div class="cwlayout">
+        <div>
+          <p style="font-size:11px;color:var(--text-muted);margin-bottom:12px;font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase">Arraste para a janela →</p>
+          <div class="cwpanel" id="cwpanel">
+            <div class="cwi" draggable="true" data-id="system">
+              <div class="cwiico">⚙️</div>
+              <div class="cwiinfo"><div class="cwiname">System Prompt</div><div class="cwitok">500 tokens</div></div>
+              <span class="cwbadge br">Essencial</span>
+            </div>
+            <div class="cwi" draggable="true" data-id="history">
+              <div class="cwiico">💬</div>
+              <div class="cwiinfo"><div class="cwiname">Histórico de Conversa</div><div class="cwitok">2.000 tokens</div></div>
+              <span class="cwbadge bo">Útil</span>
+            </div>
+            <div class="cwi" draggable="true" data-id="code">
+              <div class="cwiico">💻</div>
+              <div class="cwiinfo"><div class="cwiname">Arquivo de código relevante</div><div class="cwitok">1.500 tokens</div></div>
+              <span class="cwbadge br">Relevante</span>
+            </div>
+            <div class="cwi" draggable="true" data-id="docs">
+              <div class="cwiico">📚</div>
+              <div class="cwiinfo"><div class="cwiname">Documentação completa (toda)</div><div class="cwitok">3.000 tokens</div></div>
+              <span class="cwbadge bw">Cuidado</span>
+            </div>
+            <div class="cwi" draggable="true" data-id="examples">
+              <div class="cwiico">📋</div>
+              <div class="cwiinfo"><div class="cwiname">Exemplos (few-shot)</div><div class="cwitok">800 tokens</div></div>
+              <span class="cwbadge bo">Opcional</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="cwwin" id="cwwin" ondragover="cwOver(event)" ondragleave="cwLeave()" ondrop="cwDrop(event)">
+            <div class="cwwinlbl">Janela de Contexto</div>
+            <div id="cwslots"></div>
+            <div class="cwdrophint" id="cwdrophint">
+              <div class="cwdropico">⬇️</div>
+              <div class="cwdroptxt">Solte os itens aqui</div>
+            </div>
+          </div>
+          <div style="margin-top:14px">
+            <div class="caprow"><span>Capacidade</span><span id="cwtoks">0 / 8.000 tokens</span></div>
+            <div class="barbg"><div class="barfill" id="cwbar" style="width:0%"></div></div>
+          </div>
+          <div class="qpanel">
+            <div class="qhdr"><span>Qualidade estimada da resposta</span><span class="qscore low" id="cwqscore">0%</span></div>
+            <div class="qbarbg"><div class="qbarfill" id="cwqbar" style="width:0%"></div></div>
+            <div class="cwfb" id="cwfb">Adicione itens para ver o impacto.</div>
+          </div>
+          <button class="cwreset" onclick="cwReset()">↺ Recomeçar</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEC 3 -->
+  <section class="sec" data-section="2">
+    <div class="slabel">Seção 3 / 6</div>
+    <h2 class="stitle">Os 5 Componentes do Contexto</h2>
+    <p class="sbody">Cada elemento que você coloca no contexto tem um papel específico. Entender o papel de cada um é o primeiro passo para projetar contextos eficientes.</p>
+
+    <div class="tabs">
+      <div class="tabbts">
+        <button class="tabb on" onclick="tab(0)">⚙️ System Prompt</button>
+        <button class="tabb" onclick="tab(1)">🧠 Memória</button>
+        <button class="tabb" onclick="tab(2)">🔧 Ferramentas</button>
+        <button class="tabb" onclick="tab(3)">📄 RAG</button>
+        <button class="tabb" onclick="tab(4)">💬 Histórico</button>
+      </div>
+
+      <div class="tabp on" id="tp0">
+        <div class="tabptitle">System Prompt — A Constituição</div>
+        <p class="sbody">O system prompt é o conjunto de regras que sempre se aplica, independente do que o usuário diga. É a "constituição" do seu assistente — define persona, restrições, formato de resposta e contexto de negócio.</p>
+        <div class="codeblock"><span class="cc"># Exemplo simplificado — baseado em um CLAUDE.md real</span>
+
+<span class="ck">Você é</span> <span class="cv">um assistente de suporte técnico da Relivox.</span>
+
+<span class="ck">REGRAS:</span>
+- <span class="cs">Sempre responda em português</span>
+- <span class="cs">Não compartilhe informações de outros clientes</span>
+- <span class="cs">Se não souber, diga "Vou verificar com o time"</span>
+- <span class="cs">Tom: profissional mas amigável</span>
+
+<span class="ck">CONTEXTO:</span>
+- <span class="cv">Produto: plataforma de atendimento WhatsApp</span>
+- <span class="cv">Usuários: equipes de suporte em empresas</span></div>
+        <div class="analogy">
+          <div class="analogy-lbl">Dica</div>
+          <div class="analogy-txt">Um bom system prompt é <em>específico o suficiente</em> para guiar o comportamento, mas <em>flexível o suficiente</em> para o modelo exercer julgamento. Regras demais criam rigidez. Regras de menos criam imprevisibilidade.</div>
+        </div>
+      </div>
+
+      <div class="tabp" id="tp1">
+        <div class="tabptitle">Memória — Curto vs. Longo Prazo</div>
+        <p class="sbody">Modelos de linguagem não têm memória nativa entre sessões. Cada conversa começa do zero. Para simular memória, precisamos injetá-la deliberadamente no contexto.</p>
+        <div class="istrip">
+          <div class="ichip">⚡ <strong>Curto prazo</strong> — histórico da conversa atual</div>
+          <div class="ichip">💾 <strong>Longo prazo</strong> — arquivos, banco de dados, vetores</div>
+        </div>
+        <p class="sbody">Veja a diferença entre um assistente SEM e COM memória:</p>
+        <div class="memvis">
+          <div class="memcnv wo">
+            <div class="memcnvlbl">Sem memória</div>
+            <div class="msg"><div class="mu">Pode me chamar de Ana.</div></div>
+            <div class="msg"><div class="ma bad">Claro! Como posso ajudar?</div></div>
+            <div class="msg"><div class="mu">Qual é o meu plano atual?</div></div>
+            <div class="msg"><div class="ma bad">Poderia me informar seu nome para verificar?</div></div>
+          </div>
+          <div class="memcnv wi">
+            <div class="memcnvlbl">Com memória</div>
+            <div class="msg"><div class="mu">Pode me chamar de Ana.</div></div>
+            <div class="msg"><div class="ma good">Claro, Ana! Como posso te ajudar?</div></div>
+            <div class="msg"><div class="mu">Qual é o meu plano atual?</div></div>
+            <div class="msg"><div class="ma good">Ana, seu plano atual é o Pro — conforme o histórico de sessões anteriores.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabp" id="tp2">
+        <div class="tabptitle">Ferramentas — O Modelo Que Age</div>
+        <p class="sbody">Ferramentas transformam o modelo de um <em>gerador de texto</em> em um <em>agente que age</em>. Em vez de descrever o que faria, ele pode realmente fazer.</p>
+        <div class="tooldemo">
+          <div class="toolhdr">
+            💬 Simulação — "Qual é a previsão do tempo em São Paulo?"
+            <div class="tooltog">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                <input type="checkbox" id="toolTog" onchange="toolDemo()"> Habilitar ferramenta de clima
+              </label>
+            </div>
+          </div>
+          <div class="toolchat" id="toolchat">
+            <div class="chatmsg user">
+              <div class="snd">USUÁRIO</div>
+              <div class="bbl">Qual é a previsão do tempo em São Paulo hoje?</div>
+            </div>
+            <div class="chatmsg ai" id="toolresp">
+              <div class="snd">ASSISTENTE (sem ferramentas)</div>
+              <div class="bbl">Não tenho acesso a informações em tempo real, então não consigo fornecer a previsão exata de hoje. Recomendo verificar um app de meteorologia como Weather.com ou INMET.</div>
+            </div>
+          </div>
+          <div style="padding:0 16px 16px"><button class="toolaskbtn" onclick="toolDemo()">▶ Repetir pergunta</button></div>
+        </div>
+        <p class="sbody" style="margin-top:20px">Com ferramentas, o modelo pode: <strong>buscar na web</strong>, <strong>consultar bancos de dados</strong>, <strong>executar código</strong>, <strong>chamar APIs</strong>, <strong>ler e escrever arquivos</strong> — e combinar múltiplas ferramentas para resolver tarefas complexas.</p>
+      </div>
+
+      <div class="tabp" id="tp3">
+        <div class="tabptitle">RAG — Recuperar em vez de Memorizar</div>
+        <p class="sbody"><strong>RAG (Retrieval-Augmented Generation)</strong> resolve o problema de janela de contexto limitada. Em vez de colocar <em>tudo</em> no contexto, você recupera apenas o que é relevante para a pergunta atual.</p>
+        <div class="cmpgrid">
+          <div class="cmpc bef"><div class="cmplbl">Sem RAG</div><div class="cmptxt">Você tem 500 páginas de documentação. Coloca tudo no contexto. O modelo fica lento, caro e confuso com informação irrelevante.</div></div>
+          <div class="cmpc aft"><div class="cmplbl">Com RAG</div><div class="cmptxt">O usuário faz uma pergunta. O sistema busca as 3 páginas mais relevantes. Só essas 3 entram no contexto. Modelo rápido, barato e focado.</div></div>
+        </div>
+        <div class="analogy">
+          <div class="analogy-lbl">Preview</div>
+          <div class="analogy-txt">RAG será explorado em profundidade no Módulo 5. Por ora, lembre-se: o objetivo é <em>recuperar o contexto certo</em>, não <em>recuperar o máximo de contexto</em>.</div>
+        </div>
+      </div>
+
+      <div class="tabp" id="tp4">
+        <div class="tabptitle">Histórico de Conversa — O Que Guardar?</div>
+        <p class="sbody">Manter todo o histórico de uma conversa longa consome tokens valiosos. Estratégias inteligentes comprimem sem perder o essencial:</p>
+        <div class="rwgrid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+          <div class="rwcard"><div class="rwico">📝</div><div class="rwtit">Manter completo</div><div class="rwdesc">Conversas curtas onde cada mensagem anterior é relevante.</div></div>
+          <div class="rwcard"><div class="rwico">🗜️</div><div class="rwtit">Sumarizar</div><div class="rwdesc">Comprime mensagens antigas em um resumo. O próprio modelo pode fazer isso.</div></div>
+          <div class="rwcard"><div class="rwico">🎯</div><div class="rwtit">Janela deslizante</div><div class="rwdesc">Mantém apenas as últimas N mensagens. Simples e efetivo para chats lineares.</div></div>
+          <div class="rwcard"><div class="rwico">🔍</div><div class="rwtit">Recuperação seletiva</div><div class="rwdesc">Busca mensagens antigas relevantes para a pergunta atual. Como RAG para o histórico.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEC 4 -->
+  <section class="sec" data-section="3">
+    <div class="slabel">Seção 4 / 6</div>
+    <h2 class="stitle">Exercício Principal — Monte um Contexto</h2>
+    <p class="sbody"><strong>Cenário:</strong> Você está configurando um assistente de IA para responder dúvidas sobre o produto da sua empresa. Configure o contexto e veja como cada escolha afeta a qualidade da resposta em tempo real.</p>
+
+    <div class="blgrid">
+      <div class="blctrls">
+        <div class="blfield">
+          <label class="bllbl">⚙️ System Prompt<span class="hint"> — define persona e regras</span></label>
+          <textarea class="bltxa" id="blPrompt" placeholder="Ex: Você é um assistente amigável que ajuda clientes com dúvidas sobre nosso produto de gestão financeira. Responda sempre em português, de forma clara e objetiva." oninput="bl()"></textarea>
+        </div>
+        <div class="blfield">
+          <label class="bllbl">🔧 Ferramentas habilitadas</label>
+          <div class="toolcbs">
+            <label class="toolcbi"><input type="checkbox" value="faq" onchange="bl()"> Busca em FAQ</label>
+            <label class="toolcbi"><input type="checkbox" value="tickets" onchange="bl()"> Histórico de tickets do cliente</label>
+            <label class="toolcbi"><input type="checkbox" value="profile" onchange="bl()"> Perfil do usuário</label>
+            <label class="toolcbi"><input type="checkbox" value="docs" onchange="bl()"> Documentação do produto</label>
+          </div>
+        </div>
+        <div class="blfield">
+          <label class="bllbl">💬 Histórico de conversa<span class="hint" id="blHistLbl"> — 5 mensagens</span></label>
+          <input type="range" class="blslider" id="blHist" min="0" max="20" value="5" oninput="bl()">
+          <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);margin-top:4px"><span>0 msgs</span><span>20 msgs</span></div>
+        </div>
+        <div class="blfield">
+          <label class="bllbl">🧠 Memória persistente</label>
+          <label class="memtog">
+            <div class="togsw"><input type="checkbox" id="blMem" onchange="bl()"><div class="togsl"></div></div>
+            <span id="blMemLbl" style="font-size:14px;color:var(--text-muted)">Desabilitada</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="blprev">
+        <div class="prevhdr">Prévia em tempo real</div>
+        <div class="prevmet">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);margin-bottom:6px"><span>Tokens utilizados</span><span id="blToks">~0</span></div>
+            <div class="barbg"><div class="barfill" id="blBar" style="width:0%"></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:13px;color:var(--text-secondary)">Qualidade estimada:</span>
+            <span id="blBadge" class="qbadge ql">Baixa</span>
+          </div>
+        </div>
+        <div class="prevsmpl">
+          <div class="sturn cl"><div class="who">Cliente</div><div class="tx">Não consigo gerar o relatório de gastos do mês passado.</div></div>
+          <div class="sturn as"><div class="who">Assistente</div><div class="tx" id="blResp" style="color:var(--text-muted);font-style:italic">Configure o contexto ao lado para ver como o assistente responderia...</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEC 5 -->
+  <section class="sec" data-section="4">
+    <div class="slabel">Seção 5 / 6</div>
+    <h2 class="stitle">Context Engineering na Prática</h2>
+    <p class="sbody">Os conceitos desta aula não são teóricos — você já os usa, talvez sem saber o nome certo. Ferramentas modernas de desenvolvimento com IA são, no fundo, sistemas de context engineering.</p>
+
+    <div class="rwgrid" style="margin-top:28px">
+      <div class="rwcard"><div class="rwico">📋</div><div class="rwtit">CLAUDE.md</div><div class="rwdesc">O arquivo que você cria para o Claude Code entender seu projeto. É literalmente um system prompt — regras, convenções, arquitetura, anti-padrões.</div><div class="rwtag">System Prompt</div></div>
+      <div class="rwcard"><div class="rwico">🗂️</div><div class="rwtit">.ai/memory/</div><div class="rwdesc">Os arquivos de memória do projeto (lessons.md, state.md). São memória de longo prazo injetada no contexto a cada nova sessão.</div><div class="rwtag">Memória persistente</div></div>
+      <div class="rwcard"><div class="rwico">🔌</div><div class="rwtit">MCP Servers</div><div class="rwdesc">Model Context Protocol — servidores que expõem ferramentas para o modelo: banco de dados, filesystems, APIs externas, browsers.</div><div class="rwtag">Ferramentas</div></div>
+      <div class="rwcard"><div class="rwico">🤖</div><div class="rwtit">Subagentes</div><div class="rwdesc">Quando um agente chama outro, cada um tem seu próprio contexto isolado. Evita poluição entre tarefas e otimiza o uso de tokens por sessão.</div><div class="rwtag">Context isolation</div></div>
+    </div>
+
+    <div class="analogy" style="margin-top:32px">
+      <div class="analogy-lbl">Princípio fundamental</div>
+      <div class="analogy-txt">"Coloque no contexto apenas o que é <em>relevante</em> para a tarefa atual. Contexto irrelevante é ruído — e ruído degrada qualidade, aumenta custo e confunde o modelo."</div>
+    </div>
+  </section>
+
+  <!-- SEC 6 -->
+  <section class="sec" data-section="5">
+    <div class="slabel">Seção 6 / 6</div>
+    <h2 class="stitle">Quiz Final</h2>
+    <p class="sbody">5 perguntas para consolidar o que você aprendeu sobre context engineering.</p>
+
+    <div class="card" style="margin-top:28px">
+      <div id="quizBody">
+        <div class="qprog"><div class="qdots" id="qdots"></div><span class="qctr" id="qctr">1 / 5</span></div>
+        <div class="qq" id="qq"></div>
+        <div class="qopts" id="qopts"></div>
+        <div class="qfb" id="qfb"></div>
+        <button class="qnxt" id="qnxt" onclick="qNext()">Próxima →</button>
+      </div>
+      <div class="qend" id="qend">
+        <div class="qscore" id="qscore"></div>
+        <div class="qendmsg" id="qendmsg"></div>
+        <div id="qbadge"></div>
+        <br><br>
+        <button class="qnxt on" onclick="qRestart()" style="display:inline-block">↺ Refazer</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOTTOM NAV -->
+  <div class="bnav">
+    <a href="02-prompt-engineering.html" class="bnavbtn">
+      <span>←</span>
+      <div><span class="bnavlbl">Anterior</span>Prompt Engineering</div>
+    </a>
+    <a href="04-agentes.html" class="bnavbtn prim">
+      <div style="text-align:right"><span class="bnavlbl">Próximo</span>Prompt Patterns</div>
+      <span>→</span>
+    </a>
+  </div>
+
+</div></div>
+
+<script>
+// ═══════════════════════════════════════
+// SEC 1 — Context diagram
+// ═══════════════════════════════════════
+const CTXI = {
+  system:  { t:'⚙️ System Prompt — A Constituição', b:'São as instruções que sempre se aplicam, independente do usuário. Define persona, tom, restrições e conhecimento de base. É o primeiro elemento lido pelo modelo em toda conversa.' },
+  history: { t:'💬 Histórico de Conversa — Memória de Curto Prazo', b:'Todas as mensagens trocadas anteriormente na conversa atual. O modelo usa esse contexto para manter coerência e lembrar de preferências. Conversas longas consomem tokens rapidamente.' },
+  tools:   { t:'🔧 Ferramentas — O Que o Modelo Pode Fazer', b:'Uma lista de funções e APIs que o modelo pode chamar. Com ferramentas definidas, o modelo pode invocar código real: buscar dados, executar queries, ler arquivos, chamar APIs externas.' },
+  docs:    { t:'📄 Documentos Recuperados (RAG) — Conhecimento Externo', b:'Trechos de documentos ou dados recuperados especificamente para a pergunta atual via busca semântica. Permite ao modelo responder sobre informações que não estavam em seu treinamento.' },
+  message: { t:'✍️ Mensagem do Usuário — A Entrada Atual', b:'A pergunta ou instrução do usuário no turno atual. É o único elemento que o usuário final controla diretamente — todo o restante é responsabilidade do engenheiro que projetou o sistema.' }
+};
+let activeCtx = null;
+function showCtx(k) {
+  const tip = document.getElementById('ctxtip');
+  document.getElementById('ctxtip-title').textContent = CTXI[k].t;
+  document.getElementById('ctxtip-body').textContent = CTXI[k].b;
+  document.querySelectorAll('.ctxel').forEach(e => e.classList.remove('active'));
+  document.querySelector(`.ctxel[data-k="${k}"]`).classList.add('active');
+  if (activeCtx === k) { tip.classList.remove('on'); activeCtx = null; }
+  else { tip.classList.add('on'); activeCtx = k; }
+}
+
+// ═══════════════════════════════════════
+// SEC 2 — Drag-and-drop
+// ═══════════════════════════════════════
+const CW_MAX = 8000;
+const CWD = {
+  system:   { n:'System Prompt',               ico:'⚙️', tok:500,  q:30 },
+  history:  { n:'Histórico de Conversa',        ico:'💬', tok:2000, q:20 },
+  code:     { n:'Arquivo de código relevante',  ico:'💻', tok:1500, q:25 },
+  docs:     { n:'Documentação completa',         ico:'📚', tok:3000, q:5  },
+  examples: { n:'Exemplos (few-shot)',            ico:'📋', tok:800,  q:15 }
+};
+let cwItems=[], cwTok=0, cwQR=0, cwDrag=null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.cwi').forEach(el => {
+    el.addEventListener('dragstart', e => { cwDrag=el.dataset.id; el.classList.add('dragging'); e.dataTransfer.effectAllowed='copy'; });
+    el.addEventListener('dragend', () => el.classList.remove('dragging'));
+  });
+  qInit(); bl(); loadP();
+});
+
+function cwOver(e) { e.preventDefault(); document.getElementById('cwwin').classList.add('over'); }
+function cwLeave() { document.getElementById('cwwin').classList.remove('over'); }
+function cwDrop(e) {
+  e.preventDefault();
+  document.getElementById('cwwin').classList.remove('over');
+  if (!cwDrag || cwItems.includes(cwDrag)) return;
+  cwAdd(cwDrag); cwDrag=null;
+}
+function cwAdd(id) {
+  const d=CWD[id]; cwItems.push(id); cwTok+=d.tok; cwQR+=d.q;
+  document.querySelector(`.cwi[data-id="${id}"]`).classList.add('used');
+  document.getElementById('cwdrophint').classList.add('gone');
+  const s=document.createElement('div'); s.className='cwslot'; s.id='cws-'+id;
+  s.innerHTML=`<span style="font-size:15px">${d.ico}</span><span class="cwsname">${d.n}</span><span class="cwstok">${d.tok.toLocaleString('pt-BR')} tok</span><button class="cwsrm" onclick="cwRm('${id}')">✕</button>`;
+  document.getElementById('cwslots').appendChild(s);
+  cwRefresh();
+}
+function cwRm(id) {
+  const d=CWD[id]; cwItems=cwItems.filter(i=>i!==id); cwTok-=d.tok; cwQR-=d.q;
+  document.getElementById('cws-'+id).remove();
+  document.querySelector(`.cwi[data-id="${id}"]`).classList.remove('used');
+  if (!cwItems.length) document.getElementById('cwdrophint').classList.remove('gone');
+  cwRefresh();
+}
+function cwRefresh() {
+  const pct=Math.min((cwTok/CW_MAX)*100,100);
+  const bar=document.getElementById('cwbar');
+  bar.style.width=pct+'%';
+  bar.className='barfill'+(cwTok>CW_MAX?' x':pct>70?' w':'');
+  document.getElementById('cwtoks').textContent=`${cwTok.toLocaleString('pt-BR')} / ${CW_MAX.toLocaleString('pt-BR')} tokens`;
+  const hs=cwItems.includes('system'), hd=cwItems.includes('docs');
+  let q=Math.min(cwQR,95);
+  if(hd&&!hs) q=Math.max(q-20,5);
+  if(cwTok>CW_MAX) q=Math.max(q-25,5);
+  const qp=Math.round((q/95)*100);
+  const sc=document.getElementById('cwqscore');
+  sc.textContent=qp+'%';
+  sc.className='qscore'+(qp<30?' low':qp<60?' mid':'');
+  document.getElementById('cwqbar').style.width=qp+'%';
+  const fbs=[
+    [!cwItems.length,'Adicione itens para ver o impacto.'],
+    [cwTok>CW_MAX,'Atenção: contexto acima do limite! O modelo pode truncar conteúdo.'],
+    [hd&&!hs,'Documentação sem system prompt gera respostas genéricas e imprecisas.'],
+    [qp<30,'Contexto insuficiente. Adicione o System Prompt e itens relevantes.'],
+    [qp<55,'Razoável. Priorize itens Essencial e Relevante.'],
+    [qp<75,'Bom contexto! Foco nos itens certos melhora a precisão.'],
+    [true,'Excelente! Contexto balanceado entre qualidade e custo.']
+  ];
+  for(const[c,m] of fbs){if(c){document.getElementById('cwfb').textContent=m;break;}}
+}
+function cwReset() {
+  cwItems=[]; cwTok=0; cwQR=0;
+  document.getElementById('cwslots').innerHTML='';
+  document.getElementById('cwdrophint').classList.remove('gone');
+  document.querySelectorAll('.cwi').forEach(e=>e.classList.remove('used','dragging'));
+  cwRefresh();
+}
+
+// ═══════════════════════════════════════
+// SEC 3 — Tabs
+// ═══════════════════════════════════════
+function tab(i) {
+  document.querySelectorAll('.tabb').forEach((b,j)=>b.classList.toggle('on',i===j));
+  document.querySelectorAll('.tabp').forEach((p,j)=>p.classList.toggle('on',i===j));
+}
+
+// ═══════════════════════════════════════
+// SEC 3 — Tool demo
+// ═══════════════════════════════════════
+function toolDemo() {
+  const en=document.getElementById('toolTog').checked;
+  const chat=document.getElementById('toolchat');
+  const resp=document.getElementById('toolresp');
+  chat.querySelectorAll('.tc').forEach(e=>e.remove());
+  if(en) {
+    resp.innerHTML=`<div class="snd">ASSISTENTE (com ferramentas)</div><div class="bbl" style="color:var(--text-muted);font-style:italic">Consultando ferramenta de clima...</div>`;
+    setTimeout(()=>{
+      const tm=document.createElement('div'); tm.className='chatmsg tc';
+      tm.innerHTML=`<div class="snd">TOOL CALL</div><div class="bbl">weather_api({ city: "São Paulo, BR" })<br>→ { temp: 24, condition: "Parcialmente nublado", rain_chance: "30%" }</div>`;
+      chat.appendChild(tm);
+      setTimeout(()=>{
+        resp.innerHTML=`<div class="snd">ASSISTENTE (com ferramentas)</div><div class="bbl">Em São Paulo hoje está <strong style="color:var(--emerald-400)">24°C e parcialmente nublado</strong>, com 30% de chance de chuva à tarde. Se for sair, leve um guarda-chuva!</div>`;
+      },900);
+    },1100);
+  } else {
+    resp.innerHTML=`<div class="snd">ASSISTENTE (sem ferramentas)</div><div class="bbl">Não tenho acesso a informações em tempo real, então não consigo fornecer a previsão exata de hoje. Recomendo verificar um app de meteorologia como Weather.com ou INMET.</div>`;
+  }
+}
+
+// ═══════════════════════════════════════
+// SEC 4 — Builder
+// ═══════════════════════════════════════
+const BLR = {
+  none:             { tx:'Olá. Como posso te ajudar?', q:'l', tok:0 },
+  prompt_only:      { tx:'Entendo que você está com dificuldade para gerar o relatório. Poderia me dar mais detalhes sobre o que acontece quando tenta gerá-lo?', q:'m', tok:500 },
+  prompt_faq:       { tx:'Para gerar o relatório de gastos, acesse <strong>Relatórios → Financeiro → Gastos por período</strong>, selecione "Mês anterior" e clique em Gerar. Se o botão estiver cinza, verifique se seu perfil tem a permissão "Visualizar relatórios" em Configurações.', q:'h', tok:1200 },
+  prompt_faq_ticket:{ tx:'Oi! Vejo que você já abriu o ticket #4821 sobre esse problema semana passada. Nossa equipe identificou que a permissão "Relatórios Financeiros" foi desativada na última atualização. Para resolver: <strong>Configurações → Usuários → seu perfil → Permissões → Relatórios Financeiros → Ativar</strong>. Qualquer dúvida, estou aqui!', q:'x', tok:2800 }
+};
+function bl() {
+  const p=document.getElementById('blPrompt').value.trim();
+  const h=parseInt(document.getElementById('blHist').value);
+  const m=document.getElementById('blMem').checked;
+  const t=Array.from(document.querySelectorAll('.toolcbs input:checked')).map(i=>i.value);
+  document.getElementById('blHistLbl').textContent=` — ${h} mensagens`;
+  document.getElementById('blMemLbl').textContent=m?'Habilitada':'Desabilitada';
+  document.querySelectorAll('.toolcbi').forEach(i=>i.classList.toggle('on',i.querySelector('input').checked));
+  const hp=p.length>10, hf=t.includes('faq'), ht=t.includes('tickets');
+  let key='none';
+  if(hp&&hf&&ht) key='prompt_faq_ticket';
+  else if(hp&&hf) key='prompt_faq';
+  else if(hp) key='prompt_only';
+  const r=BLR[key];
+  let tok=r.tok; if(hp) tok+=Math.round(p.length*1.3); tok+=h*120; if(t.includes('profile')) tok+=400; if(t.includes('docs')) tok+=1200; if(m) tok+=300;
+  document.getElementById('blToks').textContent=`~${tok.toLocaleString('pt-BR')} tokens`;
+  document.getElementById('blBar').style.width=Math.min((tok/5000)*100,100)+'%';
+  const qm={l:['ql','Baixa'],m:['qm','Razoável'],h:['qh','Boa'],x:['qx','Excelente']};
+  const[cls,lbl]=qm[r.q]; const b=document.getElementById('blBadge'); b.className=`qbadge ${cls}`; b.textContent=lbl;
+  document.getElementById('blResp').innerHTML=r.tx;
+}
+
+// ═══════════════════════════════════════
+// QUIZ
+// ═══════════════════════════════════════
+const QD = [
+  { q:'Qual a diferença fundamental entre prompt engineering e context engineering?', o:['Prompt engineering é mais avançado e utiliza mais tokens','Context engineering abrange tudo que o modelo recebe, não apenas a mensagem do usuário','Context engineering é exclusivo para modelos muito grandes como Gemini','São sinônimos — a diferença é apenas de nomenclatura'], c:1, fb:'Context engineering é a disciplina de projetar intencionalmente TUDO que entra no contexto: system prompt, histórico, documentos, ferramentas — e o que deliberadamente não entra. Prompt engineering foca apenas na mensagem do usuário.' },
+  { q:'Você tem 500 páginas de documentação e quer que o modelo responda perguntas sobre ela. Qual estratégia é mais eficiente?', o:['Colocar todas as 500 páginas no system prompt','Dividir em 10 conversas separadas de 50 páginas cada','Usar RAG para recuperar apenas as páginas relevantes para cada pergunta','Aumentar o tamanho máximo do contexto nas configurações do modelo'], c:2, fb:'RAG resolve exatamente esse problema. Em vez de colocar tudo no contexto, você recupera dinamicamente apenas o relevante para a pergunta atual — reduz custo, aumenta velocidade e melhora qualidade.' },
+  { q:'Um assistente "esquece" o nome do usuário a cada nova sessão. Qual componente do contexto resolve isso?', o:['Um system prompt mais detalhado e longo','Mais mensagens no histórico de conversa atual','Memória de longo prazo persistida entre sessões','Ferramentas adicionais habilitadas'], c:2, fb:'O histórico de conversa só existe dentro de uma sessão. Para "lembrar" entre sessões, é preciso persistir informações em memória de longo prazo e injetá-la no início de cada nova conversa.' },
+  { q:'No exercício do context builder desta aula, o que mais impactou positivamente a qualidade das respostas?', o:['Aumentar o histórico de conversa para 20 mensagens','System prompt + ferramentas relevantes habilitadas (FAQ + histórico de tickets)','Habilitar memória persistente','Aumentar o número de tokens disponíveis'], c:1, fb:'A combinação de system prompt claro + ferramentas relevantes produziu as melhores respostas. O system prompt deu regras de comportamento; as ferramentas deram acesso a informações específicas do cliente.' },
+  { q:'O arquivo CLAUDE.md do Claude Code é um exemplo de qual componente de context engineering?', o:['Memória de curto prazo — salva a sessão atual','RAG — documentos recuperados dinamicamente','System prompt — instruções que sempre se aplicam, independente da tarefa','Histórico de conversa comprimido por sumarização'], c:2, fb:'O CLAUDE.md é lido no início de cada sessão e define regras, convenções e contexto do projeto. Isso é exatamente um system prompt: instruções permanentes que moldam o comportamento em todas as interações.' }
+];
+let qIdx=0, qScore=0, qAnswered=false;
+function qInit() { qDots(); qRender(); }
+function qDots() {
+  const c=document.getElementById('qdots'); c.innerHTML='';
+  QD.forEach((_,i)=>{ const d=document.createElement('div'); d.className='qdot'+(i<qIdx?' done':i===qIdx?' active':''); c.appendChild(d); });
+}
+function qRender() {
+  const q=QD[qIdx];
+  document.getElementById('qctr').textContent=`${qIdx+1} / ${QD.length}`;
+  document.getElementById('qq').textContent=q.q;
+  document.getElementById('qfb').className='qfb';
+  document.getElementById('qnxt').className='qnxt';
+  qAnswered=false;
+  const oc=document.getElementById('qopts'); oc.innerHTML='';
+  q.o.forEach((opt,i)=>{ const b=document.createElement('button'); b.className='qopt'; b.innerHTML=`<span class="oltr">${String.fromCharCode(65+i)}</span>${opt}`; b.onclick=()=>qAns(i); oc.appendChild(b); });
+}
+function qAns(i) {
+  if(qAnswered) return; qAnswered=true;
+  const q=QD[qIdx]; const opts=document.querySelectorAll('.qopt'); opts.forEach(o=>o.classList.add('dis'));
+  const fb=document.getElementById('qfb'); const nxt=document.getElementById('qnxt');
+  if(i===q.c) { opts[i].classList.add('ok'); qScore++; fb.className='qfb on ok'; fb.innerHTML='✓ Correto! '+q.fb; }
+  else { opts[i].classList.add('ng'); opts[q.c].classList.add('hint'); fb.className='qfb on ng'; fb.innerHTML='✗ Não exatamente. '+q.fb; }
+  nxt.className='qnxt on'; nxt.textContent=qIdx<QD.length-1?'Próxima →':'Ver resultado →';
+}
+function qNext() { qIdx++; if(qIdx>=QD.length){qEnd();return;} qDots(); qRender(); }
+function qEnd() {
+  document.getElementById('quizBody').style.display='none';
+  document.getElementById('qend').className='qend on';
+  const p=Math.round((qScore/QD.length)*100);
+  document.getElementById('qscore').textContent=`${qScore}/${QD.length}`;
+  const msgs=['Revise as seções e tente novamente.','Bom progresso! Algumas ideias ainda precisam sedimentar.','Muito bom! Você dominou a maioria dos conceitos.','Excelente! Você tem uma compreensão sólida de context engineering.'];
+  document.getElementById('qendmsg').textContent=msgs[p<40?0:p<60?1:p<90?2:3];
+  if(p>=60) { document.getElementById('qbadge').innerHTML='<div class="qendbadge">✓ Módulo 3 concluído</div>'; try { const KEY='ai-training-completed-v1'; const d=JSON.parse(localStorage.getItem(KEY)||'[]'); if(!d.includes(3)){d.push(3);localStorage.setItem(KEY,JSON.stringify(d));} } catch(e) {} markAll(); }
+}
+function qRestart() { qIdx=0; qScore=0; qAnswered=false; document.getElementById('quizBody').style.display='block'; document.getElementById('qend').className='qend'; qDots(); qRender(); }
+
+// ═══════════════════════════════════════
+// PROGRESS
+// ═══════════════════════════════════════
+function markAll() { document.querySelectorAll('.pstep').forEach(s=>s.classList.add('on')); }
+function loadP() { if(JSON.parse(localStorage.getItem('ai-training-completed-v1')||'[]').includes(3)) markAll(); }
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ const i=parseInt(e.target.dataset.section); document.querySelectorAll('.pstep').forEach((s,j)=>{if(j<=i)s.classList.add('on');}); }});
+},{threshold:.25});
+document.querySelectorAll('[data-section]').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
