@@ -292,7 +292,16 @@
       <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2L4 7l5 5"/></svg>
       Início
     </a>
-    <span class="module-badge">Módulo 04</span>
+    <div class="progress-indicator" style="display:flex;align-items:center;gap:6px;">
+      <div style="width:10px;height:10px;border-radius:50%;background:var(--green,#10b981);"></div>
+      <div style="width:10px;height:10px;border-radius:50%;background:var(--green,#10b981);"></div>
+      <div style="width:10px;height:10px;border-radius:50%;background:var(--green,#10b981);"></div>
+      <div style="width:10px;height:10px;border-radius:50%;background:#6366f1;border:2px solid #818cf8;"></div>
+      <div style="width:10px;height:10px;border-radius:50%;background:rgba(99,102,241,0.25);"></div>
+      <div style="width:10px;height:10px;border-radius:50%;background:rgba(99,102,241,0.25);"></div>
+      <div style="width:10px;height:10px;border-radius:50%;background:rgba(99,102,241,0.25);"></div>
+      <span style="margin-left:6px;color:#94a3b8;font-size:13px;">4 / 7</span>
+    </div>
   </nav>
 
   <header class="mod-header">
@@ -405,7 +414,7 @@
           <div id="simContent"></div>
         </div>
         <div class="sim-log" id="simLog">
-          <div class="sim-log-title">📋 Agent Log</div>
+          <div class="sim-log-title">📋 Log do Agente</div>
         </div>
       </div>
     </div>
@@ -594,7 +603,7 @@ function classify(i, choice) {
   if (classifyDone === tasks.length) {
     var s = document.getElementById('classifyScore');
     s.style.display = 'block';
-    document.getElementById('classifyScoreVal').textContent = classifyCorrect + '/5';
+    document.getElementById('classifyScoreVal').textContent = classifyCorrect + '/' + tasks.length;
     saveProgress('classify', classifyCorrect);
   }
 }
@@ -868,7 +877,7 @@ function buildPatterns() {
 /* ─── 4. TOOLS ─── */
 var toolsData = [
   { icon: '🗄', name: 'SQL Tool',    desc: 'Executar queries no banco',     cap: 70 },
-  { icon: '📂', name: 'File Reader', desc: 'Ler arquivos do projeto',        cap: 15 },
+  { icon: '📂', name: 'Leitor de Arquivos', desc: 'Ler arquivos do projeto',        cap: 15 },
   { icon: '💻', name: 'Terminal',    desc: 'Rodar comandos no servidor',     cap: 15 },
 ];
 var agentResponses = [
@@ -1098,15 +1107,23 @@ function showQuizResult() {
   result.classList.add('show');
   result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   saveProgress('quiz', correct);
+  // Sync with hub (only if score >= 4)
+  if (correct >= 4) {
+    try {
+      var KEY = 'ai-training-completed-v1';
+      var done = JSON.parse(localStorage.getItem(KEY) || '[]');
+      if (done.indexOf(4) === -1) { done.push(4); localStorage.setItem(KEY, JSON.stringify(done)); }
+    } catch(e) {}
+  }
 }
 
 /* ─── PERSISTENCE ─── */
 function saveProgress(key, val) {
   try {
-    var data = JSON.parse(localStorage.getItem('ia-training-progress') || '{}');
+    var data = JSON.parse(localStorage.getItem('ai-training-progress') || '{}');
     data['mod04-' + key] = val;
     data['mod04-visited'] = true;
-    localStorage.setItem('ia-training-progress', JSON.stringify(data));
+    localStorage.setItem('ai-training-progress', JSON.stringify(data));
   } catch(e) {}
 }
 

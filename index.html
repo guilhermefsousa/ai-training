@@ -516,7 +516,7 @@
     <div id="progress-track">
       <div id="progress-fill"></div>
     </div>
-    <span id="progress-count">0 / 6</span>
+    <span id="progress-count">0 / 7</span>
   </div>
 
   <div class="page">
@@ -532,7 +532,7 @@
         <p class="subtitle">De zero a especialista em IA aplicada — aprenda no seu ritmo, com exemplos práticos do dia a dia.</p>
         <div class="stats-row">
           <div class="stat">
-            <div class="stat-value">6</div>
+            <div class="stat-value">7</div>
             <div class="stat-label">Módulos</div>
           </div>
           <div class="stat">
@@ -614,11 +614,19 @@
       },
       {
         id: 6,
+        icon: '🛠️',
+        title: 'Ferramentas de IA para Devs',
+        desc:  'O arsenal completo: assistentes de código, MCP, frameworks de agentes, modelos e APIs.',
+        time:  '~15 min',
+        href:  'modules/06-ferramentas.html',
+      },
+      {
+        id: 7,
         icon: '📊',
         title: 'Avaliação (Eval)',
         desc:  'Como medir se a IA está funcionando. Métricas, benchmarks e prevenção de regressões.',
         time:  '~10 min',
-        href:  'modules/06-eval.html',
+        href:  'modules/07-eval.html',
       },
     ];
 
@@ -676,13 +684,7 @@
         </div>
       `;
 
-      /* Mark module as visited when user clicks */
-      card.addEventListener('click', () => {
-        const current = getCompleted();
-        if (!current.includes(mod.id)) {
-          saveCompleted([...current, mod.id]);
-        }
-      });
+      /* Completion is handled by each module's quiz — no auto-mark on click */
 
       return card;
     }

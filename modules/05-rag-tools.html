@@ -254,8 +254,17 @@
 
 <nav>
   <a href="../index.html">&#8592; Início</a>
-  <span class="nav-center">Módulo 05 &mdash; RAG &amp; Tools</span>
-  <a href="06-eval.html">Próximo &#8594;</a>
+  <span class="nav-center" style="display:flex;align-items:center;gap:6px;">
+    <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#10b981;"></span>
+    <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#10b981;"></span>
+    <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#10b981;"></span>
+    <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#10b981;"></span>
+    <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#6366f1;border:2px solid #818cf8;"></span>
+    <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:rgba(99,102,241,0.25);"></span>
+    <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:rgba(99,102,241,0.25);"></span>
+    <span style="margin-left:6px;color:#94a3b8;font-size:13px;">5 / 7</span>
+  </span>
+  <a href="06-ferramentas.html">Próximo &#8594;</a>
 </nav>
 
 <div class="wrap">
@@ -538,7 +547,7 @@
 
   <div class="mod-nav fade-in">
     <a href="04-agentes.html">&#8592; Módulo 4</a>
-    <a href="06-eval.html" class="next-mod">Módulo 6 &#8594;</a>
+    <a href="06-ferramentas.html" class="next-mod">Módulo 6 &#8594;</a>
   </div>
 
 </div>
@@ -944,13 +953,19 @@ function finishQuiz() {
   document.getElementById('qq'+(quizData.length-1)).classList.remove('active');
   const score = quizAnswers.filter((a,i) => a === quizData[i].correct).length;
   document.getElementById('quiz-score-val').textContent = score + '/' + quizData.length;
-  const msgs = ['Continue praticando! Releia as seções com calma.','Bom progresso! Revise os conceitos que errou.','Muito bem! Você entendeu os fundamentos de RAG & Tools.','Excelente! Domínio sólido do tema.','Perfeito! Resultado máximo.'];
+  const msgs = ['Continue praticando! Releia as seções com calma.','Bom progresso! Revise os conceitos que errou.','Muito bem! Você entendeu os fundamentos de RAG & Tools.','Excelente! Domínio sólido do tema.','Muito bem! Quase perfeito!','Perfeito! Resultado máximo — nota 5/5!'];
   document.getElementById('quiz-score-msg').textContent = msgs[Math.min(score, msgs.length-1)];
   document.getElementById('quiz-result').classList.add('show');
   try {
     const saved = JSON.parse(localStorage.getItem('ai-training-progress') || '{}');
     saved['module-05'] = { score, total:quizData.length, date:new Date().toISOString() };
     localStorage.setItem('ai-training-progress', JSON.stringify(saved));
+    // Sync with hub (only if score >= 4)
+    if (score >= 4) {
+      const KEY = 'ai-training-completed-v1';
+      const done = JSON.parse(localStorage.getItem(KEY) || '[]');
+      if (!done.includes(5)) { done.push(5); localStorage.setItem(KEY, JSON.stringify(done)); }
+    }
   } catch(e) {}
 }
 function restartQuiz() { buildQuiz(); }

@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo 06 — Ferramentas de IA para Devs</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0e1a;--bg2:#111827;--bg3:#1e293b;
+  --purple:#a78bfa;--blue:#60a5fa;--green:#34d399;--amber:#fbbf24;--rose:#fb7185;--cyan:#22d3ee;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --card:rgba(255,255,255,.04);--border:rgba(255,255,255,.08);
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.6;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 0%,rgba(99,102,241,.08),transparent 60%),radial-gradient(ellipse at 80% 100%,rgba(34,211,238,.06),transparent 60%);pointer-events:none;z-index:0}
+
+/* NAV */
+.topnav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:12px 24px;background:rgba(10,14,26,.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.topnav a{color:var(--text2);text-decoration:none;font-size:13px;font-family:'Space Mono',monospace;transition:.2s}
+.topnav a:hover{color:var(--purple)}
+.nav-badge{font-family:'Space Mono',monospace;font-size:11px;color:var(--cyan);background:rgba(34,211,238,.1);padding:4px 12px;border-radius:20px;border:1px solid rgba(34,211,238,.2)}
+.nav-links{display:flex;gap:16px}
+
+/* SECTIONS */
+.section{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:80px 24px}
+.section-label{font-family:'Space Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:3px;margin-bottom:12px}
+.section h2{font-family:'Syne',sans-serif;font-size:clamp(28px,5vw,42px);font-weight:800;margin-bottom:12px}
+.section .intro{color:var(--text2);font-size:15px;max-width:640px;margin-bottom:40px}
+
+/* TOOL CARDS */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:32px}
+.tool-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;transition:.3s;cursor:default;position:relative;overflow:hidden}
+.tool-card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.15);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.tool-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;opacity:0;transition:.3s}
+.tool-card:hover::before{opacity:1}
+.tool-card .icon{font-size:28px;margin-bottom:12px}
+.tool-card h3{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px}
+.tool-card .desc{font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.5}
+.tool-card .meta{display:flex;gap:8px;flex-wrap:wrap}
+.tag{font-size:11px;padding:3px 10px;border-radius:20px;font-family:'Space Mono',monospace;border:1px solid var(--border);color:var(--text2)}
+.tag.price{border-color:rgba(52,211,153,.2);color:var(--green)}
+.tag.use{border-color:rgba(167,139,250,.2);color:var(--purple)}
+
+/* COLOR ACCENTS PER TOOL */
+.tc-copilot::before{background:linear-gradient(90deg,#6e40c9,#2ea44f)}
+.tc-claude::before{background:linear-gradient(90deg,#d97706,#a78bfa)}
+.tc-cursor::before{background:linear-gradient(90deg,#3b82f6,#8b5cf6)}
+.tc-windsurf::before{background:linear-gradient(90deg,#22d3ee,#06b6d4)}
+.tc-aider::before{background:linear-gradient(90deg,#34d399,#10b981)}
+
+/* MCP */
+.mcp-diagram{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:32px 0;padding:32px;background:var(--card);border:1px solid var(--border);border-radius:14px}
+.mcp-box{padding:12px 20px;border-radius:10px;font-family:'Space Mono',monospace;font-size:13px;text-align:center;min-width:100px}
+.mcp-client{background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.3);color:var(--purple)}
+.mcp-proto{background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.2);color:var(--cyan);font-size:11px}
+.mcp-server{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);color:var(--green)}
+.mcp-arrow{color:var(--text3);font-size:20px}
+
+/* MCP SERVERS GRID */
+.mcp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:24px 0}
+.mcp-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;transition:.2s;cursor:pointer}
+.mcp-card:hover{border-color:rgba(34,211,238,.3);background:rgba(34,211,238,.04)}
+.mcp-card.selected{border-color:var(--cyan);background:rgba(34,211,238,.08)}
+.mcp-card .micon{font-size:24px;margin-bottom:6px}
+.mcp-card h4{font-size:14px;font-family:'Syne',sans-serif;margin-bottom:4px}
+.mcp-card p{font-size:11px;color:var(--text3)}
+
+/* EXERCISE */
+.exercise{background:rgba(167,139,250,.04);border:1px solid rgba(167,139,250,.15);border-radius:14px;padding:28px;margin:32px 0}
+.exercise h3{font-family:'Syne',sans-serif;font-size:18px;color:var(--purple);margin-bottom:8px}
+.exercise .edesc{font-size:13px;color:var(--text2);margin-bottom:20px}
+.capability{margin-top:16px;padding:16px;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.15);border-radius:10px;display:none}
+.capability.show{display:block}
+.capability h4{font-size:14px;color:var(--green);margin-bottom:8px;font-family:'Syne',sans-serif}
+.capability li{font-size:13px;color:var(--text2);margin-bottom:4px}
+
+/* FRAMEWORKS */
+.fw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin:24px 0}
+.fw-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;transition:.3s}
+.fw-card:hover{border-color:rgba(255,255,255,.12);transform:translateY(-2px)}
+.fw-card h3{font-family:'Syne',sans-serif;font-size:16px;margin-bottom:4px}
+.fw-card .stars{font-size:12px;color:var(--amber);margin-bottom:8px;font-family:'Space Mono',monospace}
+.fw-card .vibe{font-size:13px;color:var(--text2);font-style:italic;margin-bottom:10px}
+.fw-card .best{font-size:12px;color:var(--text3)}
+
+/* TABLE */
+.model-table-wrap{overflow-x:auto;margin:24px 0;border-radius:14px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:rgba(255,255,255,.04);padding:12px 16px;text-align:left;font-family:'Space Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text2);border-bottom:1px solid var(--border)}
+td{padding:12px 16px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:hover td{background:rgba(255,255,255,.02)}
+.model-name{font-weight:600;color:var(--text)}
+.model-co{color:var(--text3);font-size:12px}
+
+/* SCENARIO EXERCISE */
+.scenario{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin:12px 0}
+.scenario .q{font-size:14px;margin-bottom:12px}
+.scenario .opts{display:flex;flex-wrap:wrap;gap:8px}
+.scenario .opt{padding:8px 16px;border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;transition:.2s;background:transparent;color:var(--text);font-family:'DM Sans',sans-serif}
+.scenario .opt:hover{border-color:var(--purple);background:rgba(167,139,250,.06)}
+.scenario .opt.correct{border-color:var(--green);background:rgba(52,211,153,.1);color:var(--green)}
+.scenario .opt.wrong{border-color:var(--rose);background:rgba(251,113,133,.06);color:var(--rose)}
+.scenario .feedback{font-size:12px;color:var(--text2);margin-top:10px;display:none;padding:10px;background:rgba(255,255,255,.03);border-radius:8px}
+
+/* QUICK CARDS */
+.quick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin:24px 0}
+.quick-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;transition:.2s}
+.quick-card:hover{border-color:rgba(255,255,255,.12)}
+.quick-card .qi{font-size:28px;margin-bottom:8px}
+.quick-card h4{font-size:13px;font-family:'Syne',sans-serif;margin-bottom:4px}
+.quick-card p{font-size:11px;color:var(--text3)}
+
+/* EVAL CARDS */
+.eval-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin:24px 0}
+.eval-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.eval-card h4{font-family:'Syne',sans-serif;font-size:15px;margin-bottom:6px}
+.eval-card .etype{font-size:11px;font-family:'Space Mono',monospace;margin-bottom:8px}
+.eval-card .edsc{font-size:13px;color:var(--text2)}
+.etype.oss{color:var(--green)}
+.etype.cloud{color:var(--blue)}
+.etype.proxy{color:var(--amber)}
+
+/* QUIZ */
+.quiz-area{margin-top:40px}
+.quiz-q{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px;display:none}
+.quiz-q.active{display:block}
+.quiz-q .qtext{font-size:15px;margin-bottom:16px}
+.quiz-q .qopts{display:flex;flex-direction:column;gap:8px}
+.quiz-q .qopt{padding:12px 16px;border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:14px;transition:.2s;background:transparent;color:var(--text);text-align:left;font-family:'DM Sans',sans-serif;width:100%}
+.quiz-q .qopt:hover:not(.picked){border-color:var(--purple);background:rgba(167,139,250,.06)}
+.quiz-q .qopt.right{border-color:var(--green);background:rgba(52,211,153,.1);color:var(--green)}
+.quiz-q .qopt.wrongq{border-color:var(--rose);background:rgba(251,113,133,.06);color:var(--rose)}
+.quiz-result{text-align:center;padding:40px;display:none}
+.quiz-result .score{font-family:'Syne',sans-serif;font-size:48px;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.quiz-result .slabel{color:var(--text2);margin:8px 0 24px}
+.btn{display:inline-block;padding:12px 28px;border-radius:10px;font-size:14px;font-family:'Syne',sans-serif;font-weight:600;text-decoration:none;transition:.2s;border:none;cursor:pointer}
+.btn-primary{background:linear-gradient(135deg,rgba(167,139,250,.2),rgba(96,165,250,.2));border:1px solid rgba(167,139,250,.3);color:var(--purple)}
+.btn-primary:hover{background:linear-gradient(135deg,rgba(167,139,250,.3),rgba(96,165,250,.3))}
+.btn-green{background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.3);color:var(--green)}
+
+/* FOOTER */
+.foot{text-align:center;padding:40px 24px;max-width:960px;margin:0 auto}
+.foot a{color:var(--text2);text-decoration:none;font-size:13px;margin:0 12px;transition:.2s}
+.foot a:hover{color:var(--purple)}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:0 auto;max-width:200px}
+
+/* RESPONSIVE */
+@media(max-width:640px){
+  .tools-grid,.fw-grid,.eval-grid{grid-template-columns:1fr}
+  .mcp-grid,.quick-grid{grid-template-columns:repeat(2,1fr)}
+  .mcp-diagram{flex-direction:column}
+  .section{padding:48px 16px}
+}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-links">
+    <a href="../index.html">← Hub</a>
+    <a href="05-rag-tools.html">← Módulo 05</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px;">
+    <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#10b981;"></span>
+    <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#10b981;"></span>
+    <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#10b981;"></span>
+    <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#10b981;"></span>
+    <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#10b981;"></span>
+    <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#6366f1;border:2px solid #818cf8;"></span>
+    <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:rgba(99,102,241,0.25);"></span>
+    <span style="margin-left:6px;color:#94a3b8;font-size:13px;">6 / 7</span>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 1 — ASSISTENTES DE CÓDIGO
+     ══════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label" style="color:var(--purple)">Seção 01</div>
+  <h2>Assistentes de Código</h2>
+  <p class="intro">Seu copiloto diário. Essas ferramentas escrevem, editam e debatem código com você — cada uma com uma filosofia diferente.</p>
+
+  <div class="tools-grid">
+    <div class="tool-card tc-copilot">
+      <div class="icon">🐙</div>
+      <h3>GitHub Copilot</h3>
+      <div class="desc">Autocomplete inteligente direto no editor. Sugere linhas e funções inteiras enquanto você digita. Funciona com VS Code, JetBrains e Neovim.</div>
+      <div class="meta">
+        <span class="tag price">~$10/mês</span>
+        <span class="tag use">Autocomplete</span>
+      </div>
+    </div>
+
+    <div class="tool-card tc-claude">
+      <div class="icon">🧠</div>
+      <h3>Claude Code</h3>
+      <div class="desc">Agente autônomo que lê, edita, testa e comita código. Opera no terminal e IDE. Pode executar bash, git, rodar testes e fazer refactors completos.</div>
+      <div class="meta">
+        <span class="tag price">Pay-per-use</span>
+        <span class="tag use">Agente completo</span>
+      </div>
+    </div>
+
+    <div class="tool-card tc-cursor">
+      <div class="icon">✨</div>
+      <h3>Cursor</h3>
+      <div class="desc">VS Code turbinado com IA nativa. Chat integrado + autocomplete + "Composer" que edita múltiplos arquivos de uma vez seguindo instruções.</div>
+      <div class="meta">
+        <span class="tag price">Free + $20/mês Pro</span>
+        <span class="tag use">IDE com IA</span>
+      </div>
+    </div>
+
+    <div class="tool-card tc-windsurf">
+      <div class="icon">🌊</div>
+      <h3>Windsurf</h3>
+      <div class="desc">IDE com IA nativa e agente "Cascade" que planeja e executa tarefas multi-step. Alternativa com bom free tier.</div>
+      <div class="meta">
+        <span class="tag price">Free tier generoso</span>
+        <span class="tag use">IDE + Agente</span>
+      </div>
+    </div>
+
+    <div class="tool-card tc-aider">
+      <div class="icon">⌨️</div>
+      <h3>Aider</h3>
+      <div class="desc">CLI open source para pair programming com IA. Integração git nativa, suporta múltiplos modelos (Claude, GPT, Llama, etc.).</div>
+      <div class="meta">
+        <span class="tag price">Grátis (OSS)</span>
+        <span class="tag use">Terminal</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 2 — MCP
+     ══════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label" style="color:var(--cyan)">Seção 02</div>
+  <h2>MCP — O USB da IA</h2>
+  <p class="intro">Model Context Protocol é o padrão universal para conectar ferramentas à IA. Em vez de integrar cada tool manualmente, você usa um protocolo — qualquer modelo, qualquer ferramenta.</p>
+
+  <div class="mcp-diagram">
+    <div class="mcp-box mcp-client">🤖 Modelo de IA<br><small>(Claude, GPT, etc.)</small></div>
+    <div class="mcp-arrow">⇄</div>
+    <div class="mcp-box mcp-proto">⚡ MCP Protocol</div>
+    <div class="mcp-arrow">⇄</div>
+    <div class="mcp-box mcp-server">🛠️ MCP Servers<br><small>(DB, APIs, arquivos...)</small></div>
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin-bottom:16px;">MCP Servers Populares</h3>
+
+  <div class="mcp-grid">
+    <div class="mcp-card" data-name="postgres" onclick="toggleMcp(this)">
+      <div class="micon">🗄️</div>
+      <h4>Postgres</h4>
+      <p>Consulta banco de dados direto</p>
+    </div>
+    <div class="mcp-card" data-name="github" onclick="toggleMcp(this)">
+      <div class="micon">🐙</div>
+      <h4>GitHub</h4>
+      <p>PRs, issues, repos</p>
+    </div>
+    <div class="mcp-card" data-name="slack" onclick="toggleMcp(this)">
+      <div class="micon">💬</div>
+      <h4>Slack</h4>
+      <p>Enviar/ler mensagens</p>
+    </div>
+    <div class="mcp-card" data-name="filesystem" onclick="toggleMcp(this)">
+      <div class="micon">📁</div>
+      <h4>Filesystem</h4>
+      <p>Ler/escrever arquivos</p>
+    </div>
+    <div class="mcp-card" data-name="playwright" onclick="toggleMcp(this)">
+      <div class="micon">🌐</div>
+      <h4>Playwright</h4>
+      <p>Navegar na web, screenshots</p>
+    </div>
+    <div class="mcp-card" data-name="memory" onclick="toggleMcp(this)">
+      <div class="micon">💾</div>
+      <h4>Memory</h4>
+      <p>Persistir info entre sessões</p>
+    </div>
+    <div class="mcp-card" data-name="fetch" onclick="toggleMcp(this)">
+      <div class="micon">🔗</div>
+      <h4>Fetch</h4>
+      <p>HTTP requests a qualquer API</p>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <h3>🧪 Exercício: Monte seu MCP Setup</h3>
+    <p class="edesc">Cenário: Você está montando um assistente para uma equipe de suporte. Selecione os MCP servers acima que seriam úteis.</p>
+    <div id="mcp-selected" style="font-size:13px;color:var(--text2);margin-bottom:8px">Nenhum selecionado</div>
+    <div class="capability" id="mcp-cap">
+      <h4>🚀 Capacidades do seu assistente:</h4>
+      <ul id="mcp-cap-list"></ul>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 3 — FRAMEWORKS DE AGENTES
+     ══════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label" style="color:var(--green)">Seção 03</div>
+  <h2>Frameworks de Agentes</h2>
+  <p class="intro">Quando um agente solo não basta, você monta um time. Esses frameworks facilitam a criação de sistemas multi-agente.</p>
+
+  <div class="fw-grid">
+    <div class="fw-card">
+      <h3>🚀 CrewAI</h3>
+      <div class="stars">★ 44k+ stars</div>
+      <div class="vibe">"Monte uma equipe virtual em 50 linhas de código"</div>
+      <div class="best">Melhor para: times de agentes com roles definidos, prototipagem rápida</div>
+    </div>
+    <div class="fw-card">
+      <h3>🔀 LangGraph</h3>
+      <div class="stars">★ 15k+ stars</div>
+      <div class="vibe">"Workflows complexos com persistência e checkpoints"</div>
+      <div class="best">Melhor para: fluxos longos, estado durável, recuperação de falhas</div>
+    </div>
+    <div class="fw-card">
+      <h3>🧠 Claude Agent SDK</h3>
+      <div class="stars">★ Anthropic oficial</div>
+      <div class="vibe">"Agentes com contexto isolado, bash, file editing"</div>
+      <div class="best">Melhor para: workflows de dev, integração nativa com Claude</div>
+    </div>
+    <div class="fw-card">
+      <h3>🏢 AutoGen (Microsoft)</h3>
+      <div class="stars">★ 40k+ stars</div>
+      <div class="vibe">"Agentes escaláveis com GUI (AutoGen Studio)"</div>
+      <div class="best">Melhor para: enterprise, customização profunda, event-driven</div>
+    </div>
+    <div class="fw-card">
+      <h3>🔒 Pydantic AI</h3>
+      <div class="stars">★ 15k+ stars</div>
+      <div class="vibe">"Agentes type-safe para produção em Python"</div>
+      <div class="best">Melhor para: robustez em produção, multi-modelo, type safety</div>
+    </div>
+    <div class="fw-card">
+      <h3>🤖 OpenAI Agents SDK</h3>
+      <div class="stars">★ OpenAI oficial</div>
+      <div class="vibe">"3 conceitos: agents, handoffs, routines"</div>
+      <div class="best">Melhor para: simplicidade, ecossistema OpenAI, handoff patterns</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 4 — MODELOS & APIs
+     ══════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label" style="color:var(--amber)">Seção 04</div>
+  <h2>Modelos & APIs — O Cardápio</h2>
+  <p class="intro">Cada modelo tem forças diferentes. Escolher o certo é como escolher a ferramenta certa pra cada tarefa.</p>
+
+  <div class="model-table-wrap">
+    <table>
+      <thead>
+        <tr><th>Modelo</th><th>Empresa</th><th>Melhor para</th><th>Preço (input/1M)</th><th>Context</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="model-name">Claude Opus 4</span></td><td class="model-co">Anthropic</td><td>Raciocínio complexo, código, agentes</td><td>~$15</td><td>200K</td></tr>
+        <tr><td><span class="model-name">Claude Sonnet 4</span></td><td class="model-co">Anthropic</td><td>Melhor custo-benefício geral</td><td>~$3</td><td>200K</td></tr>
+        <tr><td><span class="model-name">GPT-4o</span></td><td class="model-co">OpenAI</td><td>Multimodal, velocidade</td><td>~$2.50</td><td>128K</td></tr>
+        <tr><td><span class="model-name">GPT-o3</span></td><td class="model-co">OpenAI</td><td>Raciocínio avançado</td><td>~$10</td><td>200K</td></tr>
+        <tr><td><span class="model-name">Gemini 2.5 Pro</span></td><td class="model-co">Google</td><td>Contexto gigante, multimodal</td><td>~$1.25</td><td>1M+</td></tr>
+        <tr><td><span class="model-name">Llama 4</span></td><td class="model-co">Meta</td><td>Open source, self-hosted</td><td>Grátis*</td><td>128K</td></tr>
+        <tr><td><span class="model-name">DeepSeek V3</span></td><td class="model-co">DeepSeek</td><td>Custo muito baixo, código</td><td>~$0.27</td><td>128K</td></tr>
+        <tr><td><span class="model-name">Mistral Large</span></td><td class="model-co">Mistral</td><td>Europa, multilingual</td><td>~$2</td><td>128K</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:11px;color:var(--text3)">* Self-hosted = custo de infra. Preços aproximados, podem variar.</p>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin:32px 0 16px">🎯 Escolha o modelo certo</h3>
+
+  <div class="scenario" id="sc1">
+    <div class="q">1. Startup com pouco budget precisa de um coding assistant bom e barato.</div>
+    <div class="opts">
+      <button class="opt" onclick="checkScenario('sc1',this,false)">Claude Opus 4</button>
+      <button class="opt" onclick="checkScenario('sc1',this,true)">DeepSeek V3</button>
+      <button class="opt" onclick="checkScenario('sc1',this,false)">Gemini 2.5 Pro</button>
+      <button class="opt" onclick="checkScenario('sc1',this,true)">Claude Sonnet 4</button>
+    </div>
+    <div class="feedback" id="sc1-fb">DeepSeek V3 ($0.27/M) ou Claude Sonnet ($3/M) são os melhores custo-benefício para código. DeepSeek é imbatível em preço, Sonnet é mais versátil.</div>
+  </div>
+
+  <div class="scenario" id="sc2">
+    <div class="q">2. Empresa precisa processar 500 páginas de contrato de uma vez.</div>
+    <div class="opts">
+      <button class="opt" onclick="checkScenario('sc2',this,false)">GPT-4o (128K)</button>
+      <button class="opt" onclick="checkScenario('sc2',this,true)">Gemini 2.5 Pro (1M+)</button>
+      <button class="opt" onclick="checkScenario('sc2',this,false)">Llama 4 (128K)</button>
+    </div>
+    <div class="feedback" id="sc2-fb">500 páginas ≈ 250K+ tokens. Só o Gemini 2.5 Pro com 1M+ de contexto consegue processar tudo de uma vez sem precisar dividir.</div>
+  </div>
+
+  <div class="scenario" id="sc3">
+    <div class="q">3. App que precisa analisar imagens de produtos enviadas por clientes.</div>
+    <div class="opts">
+      <button class="opt" onclick="checkScenario('sc3',this,false)">DeepSeek V3</button>
+      <button class="opt" onclick="checkScenario('sc3',this,true)">GPT-4o</button>
+      <button class="opt" onclick="checkScenario('sc3',this,false)">Mistral Large</button>
+      <button class="opt" onclick="checkScenario('sc3',this,true)">Gemini 2.5 Pro</button>
+    </div>
+    <div class="feedback" id="sc3-fb">GPT-4o e Gemini são os líderes em capacidade multimodal (texto + imagem). Ambos conseguem analisar imagens com alta qualidade.</div>
+  </div>
+
+  <div class="scenario" id="sc4">
+    <div class="q">4. Dados sensíveis que não podem sair da empresa sob nenhuma hipótese.</div>
+    <div class="opts">
+      <button class="opt" onclick="checkScenario('sc4',this,false)">Claude Opus 4</button>
+      <button class="opt" onclick="checkScenario('sc4',this,false)">GPT-4o</button>
+      <button class="opt" onclick="checkScenario('sc4',this,true)">Llama 4 (self-hosted)</button>
+    </div>
+    <div class="feedback" id="sc4-fb">Llama 4 pode ser hospedado nos seus próprios servidores. Dados nunca saem da sua infra. É a única opção onde você tem controle total.</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 5 — EVAL & OBSERVABILIDADE
+     ══════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label" style="color:var(--blue)">Seção 05</div>
+  <h2>Eval & Observabilidade</h2>
+  <p class="intro">Como saber se sua IA está funcionando? Existem ferramentas específicas para isso — você vai aprender em detalhes no próximo módulo. Aqui, um preview rápido:</p>
+
+  <div class="eval-grid">
+    <div class="eval-card">
+      <h4>🧪 Promptfoo</h4>
+      <div class="etype oss">Open Source · CLI</div>
+      <div class="edsc">Testa prompts com datasets automatizados. O "unit test" dos seus prompts.</div>
+    </div>
+    <div class="eval-card">
+      <h4>📈 Langfuse</h4>
+      <div class="etype oss">Open Source · Analytics</div>
+      <div class="edsc">Tracing e analytics — veja custo, latência e qualidade de cada chamada.</div>
+    </div>
+    <div class="eval-card">
+      <h4>🔄 Helicone</h4>
+      <div class="etype proxy">Proxy · Observabilidade</div>
+      <div class="edsc">Proxy simples que loga todas as chamadas de API com uma linha de código.</div>
+    </div>
+  </div>
+  <p style="font-size:13px;color:var(--text2);margin-top:16px">Aprofundamento completo no <a href="07-eval.html" style="color:var(--blue)">Módulo 07 — Avaliação (Eval)</a>.</p>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 6 — IA ALÉM DO TEXTO
+     ══════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label" style="color:var(--rose)">Seção 06</div>
+  <h2>IA Generativa Além do Texto</h2>
+  <p class="intro">Texto é só o começo. IA já gera imagens, voz, música e vídeo.</p>
+
+  <div class="quick-grid">
+    <div class="quick-card">
+      <div class="qi">🎨</div>
+      <h4>DALL-E / Midjourney</h4>
+      <p>Geração de imagens a partir de texto</p>
+    </div>
+    <div class="quick-card">
+      <div class="qi">🎙️</div>
+      <h4>ElevenLabs</h4>
+      <p>Texto para voz realista, clonagem de voz</p>
+    </div>
+    <div class="quick-card">
+      <div class="qi">🎵</div>
+      <h4>Suno / Udio</h4>
+      <p>Geração de música completa com vocal</p>
+    </div>
+    <div class="quick-card">
+      <div class="qi">🎬</div>
+      <h4>Runway / Sora</h4>
+      <p>Geração de vídeo a partir de texto</p>
+    </div>
+    <div class="quick-card">
+      <div class="qi">📝</div>
+      <h4>Whisper (OpenAI)</h4>
+      <p>Transcrição de áudio para texto</p>
+    </div>
+    <div class="quick-card">
+      <div class="qi">📚</div>
+      <h4>NotebookLM</h4>
+      <p>Pesquisa em documentos com IA (Google)</p>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════
+     SECTION 7 — QUIZ
+     ══════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label" style="color:var(--purple)">Quiz Final</div>
+  <h2>Teste seus conhecimentos</h2>
+
+  <div class="quiz-area" id="quiz-area">
+    <div class="quiz-q active" id="qq0">
+      <div class="qtext">1. Qual ferramenta funciona como um agente autônomo no terminal, podendo ler, editar, testar e comitar código?</div>
+      <div class="qopts">
+        <button class="qopt" onclick="quizAnswer(0,this,0)">GitHub Copilot</button>
+        <button class="qopt" onclick="quizAnswer(0,this,1)">Claude Code</button>
+        <button class="qopt" onclick="quizAnswer(0,this,2)">Cursor</button>
+        <button class="qopt" onclick="quizAnswer(0,this,3)">Midjourney</button>
+      </div>
+    </div>
+    <div class="quiz-q" id="qq1">
+      <div class="qtext">2. O que é MCP (Model Context Protocol)?</div>
+      <div class="qopts">
+        <button class="qopt" onclick="quizAnswer(1,this,0)">Um modelo de IA da Microsoft</button>
+        <button class="qopt" onclick="quizAnswer(1,this,1)">Um framework de testes para prompts</button>
+        <button class="qopt" onclick="quizAnswer(1,this,2)">Um protocolo universal para conectar ferramentas à IA</button>
+        <button class="qopt" onclick="quizAnswer(1,this,3)">Uma linguagem de programação para agentes</button>
+      </div>
+    </div>
+    <div class="quiz-q" id="qq2">
+      <div class="qtext">3. Qual modelo é a melhor opção quando os dados não podem sair da empresa?</div>
+      <div class="qopts">
+        <button class="qopt" onclick="quizAnswer(2,this,0)">GPT-4o (cloud)</button>
+        <button class="qopt" onclick="quizAnswer(2,this,1)">Llama 4 (self-hosted)</button>
+        <button class="qopt" onclick="quizAnswer(2,this,2)">Claude Opus (cloud)</button>
+        <button class="qopt" onclick="quizAnswer(2,this,3)">Gemini Pro (cloud)</button>
+      </div>
+    </div>
+    <div class="quiz-q" id="qq3">
+      <div class="qtext">4. Qual framework de agentes é conhecido por grafos com estado e persistência?</div>
+      <div class="qopts">
+        <button class="qopt" onclick="quizAnswer(3,this,0)">CrewAI</button>
+        <button class="qopt" onclick="quizAnswer(3,this,1)">LangGraph</button>
+        <button class="qopt" onclick="quizAnswer(3,this,2)">OpenAI Agents SDK</button>
+        <button class="qopt" onclick="quizAnswer(3,this,3)">Pydantic AI</button>
+      </div>
+    </div>
+    <div class="quiz-q" id="qq4">
+      <div class="qtext">5. Qual ferramenta permite testar prompts com datasets automatizados via CLI?</div>
+      <div class="qopts">
+        <button class="qopt" onclick="quizAnswer(4,this,0)">LangSmith</button>
+        <button class="qopt" onclick="quizAnswer(4,this,1)">Helicone</button>
+        <button class="qopt" onclick="quizAnswer(4,this,2)">Promptfoo</button>
+        <button class="qopt" onclick="quizAnswer(4,this,3)">Braintrust</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="quiz-result" id="quiz-result">
+    <div class="score" id="quiz-score">0/5</div>
+    <div class="slabel" id="quiz-label">Resultado</div>
+    <div style="margin-top:16px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-green" id="complete-btn" onclick="markComplete()" style="display:none;">✓ Marcar módulo como concluído</button>
+      <a href="07-eval.html" class="btn btn-primary">Módulo 07 — Eval →</a>
+    </div>
+  </div>
+</div>
+
+<footer class="foot">
+  <a href="../index.html">← Hub</a>
+  <a href="05-rag-tools.html">← Módulo 05</a>
+  <a href="07-eval.html">Módulo 07 →</a>
+</footer>
+
+<script>
+// ── MCP EXERCISE ──
+const mcpCaps = {
+  postgres: '📊 Consultar banco de dados — "Quantos usuários cadastraram essa semana?"',
+  github: '🐙 Gerenciar repos — "Crie uma issue para o bug do login"',
+  slack: '💬 Enviar mensagens — "Avise no #suporte que o deploy foi feito"',
+  filesystem: '📁 Ler arquivos — "Leia o config e me diga a porta do servidor"',
+  playwright: '🌐 Navegar na web — "Abre o site em staging e tira screenshot"',
+  memory: '💾 Lembrar preferências — "Esse cliente prefere respostas formais"',
+  fetch: '🔗 Chamar APIs — "Busca o status do deploy na API do Vercel"'
+};
+const mcpSelected = new Set();
+
+function toggleMcp(el) {
+  const name = el.dataset.name;
+  if (mcpSelected.has(name)) { mcpSelected.delete(name); el.classList.remove('selected'); }
+  else { mcpSelected.add(name); el.classList.add('selected'); }
+  updateMcp();
+}
+
+function updateMcp() {
+  const countEl = document.getElementById('mcp-selected');
+  const capEl = document.getElementById('mcp-cap');
+  const listEl = document.getElementById('mcp-cap-list');
+  if (mcpSelected.size === 0) {
+    countEl.textContent = 'Nenhum selecionado';
+    capEl.classList.remove('show');
+    return;
+  }
+  countEl.textContent = mcpSelected.size + ' servidor(es) selecionado(s)';
+  capEl.classList.add('show');
+  listEl.innerHTML = '';
+  mcpSelected.forEach(name => {
+    const li = document.createElement('li');
+    li.textContent = mcpCaps[name];
+    listEl.appendChild(li);
+  });
+}
+
+// ── SCENARIO EXERCISE ──
+function checkScenario(id, btn, correct) {
+  const sc = document.getElementById(id);
+  if (sc.dataset.done) return;
+  sc.dataset.done = '1';
+  btn.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    sc.querySelectorAll('.opt').forEach(o => {
+      if (o.getAttribute('onclick').includes('true')) o.classList.add('correct');
+    });
+  }
+  document.getElementById(id + '-fb').style.display = 'block';
+}
+
+// ── QUIZ ──
+const quizCorrect = [1, 2, 1, 1, 2];
+let quizScore = 0;
+let quizAnswered = 0;
+
+function quizAnswer(qIdx, btn, choice) {
+  const qq = document.getElementById('qq' + qIdx);
+  if (qq.dataset.done) return;
+  qq.dataset.done = '1';
+  quizAnswered++;
+  const correct = quizCorrect[qIdx] === choice;
+  if (correct) { quizScore++; btn.classList.add('right'); }
+  else {
+    btn.classList.add('wrongq');
+    qq.querySelectorAll('.qopt').forEach((o, i) => { if (i === quizCorrect[qIdx]) o.classList.add('right'); });
+  }
+  btn.classList.add('picked');
+  // Show next or result
+  setTimeout(() => {
+    if (quizAnswered < 5) {
+      document.getElementById('qq' + (qIdx + 1)).classList.add('active');
+    } else {
+      showQuizResult();
+    }
+  }, 800);
+}
+
+function showQuizResult() {
+  document.getElementById('quiz-score').textContent = quizScore + '/5';
+  const labels = ['Tente novamente!', 'Pode melhorar!', 'Bom começo!', 'Muito bom!', 'Excelente!', 'Perfeito! 🚀'];
+  document.getElementById('quiz-label').textContent = labels[quizScore];
+  document.getElementById('quiz-result').style.display = 'block';
+  if (quizScore >= 4) {
+    document.getElementById('complete-btn').style.display = 'inline-block';
+  }
+}
+
+function markComplete() {
+  try {
+    const KEY = 'ai-training-completed-v1';
+    const done = JSON.parse(localStorage.getItem(KEY) || '[]');
+    if (!done.includes(6)) { done.push(6); localStorage.setItem(KEY, JSON.stringify(done)); }
+  } catch(e) {}
+  const btn = document.getElementById('complete-btn');
+  btn.textContent = '✓ Módulo concluído!';
+  btn.style.background = 'rgba(52,211,153,.2)';
+  btn.style.borderColor = 'var(--green)';
+}
+
+// Restore
+try {
+  if (JSON.parse(localStorage.getItem('ai-training-completed-v1') || '[]').includes(6)) {
+    const btn = document.getElementById('complete-btn');
+    btn.textContent = '✓ Módulo concluído!';
+    btn.style.background = 'rgba(52,211,153,.2)';
+    btn.style.borderColor = 'var(--green)';
+  }
+} catch(e) {}
+</script>
+</body>
+</html>

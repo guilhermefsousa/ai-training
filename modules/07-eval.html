@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Módulo 06 — Avaliação (Eval) | IA para Devs</title>
+  <title>Módulo 07 — Avaliação (Eval) | IA para Devs</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1086,9 +1086,18 @@
   <nav class="topnav">
     <div class="nav-links">
       <a href="../index.html" class="nav-btn">← Hub</a>
-      <a href="05-rag-tools.html" class="nav-btn">← Módulo 05</a>
+      <a href="06-ferramentas.html" class="nav-btn">← Módulo 06</a>
     </div>
-    <span class="nav-badge">Módulo 06 — Final</span>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#10b981;"></span>
+      <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#10b981;"></span>
+      <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#10b981;"></span>
+      <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#10b981;"></span>
+      <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#10b981;"></span>
+      <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#10b981;"></span>
+      <span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#6366f1;border:2px solid #818cf8;"></span>
+      <span style="margin-left:6px;color:#94a3b8;font-size:13px;">7 / 7</span>
+    </div>
   </nav>
 
   <!-- ── Page ── -->
@@ -1098,7 +1107,7 @@
     <header class="mod-header">
       <div class="mod-eyebrow">
         <span class="eyebrow-dot"></span>
-        Módulo 06 · Módulo Final
+        Módulo 07 · Módulo Final
       </div>
       <h1>Avaliação (Eval)<br>Como Medir se a IA Está Funcionando</h1>
       <p class="subtitle">Você mudou um prompt — melhorou ou piorou? Sem eval, você está chutando.</p>
@@ -1470,8 +1479,8 @@
     <div id="confetti-container"></div>
     <div class="celebrate-content">
       <span class="celebrate-emoji">🎉</span>
-      <div class="celebrate-title">Treinamento Completo!</div>
-      <div class="celebrate-sub">Você completou todos os 6 módulos de IA para Devs</div>
+      <div class="celebrate-title" id="celebrate-title">Treinamento Completo!</div>
+      <div class="celebrate-sub" id="celebrate-sub">Você completou todos os 7 módulos de IA para Devs</div>
 
       <div class="certificate">
         <div class="cert-label">Certificado de Conclusão</div>
@@ -1555,7 +1564,7 @@
         color: '#10b981'
       },
       {
-        name: 'Groundedness',
+        name: 'Fundamentação (Groundedness)',
         desc: 'A resposta se baseia nas fontes fornecidas? Ou está alucinando informações?',
         pct: 81,
         color: '#60a5fa'
@@ -1999,7 +2008,7 @@
 
       document.getElementById('quiz-score-panel').style.display = 'none';
       document.getElementById('quiz-submit-wrap').style.display = 'block';
-      document.getElementById('btn-submit-quiz').textContent = 'Ver Resultado Final →';
+      document.getElementById('btn-submit-quiz').textContent = 'Responda todas as perguntas';
 
       document.getElementById('quiz-container').scrollIntoView({ behavior: 'smooth' });
     }
@@ -2014,7 +2023,8 @@
       { id:3, name:'Context Engineering' },
       { id:4, name:'Agentes de IA' },
       { id:5, name:'RAG & Tools' },
-      { id:6, name:'Avaliação (Eval)' }
+      { id:6, name:'Ferramentas de IA para Devs' },
+      { id:7, name:'Avaliação (Eval)' }
     ];
 
     function getCompleted() {
@@ -2024,14 +2034,19 @@
 
     function markModuleComplete() {
       const completed = getCompleted();
-      if (!completed.includes(6)) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify([...completed, 6]));
+      if (!completed.includes(7)) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify([...completed, 7]));
       }
     }
 
     function showCelebration() {
       markModuleComplete();
       const completed = getCompleted();
+      const allDone = ALL_MODULES.every(m => completed.includes(m.id));
+      document.getElementById('celebrate-title').textContent = allDone ? 'Treinamento Completo!' : 'Módulo 07 Concluído!';
+      document.getElementById('celebrate-sub').textContent = allDone
+        ? 'Você completou todos os 7 módulos de IA para Devs'
+        : 'Você concluiu o módulo final! Complete os demais para o certificado completo.';
 
       /* Build cert modules */
       const certModules = document.getElementById('cert-modules');

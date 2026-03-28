@@ -753,18 +753,21 @@
     <a href="../index.html" class="nav-back">
       ← Voltar ao índice
     </a>
-    <div class="progress-wrap">
-      <span class="progress-label">Progresso do módulo</span>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progressFill"></div>
-      </div>
-      <span class="progress-label" id="progressPct">0%</span>
+    <div class="progress-indicator" style="display:flex;align-items:center;gap:6px;">
+      <div class="progress-dot" style="width:10px;height:10px;border-radius:50%;background:var(--green-500);"></div>
+      <div class="progress-dot" style="width:10px;height:10px;border-radius:50%;background:rgba(99,102,241,0.25);"></div>
+      <div class="progress-dot" style="width:10px;height:10px;border-radius:50%;background:rgba(99,102,241,0.25);"></div>
+      <div class="progress-dot" style="width:10px;height:10px;border-radius:50%;background:rgba(99,102,241,0.25);"></div>
+      <div class="progress-dot" style="width:10px;height:10px;border-radius:50%;background:rgba(99,102,241,0.25);"></div>
+      <div class="progress-dot" style="width:10px;height:10px;border-radius:50%;background:rgba(99,102,241,0.25);"></div>
+      <div class="progress-dot" style="width:10px;height:10px;border-radius:50%;background:rgba(99,102,241,0.25);"></div>
+      <span style="margin-left:6px;color:var(--text-secondary);font-size:13px;">1 / 7</span>
     </div>
   </nav>
 
   <!-- HERO -->
   <div class="hero">
-    <div class="hero-badge">🧠 Módulo 1 de 6</div>
+    <div class="hero-badge">🧠 Módulo 1 de 7</div>
     <h1>Fundamentos de IA Generativa</h1>
     <p>Entenda de vez o que é IA, como LLMs funcionam e por que tokens, temperatura e probabilidade importam para você como dev.</p>
   </div>
@@ -982,7 +985,7 @@
       <div class="temp-slider-wrap">
         <div class="temp-label-row">
           <div>
-            <div style="font-weight: 600; font-size: 0.95rem;">Prompt: <em>"Descreva nossa plataforma de atendimento"</em></div>
+            <div style="font-weight: 600; font-size: 0.95rem;">Prompt: <em>"Descreva a linguagem Python"</em></div>
             <div style="color: var(--text-3); font-size: 0.82rem; margin-top: 4px;">Mova o slider e observe como a resposta muda</div>
           </div>
           <div class="temp-val-display">
@@ -1161,7 +1164,7 @@
       <div class="quiz-score-num" id="quizScoreNum">0/5</div>
       <div class="quiz-score-label" id="quizScoreLabel"></div>
       <div id="quizResultEmoji" style="font-size: 2.5rem; margin-bottom: 20px;"></div>
-      <a href="02-prompt-engineering.html" class="btn btn-primary" id="nextModuleBtn">
+      <a href="02-prompt-engineering.html" class="btn btn-primary" id="nextModuleBtn" style="display:none;">
         Próximo Módulo →
       </a>
     </div>
@@ -1226,7 +1229,7 @@
       score.style.color = 'var(--green)';
     } else {
       boxA.classList.add('selected-wrong');
-      boxB.style.opacity = '0.5';
+      boxA.style.opacity = '0.5';
       resA.textContent = '❌ Programação tradicional: você escreve as regras manualmente';
       resA.style.color = 'var(--red)';
       resB.textContent = '✅ ML era este: dados → padrões aprendidos automaticamente';
@@ -1526,9 +1529,11 @@
     });
 
     const exp = document.getElementById('exp' + qNum);
-    exp.classList.add('visible');
-
     const isCorrect = chosen === correct;
+    if (!isCorrect) {
+      exp.innerHTML = '💡 ' + exp.innerHTML.replace(/^[\s]*✅\s*\w+!\s*/, '');
+    }
+    exp.classList.add('visible');
     if (isCorrect) quizScore++;
     quizAnswers[qNum] = isCorrect;
 
@@ -1563,12 +1568,15 @@
     result.classList.add('visible');
     markSectionDone('quiz');
 
-    // Save to localStorage (sync with hub)
-    try {
-      const KEY = 'ai-training-completed-v1';
-      const done = JSON.parse(localStorage.getItem(KEY) || '[]');
-      if (!done.includes(1)) { done.push(1); localStorage.setItem(KEY, JSON.stringify(done)); }
-    } catch(e) {}
+    // Save to localStorage only if score >= 4
+    if (quizScore >= 4) {
+      try {
+        const KEY = 'ai-training-completed-v1';
+        const done = JSON.parse(localStorage.getItem(KEY) || '[]');
+        if (!done.includes(1)) { done.push(1); localStorage.setItem(KEY, JSON.stringify(done)); }
+      } catch(e) {}
+      document.getElementById('nextModuleBtn').style.display = 'inline-block';
+    }
   }
 
   // ─────────────────────────────────────────────────────────
