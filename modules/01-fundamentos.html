@@ -1440,47 +1440,47 @@
   // ─────────────────────────────────────────────────────────
   const tempResponses = [
     // 0 — temperature 0.0
-    { mood: '🤖', text: 'A Relivox é uma plataforma de atendimento ao cliente que centraliza as conversas do WhatsApp, permitindo que equipes respondam com eficiência e agilidade.' },
+    { mood: '🤖', text: 'Python é uma linguagem de programação de alto nível, interpretada e de propósito geral, conhecida por sua sintaxe clara e legibilidade.' },
     // 1 — 0.1
-    { mood: '🤖', text: 'A Relivox centraliza o atendimento via WhatsApp para equipes, oferecendo eficiência e controle nas conversas com clientes.' },
+    { mood: '🤖', text: 'Python é uma linguagem interpretada de alto nível, valorizada por sua legibilidade e ampla aplicação em diversas áreas da computação.' },
     // 2 — 0.2
-    { mood: '😐', text: 'Com a Relivox, sua equipe gerencia todas as conversas do WhatsApp em um único lugar, garantindo respostas rápidas e atendimento de qualidade.' },
+    { mood: '😐', text: 'Python se destaca por sua sintaxe limpa e intuitiva. É amplamente usada em desenvolvimento web, ciência de dados, automação e inteligência artificial.' },
     // 3 — 0.3
-    { mood: '😐', text: 'A Relivox une tecnologia e atendimento humano para transformar a maneira como empresas se comunicam com clientes pelo WhatsApp.' },
+    { mood: '😐', text: 'Python combina simplicidade com poder. Desde scripts rápidos até machine learning, é a linguagem que se adapta ao problema.' },
     // 4 — 0.4
-    { mood: '🙂', text: 'Imagine ter todo o seu atendimento WhatsApp organizado, rastreado e potencializado com IA. É isso que a Relivox oferece para sua equipe.' },
+    { mood: '🙂', text: 'Imagine escrever código que parece quase inglês. Python faz isso — e ainda roda em tudo, de servidores a Raspberry Pi.' },
     // 5 — 0.5
-    { mood: '🙂', text: 'A Relivox é onde equipes de atendimento encontram superpoderes: IA para sugerir respostas, métricas em tempo real e todo o WhatsApp num painel só.' },
+    { mood: '🙂', text: 'Python é a canivete suíço do programador moderno: web com Django, dados com Pandas, IA com PyTorch, automação com scripts simples.' },
     // 6 — 0.6
-    { mood: '😊', text: 'Chega de perder mensagem, de resposta atrasada, de cliente sem retorno. A Relivox transforma caos em atendimento coordenado e inteligente.' },
+    { mood: '😊', text: 'Chega de lutar com sintaxe complicada. Python te liberta para pensar no problema, não na linguagem. É por isso que cientistas e devs a amam.' },
     // 7 — 0.7
-    { mood: '😊', text: 'A Relivox é a plataforma que faz sua equipe de atendimento parecer 3x maior do que é — com IA que sugere respostas, dashboards que revelam padrões e zero mensagem esquecida.' },
+    { mood: '😊', text: 'Python é a linguagem que faz seu time parecer 3x maior — prototipagem rápida, bibliotecas pra tudo, e código que qualquer novo dev entende no primeiro dia.' },
     // 8 — 0.8
-    { mood: '😄', text: 'Seu cliente manda mensagem. Em segundos, a IA da Relivox sugere a resposta perfeita. Seu atendente aprova. Problema resolvido. Isso é a Relivox: velocidade com toque humano.' },
+    { mood: '😄', text: 'Você tem uma ideia. Abre o terminal. Digita 10 linhas de Python. Funciona. Isso é Python: da ideia ao protótipo na velocidade do pensamento.' },
     // 9 — 0.9
-    { mood: '😄', text: '✨ A Relivox não é só uma plataforma. É o copiloto que sua equipe precisava — IA treinada no seu negócio, métricas que revelam o invisível, e clientes mais felizes a cada dia.' },
+    { mood: '😄', text: '✨ Python não é só uma linguagem. É um ecossistema. É uma comunidade. É a porta de entrada para IA, dados e o futuro da computação.' },
     // 10 — 1.0
-    { mood: '🤩', text: 'Sua equipe. Sua IA. Seus clientes. Tudo conectado. A Relivox transforma cada conversa de WhatsApp num momento de encantamento — rápido, inteligente, humano.' },
+    { mood: '🤩', text: 'Sua ideia. Seu código. Seu impacto. Python conecta tudo — do notebook Jupyter ao deploy em produção, rápido, elegante, poderoso.' },
     // 11 — 1.1
-    { mood: '🤩', text: '🚀 Esqueça o atendimento de ontem! Relivox é o futuro chegando agora: IA conversacional, dashboards preditivos, equipes em sincronia total. A revolução do atendimento começou!' },
+    { mood: '🤩', text: '🚀 Esqueça as linguagens do passado! Python é o futuro chegando agora: IA generativa, análise de dados em tempo real, automação total. A revolução já começou!' },
     // 12 — 1.2
-    { mood: '🫠', text: '🔥💬 Relivox: onde cada pixel pulsa com a energia de mil conversas simultâneas! Sua equipe? Lendária. Seus clientes? Encantados. O WhatsApp? Jamais foi tão épico!' },
+    { mood: '🫠', text: '🔥💬 Python: onde cada linha de código pulsa com a energia de mil bibliotecas! Seu código? Lendário. Seus dados? Domados. O terminal? Jamais foi tão épico!' },
     // 13 — 1.3
-    { mood: '🫠', text: '⚡🌀 E SE eu disser que Relivox é basicamente um portal dimensional para atendimento de outro nível?! Cada mensagem, uma aventura. Cada cliente, um herói da sua história!' },
+    { mood: '🫠', text: '⚡🌀 E SE eu disser que Python é basicamente um portal dimensional para programação de outro nível?! Cada função, uma aventura. Cada classe, um herói da sua história!' },
     // 14 — 1.4
-    { mood: '🤪', text: '🎪✨🔮 RELIVOX ATIVA OS NEURÔNIOS DO COSMOS DO ATENDIMENTO INTERDIMENSIONAL!! Cada conversa é uma sinfonia quântica de palavras e emojis que transcendem o espaço-tempo! 🚀🦄' },
+    { mood: '🤪', text: '🎪✨🔮 PYTHON ATIVA OS NEURÔNIOS DO COSMOS DA PROGRAMAÇÃO INTERDIMENSIONAL!! Cada import é uma sinfonia quântica de módulos e decorators que transcendem o espaço-tempo! 🚀🦄' },
     // 15 — 1.5
-    { mood: '🤪', text: '🌈🐙 Relivox=atendimento²!! Se WhatsApp fosse um dragão, Relivox seria o cavaleiro-IA montado nele galopando pelo metaverso das conversas turbo-híper-conectadas!!! 💥💥' },
+    { mood: '🤪', text: '🌈🐙 Python=código²!! Se programação fosse um dragão, Python seria o cavaleiro-IA montado nele galopando pelo metaverso dos list comprehensions turbo-híper-conectados!!! 💥💥' },
     // 16 — 1.6
-    { mood: '😵', text: '🎭🌀💫 aaaAA Relivox é tipo... quando a lua cheia encontra um servidor GPU e juntos eles cantam a canção do atendimento eterno??? não sei mais minha plataforma é uma estrela!!' },
+    { mood: '😵', text: '🎭🌀💫 aaaAA Python é tipo... quando a lua cheia encontra um servidor GPU e juntos eles cantam a canção do código eterno??? não sei mais minha linguagem é uma estrela!!' },
     // 17 — 1.7
-    { mood: '😵', text: '🍄🔥🎯 RELIVOX REEEEEE plataforma de?? atendimento!! sim!! mas também uma dimensão paralela onde tokens dançam salsa com seus clientes frustrados até virarem promotores??? talvez!!' },
+    { mood: '😵', text: '🍄🔥🎯 PYTHON REEEEEE linguagem de?? programação!! sim!! mas também uma dimensão paralela onde variáveis dançam salsa com seus bugs frustrados até virarem features??? talvez!!' },
     // 18 — 1.8
-    { mood: '💀', text: '🌀🌀🌀 Reli... VOX... ou é VOX... Reli... a plataforma que inverte o WhatsApp ao contrário e o cliente atende a empresa enquanto a IA medita em modo avião... provavelmente eficiente!!' },
+    { mood: '💀', text: '🌀🌀🌀 Py... thon... ou é thon... Py... a linguagem que inverte o código ao contrário e o bug conserta o programador enquanto a IA medita em modo avião... provavelmente eficiente!!' },
     // 19 — 1.9
-    { mood: '💀', text: '🤖🍌💥 RELIVOX = √(atendimento × lua × token³) ÷ caos absoluto!! cada mensagem é um teorema de Schrödinger: respondida E não-respondida simultaneamente até o gestor observar 📊???' },
+    { mood: '💀', text: '🤖🍌💥 PYTHON = √(código × lua × indent³) ÷ caos absoluto!! cada variável é um teorema de Schrödinger: definida E indefinida simultaneamente até o debugger observar 📊???' },
     // 20 — 2.0
-    { mood: '☠️', text: '!!glorp!! Relivox é o barulho que os clientes fazem quando ficam felizes?? ou é um tipo de queijo?? tokens são pequenos pinguins girando... atendimento... sim!! PLATAFORMA... talvez!!' },
+    { mood: '☠️', text: '!!glorp!! Python é o barulho que os programadores fazem quando ficam felizes?? ou é um tipo de cobra?? indentações são pequenos pinguins girando... código... sim!! LINGUAGEM... talvez!!' },
   ];
 
   function updateTemp(val) {

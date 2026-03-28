@@ -518,9 +518,9 @@
       <div class="tabp on" id="tp0">
         <div class="tabptitle">System Prompt — A Constituição</div>
         <p class="sbody">O system prompt é o conjunto de regras que sempre se aplica, independente do que o usuário diga. É a "constituição" do seu assistente — define persona, restrições, formato de resposta e contexto de negócio.</p>
-        <div class="codeblock"><span class="cc"># Exemplo simplificado — baseado em um CLAUDE.md real</span>
+        <div class="codeblock"><span class="cc"># Exemplo simplificado de system prompt</span>
 
-<span class="ck">Você é</span> <span class="cv">um assistente de suporte técnico da Relivox.</span>
+<span class="ck">Você é</span> <span class="cv">um assistente de suporte técnico da TechStore.</span>
 
 <span class="ck">REGRAS:</span>
 - <span class="cs">Sempre responda em português</span>
@@ -529,8 +529,8 @@
 - <span class="cs">Tom: profissional mas amigável</span>
 
 <span class="ck">CONTEXTO:</span>
-- <span class="cv">Produto: plataforma de atendimento WhatsApp</span>
-- <span class="cv">Usuários: equipes de suporte em empresas</span></div>
+- <span class="cv">Produto: loja online de eletrônicos</span>
+- <span class="cv">Usuários: clientes com dúvidas sobre produtos e pedidos</span></div>
         <div class="analogy">
           <div class="analogy-lbl">Dica</div>
           <div class="analogy-txt">Um bom system prompt é <em>específico o suficiente</em> para guiar o comportamento, mas <em>flexível o suficiente</em> para o modelo exercer julgamento. Regras demais criam rigidez. Regras de menos criam imprevisibilidade.</div>
@@ -678,10 +678,10 @@
     <p class="sbody">Os conceitos desta aula não são teóricos — você já os usa, talvez sem saber o nome certo. Ferramentas modernas de desenvolvimento com IA são, no fundo, sistemas de context engineering.</p>
 
     <div class="rwgrid" style="margin-top:28px">
-      <div class="rwcard"><div class="rwico">📋</div><div class="rwtit">CLAUDE.md</div><div class="rwdesc">O arquivo que você cria para o Claude Code entender seu projeto. É literalmente um system prompt — regras, convenções, arquitetura, anti-padrões.</div><div class="rwtag">System Prompt</div></div>
-      <div class="rwcard"><div class="rwico">🗂️</div><div class="rwtit">.ai/memory/</div><div class="rwdesc">Os arquivos de memória do projeto (lessons.md, state.md). São memória de longo prazo injetada no contexto a cada nova sessão.</div><div class="rwtag">Memória persistente</div></div>
+      <div class="rwcard"><div class="rwico">📋</div><div class="rwtit">System Prompt</div><div class="rwdesc">O arquivo de instruções que você cria para a IA entender seu projeto. Define regras, convenções, arquitetura e anti-padrões.</div><div class="rwtag">System Prompt</div></div>
+      <div class="rwcard"><div class="rwico">🗂️</div><div class="rwtit">Memória do Projeto</div><div class="rwdesc">Arquivos que guardam decisões, lições e estado do projeto. São memória de longo prazo injetada no contexto a cada nova sessão.</div><div class="rwtag">Memória persistente</div></div>
       <div class="rwcard"><div class="rwico">🔌</div><div class="rwtit">MCP Servers</div><div class="rwdesc">Model Context Protocol — servidores que expõem ferramentas para o modelo: banco de dados, filesystems, APIs externas, browsers.</div><div class="rwtag">Ferramentas</div></div>
-      <div class="rwcard"><div class="rwico">🤖</div><div class="rwtit">Subagentes</div><div class="rwdesc">Quando um agente chama outro, cada um tem seu próprio contexto isolado. Evita poluição entre tarefas e otimiza o uso de tokens por sessão.</div><div class="rwtag">Context isolation</div></div>
+      <div class="rwcard"><div class="rwico">🤖</div><div class="rwtit">Subagentes</div><div class="rwdesc">Quando um agente chama outro, cada um tem seu próprio contexto isolado. Evita poluição entre tarefas e otimiza o uso de tokens.</div><div class="rwtag">Context isolation</div></div>
     </div>
 
     <div class="analogy" style="margin-top:32px">
@@ -899,7 +899,7 @@ const QD = [
   { q:'Você tem 500 páginas de documentação e quer que o modelo responda perguntas sobre ela. Qual estratégia é mais eficiente?', o:['Colocar todas as 500 páginas no system prompt','Dividir em 10 conversas separadas de 50 páginas cada','Usar RAG para recuperar apenas as páginas relevantes para cada pergunta','Aumentar o tamanho máximo do contexto nas configurações do modelo'], c:2, fb:'RAG resolve exatamente esse problema. Em vez de colocar tudo no contexto, você recupera dinamicamente apenas o relevante para a pergunta atual — reduz custo, aumenta velocidade e melhora qualidade.' },
   { q:'Um assistente "esquece" o nome do usuário a cada nova sessão. Qual componente do contexto resolve isso?', o:['Um system prompt mais detalhado e longo','Mais mensagens no histórico de conversa atual','Memória de longo prazo persistida entre sessões','Ferramentas adicionais habilitadas'], c:2, fb:'O histórico de conversa só existe dentro de uma sessão. Para "lembrar" entre sessões, é preciso persistir informações em memória de longo prazo e injetá-la no início de cada nova conversa.' },
   { q:'No exercício do context builder desta aula, o que mais impactou positivamente a qualidade das respostas?', o:['Aumentar o histórico de conversa para 20 mensagens','System prompt + ferramentas relevantes habilitadas (FAQ + histórico de tickets)','Habilitar memória persistente','Aumentar o número de tokens disponíveis'], c:1, fb:'A combinação de system prompt claro + ferramentas relevantes produziu as melhores respostas. O system prompt deu regras de comportamento; as ferramentas deram acesso a informações específicas do cliente.' },
-  { q:'O arquivo CLAUDE.md do Claude Code é um exemplo de qual componente de context engineering?', o:['Memória de curto prazo — salva a sessão atual','RAG — documentos recuperados dinamicamente','System prompt — instruções que sempre se aplicam, independente da tarefa','Histórico de conversa comprimido por sumarização'], c:2, fb:'O CLAUDE.md é lido no início de cada sessão e define regras, convenções e contexto do projeto. Isso é exatamente um system prompt: instruções permanentes que moldam o comportamento em todas as interações.' }
+  { q:'Um arquivo de instruções do projeto que a IA lê no início de cada sessão é um exemplo de qual componente?', o:['Memória de curto prazo — salva a sessão atual','RAG — documentos recuperados dinamicamente','System prompt — instruções que sempre se aplicam, independente da tarefa','Histórico de conversa comprimido por sumarização'], c:2, fb:'Arquivos de instruções do projeto são lidos no início de cada sessão e definem regras, convenções e contexto. Isso é exatamente um system prompt: instruções permanentes que moldam o comportamento em todas as interações.' }
 ];
 let qIdx=0, qScore=0, qAnswered=false;
 function qInit() { qDots(); qRender(); }
