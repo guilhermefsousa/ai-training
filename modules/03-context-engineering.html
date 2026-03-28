@@ -933,7 +933,7 @@ function qEnd() {
   document.getElementById('qscore').textContent=`${qScore}/${QD.length}`;
   const msgs=['Revise as seções e tente novamente.','Bom progresso! Algumas ideias ainda precisam sedimentar.','Muito bom! Você dominou a maioria dos conceitos.','Excelente! Você tem uma compreensão sólida de context engineering.'];
   document.getElementById('qendmsg').textContent=msgs[p<40?0:p<60?1:p<90?2:3];
-  if(p>=60) { document.getElementById('qbadge').innerHTML='<div class="qendbadge">✓ Módulo 3 concluído</div>'; try { const KEY='ai-training-completed-v1'; const d=JSON.parse(localStorage.getItem(KEY)||'[]'); if(!d.includes(3)){d.push(3);localStorage.setItem(KEY,JSON.stringify(d));} } catch(e) {} markAll(); }
+  if(p>=80) { document.getElementById('qbadge').innerHTML='<div class="qendbadge">✓ Módulo 3 concluído</div>'; try { const KEY='ai-training-completed-v1'; const d=JSON.parse(localStorage.getItem(KEY)||'[]'); if(!d.includes(3)){d.push(3);localStorage.setItem(KEY,JSON.stringify(d));} } catch(e) {} markAll(); }
 }
 function qRestart() { qIdx=0; qScore=0; qAnswered=false; document.getElementById('quizBody').style.display='block'; document.getElementById('qend').className='qend'; qDots(); qRender(); }
 
