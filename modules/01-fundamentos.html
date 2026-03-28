@@ -5,27 +5,55 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Módulo 1 — Fundamentos de IA Generativa</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
 
   :root {
-    --bg:           #0f172a;
-    --bg-card:      #1e293b;
-    --bg-card-2:    #162032;
-    --border:       rgba(139,92,246,0.18);
-    --border-h:     rgba(139,92,246,0.5);
+    /* ── Cosmos palette (shared with modules 02-05) ── */
+    --cosmos-black:   #04060f;
+    --cosmos-deep:    #070c1a;
+    --cosmos-navy:    #0b1128;
+    --indigo-500:     #6366f1;
+    --indigo-400:     #818cf8;
+    --indigo-300:     #a5b4fc;
+    --violet-600:     #7c3aed;
+    --violet-500:     #8b5cf6;
+    --violet-400:     #a78bfa;
+    --cyan-400:       #22d3ee;
+    --green-400:      #34d399;
+    --green-500:      #10b981;
+    --gold-400:       #fbbf24;
+    --gold-300:       #fde68a;
+    --red-400:        #f87171;
+    --blue-400:       #60a5fa;
+    --blue-500:       #3b82f6;
+    --text-primary:   #f0f4ff;
+    --text-secondary: #94a3b8;
+    --text-muted:     #475569;
+    --card-bg:        rgba(14, 18, 38, 0.85);
+    --card-border:    rgba(99, 102, 241, 0.18);
+    --card-border-h:  rgba(99, 102, 241, 0.55);
+    --radius-card:    16px;
+    --transition:     0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* ── Legacy aliases used by existing module-01 CSS ── */
+    --bg:           var(--cosmos-black);
+    --bg-card:      rgba(14, 18, 38, 0.85);
+    --bg-card-2:    rgba(11, 17, 40, 0.9);
+    --border:       rgba(99, 102, 241, 0.18);
+    --border-h:     rgba(99, 102, 241, 0.55);
     --purple:       #8b5cf6;
     --purple-light: #a78bfa;
     --blue:         #3b82f6;
     --blue-light:   #60a5fa;
     --cyan:         #22d3ee;
-    --green:        #4ade80;
-    --yellow:       #facc15;
+    --green:        #34d399;
+    --yellow:       #fbbf24;
     --red:          #f87171;
-    --text:         #f1f5f9;
+    --text:         #f0f4ff;
     --text-2:       #94a3b8;
     --text-3:       #475569;
     --radius:       14px;
-    --ease:         0.3s cubic-bezier(0.4,0,0.2,1);
+    --ease:         var(--transition);
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,46 +61,49 @@
 
   body {
     font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    background: var(--cosmos-black);
+    color: var(--text-primary);
     min-height: 100vh;
     overflow-x: hidden;
     line-height: 1.7;
   }
 
   /* ── BACKGROUND ──────────────────────────────────────── */
-  .bg-orb {
+  .nebula {
     position: fixed;
     border-radius: 50%;
-    filter: blur(100px);
+    filter: blur(120px);
     pointer-events: none;
     z-index: 0;
-    opacity: 0.5;
+    mix-blend-mode: screen;
+    animation: nebulaDrift 25s ease-in-out infinite alternate;
   }
-  .bg-orb-1 {
-    width: 600px; height: 500px;
+  .nebula-1 {
+    width: 700px; height: 500px;
     top: -150px; left: -150px;
-    background: radial-gradient(ellipse, rgba(139,92,246,0.2) 0%, transparent 70%);
-    animation: orbDrift 20s ease-in-out infinite alternate;
+    background: radial-gradient(ellipse, rgba(67, 56, 202, 0.20) 0%, transparent 70%);
+    animation-duration: 28s;
   }
-  .bg-orb-2 {
-    width: 500px; height: 600px;
-    bottom: -100px; right: -100px;
-    background: radial-gradient(ellipse, rgba(59,130,246,0.18) 0%, transparent 70%);
-    animation: orbDrift 26s ease-in-out infinite alternate-reverse;
+  .nebula-2 {
+    width: 550px; height: 600px;
+    bottom: -100px; right: -80px;
+    background: radial-gradient(ellipse, rgba(124, 58, 237, 0.16) 0%, transparent 70%);
+    animation-duration: 22s;
+    animation-delay: -8s;
   }
-  @keyframes orbDrift {
-    0%   { transform: translate(0,0) scale(1); }
-    100% { transform: translate(30px, 40px) scale(1.1); }
+  @keyframes nebulaDrift {
+    0%   { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(30px, 40px) scale(1.06); }
   }
 
   /* ── LAYOUT ──────────────────────────────────────────── */
   .page-wrap {
     position: relative;
     z-index: 1;
-    max-width: 820px;
+    min-height: 100vh;
+    max-width: 900px;
     margin: 0 auto;
-    padding: 0 20px 80px;
+    padding: 0 24px 80px;
   }
 
   /* ── TOP NAV ─────────────────────────────────────────── */
@@ -80,87 +111,98 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 0 0;
-    gap: 12px;
-    flex-wrap: wrap;
+    padding: 24px 0 20px;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.12);
+    margin-bottom: 48px;
   }
   .nav-back {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    color: var(--text-2);
+    color: var(--indigo-400);
     text-decoration: none;
-    font-size: 0.875rem;
+    font-size: 14px;
     font-weight: 500;
-    transition: color var(--ease);
+    transition: color var(--transition);
   }
-  .nav-back:hover { color: var(--purple-light); }
-
-  .progress-wrap {
+  .nav-back:hover { color: var(--cyan-400); }
+  .progress-indicator {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
   }
-  .progress-label {
-    font-size: 0.75rem;
-    color: var(--text-3);
-    white-space: nowrap;
+  .progress-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    opacity: 0.3;
   }
-  .progress-bar-bg {
-    width: 120px;
-    height: 5px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 99px;
-    overflow: hidden;
+  .progress-dot.active {
+    background: var(--violet-500);
+    opacity: 1;
+    box-shadow: 0 0 8px var(--violet-500);
   }
-  .progress-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--purple), var(--blue));
-    border-radius: 99px;
-    transition: width 0.6s var(--ease);
-    width: 0%;
+  .progress-dot.done {
+    background: var(--green-500);
+    opacity: 1;
   }
 
   /* ── MODULE HERO ─────────────────────────────────────── */
   .hero {
     text-align: center;
-    padding: 52px 0 40px;
+    padding: 0 0 56px;
   }
   .hero-badge {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(139,92,246,0.12);
-    border: 1px solid rgba(139,92,246,0.3);
-    border-radius: 99px;
-    padding: 6px 16px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--purple-light);
-    letter-spacing: 0.05em;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    margin-bottom: 20px;
+    color: var(--violet-400);
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    border-radius: 100px;
+    padding: 6px 16px;
+    margin-bottom: 24px;
+    animation: fadeSlideDown 0.6s ease both;
   }
   .hero h1 {
-    font-size: clamp(1.8rem, 5vw, 2.8rem);
-    font-weight: 700;
-    line-height: 1.2;
-    background: linear-gradient(135deg, #fff 30%, var(--purple-light));
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 7vw, 70px);
+    letter-spacing: 0.03em;
+    line-height: 0.95;
+    background: linear-gradient(135deg, var(--violet-400) 0%, var(--cyan-400) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.5));
     margin-bottom: 16px;
+    animation: fadeSlideDown 0.6s 0.1s ease both;
   }
   .hero p {
-    font-size: 1rem;
-    color: var(--text-2);
+    font-size: 17px;
+    font-weight: 300;
+    color: var(--text-secondary);
     max-width: 540px;
     margin: 0 auto;
+    animation: fadeSlideDown 0.6s 0.2s ease both;
+  }
+  @keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   /* ── SECTION ─────────────────────────────────────────── */
   .section {
     margin-top: 56px;
+    margin-bottom: 64px;
   }
   .section-header {
     display: flex;
@@ -175,27 +217,36 @@
     width: 38px;
     height: 38px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--purple), var(--blue));
-    font-weight: 700;
+    background: linear-gradient(135deg, var(--violet-500), var(--blue-500));
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
     font-size: 0.9rem;
     flex-shrink: 0;
   }
   .section-header h2 {
-    font-size: 1.4rem;
-    font-weight: 600;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(26px, 4vw, 38px);
+    letter-spacing: 0.03em;
+    color: var(--text-primary);
   }
 
   /* ── CARD ─────────────────────────────────────────────── */
   .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-card);
     padding: 28px;
     margin-bottom: 16px;
+    backdrop-filter: blur(12px);
+    transition: border-color var(--transition), box-shadow var(--transition);
   }
-  .card p { color: var(--text-2); margin-bottom: 12px; }
+  .card:hover {
+    border-color: var(--card-border-h);
+    box-shadow: 0 0 32px rgba(99, 102, 241, 0.08);
+  }
+  .card p { color: var(--text-secondary); margin-bottom: 12px; }
   .card p:last-child { margin-bottom: 0; }
-  .card strong { color: var(--text); }
+  .card strong { color: var(--text-primary); }
 
   /* ── INFO HIGHLIGHT ──────────────────────────────────── */
   .highlight {
@@ -686,18 +737,12 @@
   .btn-sm { padding: 8px 16px; font-size: 0.82rem; border-radius: 8px; }
 
   /* ── BOTTOM NAV ──────────────────────────────────────── */
-  .bottom-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 32px 0 0;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    margin-top: 40px;
-    flex-wrap: wrap;
-    gap: 14px;
-  }
-  .bottom-module-info { font-size: 0.82rem; color: var(--text-3); }
-  .bottom-module-info strong { color: var(--text-2); }
+  .bottom-nav { display: flex; align-items: center; justify-content: space-between; padding-top: 44px; border-top: 1px solid rgba(99,102,241,0.12); margin-top: 44px; gap: 14px; flex-wrap: wrap; }
+  .nav-module-btn { display: inline-flex; align-items: center; gap: 10px; padding: 11px 18px; border-radius: 10px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500; transition: all var(--transition); backdrop-filter: blur(8px); }
+  .nav-module-btn:hover { border-color: var(--violet-500); color: var(--violet-400); transform: translateX(3px); }
+  .nav-module-btn.prev:hover { transform: translateX(-3px); }
+  .nav-module-arrow { font-size: 18px; }
+  .nav-module-meta { font-family: 'DM Mono',monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 2px; }
 
   /* ── MISC ─────────────────────────────────────────────── */
   .emoji-big { font-size: 1.5rem; }
@@ -743,25 +788,23 @@
 </head>
 <body>
 
-<div class="bg-orb bg-orb-1"></div>
-<div class="bg-orb bg-orb-2"></div>
+<div class="nebula nebula-1"></div>
+<div class="nebula nebula-2"></div>
 
 <div class="page-wrap">
 
   <!-- TOP NAV -->
   <nav class="top-nav">
-    <a href="../index.html" class="nav-back">
-      ← Voltar ao índice
-    </a>
-    <div class="progress-indicator" style="display:flex;align-items:center;gap:6px;">
-      <div class="progress-dot" style="width:10px;height:10px;border-radius:50%;background:var(--green-500);"></div>
-      <div class="progress-dot" style="width:10px;height:10px;border-radius:50%;background:rgba(99,102,241,0.25);"></div>
-      <div class="progress-dot" style="width:10px;height:10px;border-radius:50%;background:rgba(99,102,241,0.25);"></div>
-      <div class="progress-dot" style="width:10px;height:10px;border-radius:50%;background:rgba(99,102,241,0.25);"></div>
-      <div class="progress-dot" style="width:10px;height:10px;border-radius:50%;background:rgba(99,102,241,0.25);"></div>
-      <div class="progress-dot" style="width:10px;height:10px;border-radius:50%;background:rgba(99,102,241,0.25);"></div>
-      <div class="progress-dot" style="width:10px;height:10px;border-radius:50%;background:rgba(99,102,241,0.25);"></div>
-      <span style="margin-left:6px;color:var(--text-secondary);font-size:13px;">1 / 7</span>
+    <a href="../index.html" class="nav-back">← Voltar ao índice</a>
+    <div class="progress-indicator">
+      <div class="progress-dot active"></div>
+      <div class="progress-dot"></div>
+      <div class="progress-dot"></div>
+      <div class="progress-dot"></div>
+      <div class="progress-dot"></div>
+      <div class="progress-dot"></div>
+      <div class="progress-dot"></div>
+      <span style="margin-left:6px;">1 / 7</span>
     </div>
   </nav>
 
@@ -1171,15 +1214,22 @@
   </div>
 
   <!-- BOTTOM NAV -->
-  <div class="bottom-nav">
-    <div class="bottom-module-info">
-      <strong>Módulo 1</strong> — Fundamentos de IA Generativa<br>
-      <span>Próximo: Módulo 2 — Prompt Engineering</span>
-    </div>
-    <a href="02-prompt-engineering.html" class="btn btn-primary">
-      Próximo Módulo →
+  <nav class="bottom-nav">
+    <a href="../index.html" class="nav-module-btn prev">
+      <span class="nav-module-arrow">←</span>
+      <div>
+        <span class="nav-module-meta">Início</span>
+        Índice do curso
+      </div>
     </a>
-  </div>
+    <a href="02-prompt-engineering.html" class="nav-module-btn">
+      <div style="text-align:right;">
+        <span class="nav-module-meta">Módulo 2</span>
+        Prompt Engineering
+      </div>
+      <span class="nav-module-arrow">→</span>
+    </a>
+  </nav>
 
 </div><!-- /page-wrap -->
 
@@ -1191,9 +1241,7 @@
   const TOTAL_SECTIONS = 5; // 1 diagram, 1 phrase, 1 tokenizer (auto), 1 temp (auto), 1 quiz
 
   function updateProgress() {
-    const pct = Math.round((sectionsCompleted.size / TOTAL_SECTIONS) * 100);
-    document.getElementById('progressFill').style.width = pct + '%';
-    document.getElementById('progressPct').textContent = pct + '%';
+    // Progress bar replaced by dot nav — no DOM elements to update
   }
 
   function markSectionDone(id) {
